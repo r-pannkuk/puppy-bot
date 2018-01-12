@@ -1,3 +1,51 @@
+require('dotenv').config();
+
+const Discord = require('discord.js');
+const commando = require('discord.js-commando');
+const path = require('path');
+const Enmap = require('enmap');
+const EnmapLevel = require('enmap-level');
+const Sqlite = require('sqlite');
+
+/* Bot client creation. */
+const client = new commando.Client({
+    owner: process.env.USER,
+    unknownCommandResponse: false
+});
+
+/* Guild settings load. */
+
+client.setProvider(
+    Sqlite.open(path.join(__dirname, 'settings.sqlite3')).then(db =>
+    new commando.SQLiteProvider(db))
+).catch(console.error);
+
+/* Enhanced map for points allocation. */
+const pointProvider = new EnmapLevel({
+    name: "points"
+});
+
+client.points = new Enmap({
+    provider: pointProvider
+});
+
+/* Command group registry. */
+
+client.registry.registerGroups([
+    [ 'rng', 'Random Number Generators' ],
+    [ 'points', 'Level System' ]
+]);
+client.registry.registerDefaults();
+client.registry.registerCommandsIn(__dirname + '/commands');
+
+/* Startup */
+
+client.login(process.env.TOKEN);
+
+
+/*** This section of code allows us to prevent sleeping by Heroku by simulating an active web client */
+
+
 const express = require('express');
 const app = express();
 
@@ -26,22 +74,3 @@ app.listen(port, () => {
 setInterval(() => {
     http.get('http://your-app-name.herokuapp.com');
   }, 900000);
-
-
-/******************* */
-
-
-require('dotenv').config();
-
-const Discord = require('discord.js');
-const commando = require('discord.js-commando');
-const bot = new commando.Client({
-    owner: process.env.USER,
-    unknownCommandResponse: false
-});
-
-bot.registry.registerGroup('rng', 'Random');
-bot.registry.registerDefaults();
-bot.registry.registerCommandsIn(__dirname + '/commands');
-
-bot.login(process.env.TOKEN);

@@ -23,7 +23,10 @@ module.exports = class DiceRollCommand extends commando.Command {
                             return 'Too many dice groupings.  Please use less dice.';
 
                         for(var group in groups) {
-                            if(/^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])d([1-9][0-9][0-9]|[1-9][0-9]|[2-9])$/g.test(groups[group]) == false) {
+                            if(
+                                /^d([1-9][0-9][0-9]|[1-9][0-9]|[2-9])$/g.test(groups[group]) == false &&
+                                /^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])d([1-9][0-9][0-9]|[1-9][0-9]|[2-9])$/g.test(groups[group]) == false &&
+                                /^(\+|\-|\*|\/)([1-9][0-9][0-9]|[1-9][0-9]|[0-9])$/g.test(groups[group]) == false) {
                                 return 'Input had an error. Please try again.';
                             }
                         }
@@ -38,9 +41,25 @@ module.exports = class DiceRollCommand extends commando.Command {
     async run(message, args) {
         var groups = args.input.split(' ');
         var diceGroups = [];
+        var operatorGroups = [];
+
+        var diceResults = [];
 
         for(var group in groups) {
-            var split = groups[group].split('d');
+            // Edge case for d4
+            if(/^d([1-9][0-9][0-9]|[1-9][0-9]|[2-9])$/g.test(groups[group]) == true) {
+                diceGroups.push('1' + groups[group]);
+            }
+            else if(/^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])d([1-9][0-9][0-9]|[1-9][0-9]|[2-9])$/g.test(groups[group]) == true) {
+                diceGroups.push(groups[group]);
+            }
+            else if(/^(\+|\-|\*|\/)([1-9][0-9][0-9]|[1-9][0-9]|[0-9])$/g.test(groups[group]) == true) {
+                operatorGroups.push(groups[group]);
+            }
+        }
+
+        for(var group in diceGroups) {
+            var split = diceGroups[group].split('d');
             var diceCount = split[0];
             var sidesCount = split[1];
 
@@ -50,8 +69,8 @@ module.exports = class DiceRollCommand extends commando.Command {
                 dice.push(Math.floor(Math.random() * sidesCount) + 1);
             }
 
-            diceGroups.push({
-                group: groups[group],
+            diceResults.push({
+                group: diceGroups[group],
                 diceCount: diceCount,
                 sidesCount: sidesCount,
                 dice: dice
@@ -64,14 +83,40 @@ module.exports = class DiceRollCommand extends commando.Command {
 
         var sum = 0;
 
-        for(var group in diceGroups) {
-            sum = diceGroups[group].dice.reduce((total, n) => total + n, sum);
+        for(var group in diceResults) {
+            sum = diceResults[group].dice.reduce((total, n) => total + n, sum);
 
-            if(diceGroups[group].dice.toString().length <= 1024)
-                embed.addField(diceGroups[group].group, diceGroups[group].dice.toString());
+            if(diceResults[group].dice.toString().length <= 1024)
+                embed.addField(diceResults[group].group, diceResults[group].dice.toString());
         }
 
-        embed.setDescription(`You rolled ${sum}.`);
+        var original_sum = sum;
+
+        for(var group in operatorGroups) {
+            var operator = operatorGroups[group][0];
+            var value = parseInt(operatorGroups[group].substr(1));
+
+            if(operator === '+') {
+                sum += value;
+            }
+            else if(operator === '-') {
+                sum -= value;
+            }
+            else if(operator === '*') {
+                sum *= value;
+            }
+            else if(operator === '/') {
+                sum /= value;
+            }
+        }
+
+        console.log(operatorGroups.length);
+
+        if(operatorGroups.length > 0) {
+            embed.setDescription(`${message.author} rolled ${original_sum} {${operatorGroups.join(',')}} = **${sum}**.`);
+        } else {
+            embed.setDescription(`${message.author} rolled **${sum}**.`);
+        }
 
         return message.embed(embed);
     }
