@@ -33,7 +33,8 @@ client.points = new Enmap({
 
 client.registry.registerGroups([
     [ 'rng', 'Random Number Generators' ],
-    [ 'points', 'Level System' ]
+    [ 'points', 'Level System' ],
+    [ 'memes', 'Memes and Stupidity' ]
 ]);
 client.registry.registerDefaults();
 client.registry.registerCommandsIn(__dirname + '/commands');
