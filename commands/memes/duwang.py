@@ -3,49 +3,83 @@
 # 8/2014
 # No restrictions on use
 
-from PIL import Image
+from PIL import Image, ImageFont, ImageDraw
 import hashlib
 import time
 import urllib.request
+from stat import S_ISREG, ST_CTIME, ST_MODE
 import sys
-import os.path
+import os
+import time
+import re
+import textwrap
+
+MAX_THRESHOLD = 30
+MIN_THRESHOLD = 10
 
 def main():
-    
-    # if(len(sys.argv) == 1 or sys.argv[1] == ''):
-    #     print("./commands/memes/duwang_original.jpg");
-    #     return;
+    if(len(sys.argv) == 1 or sys.argv[1] == ''):
+        print("./commands/memes/duwang_original.jpg")
+        return
 
-    # download image from URL
+
+    # Determine if image exists in save files
     location = sys.argv[1]
-    save_name = "./commands/memes/saves/" + hashlib.sha1(location.encode()).hexdigest() + ".png";
+    save_name = "./commands/memes/saves/duwang/" + hashlib.sha1(location.encode()).hexdigest() + ".png"
 
     # check for already created images
-    # if(os.path.isfile(save_name)):
-    #     print(save_name);
-    #     return;
+    if(os.path.isfile(save_name)):
+        print(save_name)
+        return
+    
+    if(len(os.listdir("./commands/memes/saves/duwang")) >= MAX_THRESHOLD):
+        files = (os.path.join("./commands/memes/saves/duwang/", fn) for fn in os.listdir("./commands/memes/saves/duwang/"))
+        files = ((os.stat(path), path) for path in files)
+        files = ((stat[ST_CTIME], path) for stat, path in files if S_ISREG(stat[ST_MODE]))
 
-    # open base image and image to be superimposed:
-    duwang = Image.open("./commands/memes/duwang.png")
-    user_img = Image.open(urllib.request.urlretrieve(location)[0])
+        sorted_files = sorted(files)
+        sorted_files.reverse()
 
-    # scale image to proper dimensions
-    user_img.thumbnail((78,44))
+        # remove oldest files
+        for cdate, path in sorted_files[MIN_THRESHOLD-1:]:
+            os.remove(path)
 
+    # open base image to be used as the basis for the new one
+    duwang = Image.open("./commands/memes/duwang_text.png")
+    
     # create a new empty image with alpha, set to base image size
-    new_im = Image.new('RGBA', (312,175))
+    new_img = Image.new('RGBA', (312,175))
+    
+    # Paste the base image onto the new one before edits take place
+    new_img.paste(duwang, (0,0))
 
+    # determine if this is a URL
+    if(re.match('/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g', sys.argv[1])):
+        user_img = Image.open(urllib.request.urlretrieve(location)[0])
 
-    # Duwang image pasted first, second image pasted over it at the "Beautiful" line
-    new_im.paste(duwang, (0,0))
-    new_im.paste(user_img, (204 + (int)((78 - user_img.width) / 2),57))
+        # scale image to proper dimensions for a picture
+        user_img.thumbnail((78,44))
+
+        # Simply post the new image in the right spot, adjusting for width
+        new_img.paste(user_img, (204 + (int)((78 - user_img.width) / 2),57))
+
+    # otherwise use text
+    else:
+        font = ImageFont.truetype("./commands/memes/animeace2_ital.ttf", 13)
+        font_height = font.getsize('T')[1] + 4
+        max_width = font.getsize('WWWWWWWWWW')[0]
+
+        offset = 5 + (int)((110 - (len(textwrap.wrap(sys.argv[1], width=9))*font_height))/2)
+
+        for line in textwrap.wrap(sys.argv[1], width=9):
+            ImageDraw.Draw(new_img).text((185 + (int)((max_width - font.getsize(line)[0])/2), offset), line, fill=(0,0,0,255), font=font)
+            offset += font_height
 
     # save
-    save_name = "./commands/memes/saves/test.png";
-    new_im.save(save_name)
+    new_img.save(save_name)
 
-    print(save_name);
-    return;
+    print(save_name)
+    return
 
 if __name__ == '__main__':
     main()
