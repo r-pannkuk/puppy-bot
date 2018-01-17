@@ -18,7 +18,14 @@
     "enmap": "^0.4.2",
     "enmap-level": "^1.0.0",
     "express": "^4.16.2",
+    "fs": "0.0.1-security",
+    "get-youtube-id": "^1.0.0",
+    "node-opus": "^0.2.7",
     "python-shell": "^0.4.0",
-    "sqlite": "^2.9.0"
+    "request": "^2.83.0",
+    "sqlite": "^2.9.0",
+    "valid-url": "^1.0.9",
+    "youtube-info": "^1.1.2",
+    "ytdl-core": "^0.18.7"
   }
 }

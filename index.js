@@ -1,3 +1,5 @@
+const MusicPlayer = require('./core/MusicPlayer.js');
+
 require('dotenv').config();
 
 const Discord = require('discord.js');
@@ -29,12 +31,18 @@ client.points = new Enmap({
     provider: pointProvider
 });
 
+/* MusicPlayer added to bot. */
+client.musicPlayer = new MusicPlayer({
+    youtube: process.env.YOUTUBE
+});
+
 /* Command group registry. */
 
 client.registry.registerGroups([
     [ 'rng', 'Random Number Generators' ],
     [ 'points', 'Level System' ],
-    [ 'memes', 'Memes and Stupidity' ]
+    [ 'memes', 'Memes and Stupidity' ],
+    [ 'music', 'General music player for Youtube and Soundcloud' ]
 ]);
 client.registry.registerDefaults();
 client.registry.registerCommandsIn(__dirname + '/commands');
