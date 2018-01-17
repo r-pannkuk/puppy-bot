@@ -16,7 +16,6 @@
     "enmap": "^0.4.2",
     "enmap-level": "^1.0.0",
     "express": "^4.16.2",
-    "ffmpeg": "0.0.4",
     "ffmpeg-binaries": "^3.2.2-3",
     "fs": "0.0.1-security",
     "get-youtube-id": "^1.0.0",
