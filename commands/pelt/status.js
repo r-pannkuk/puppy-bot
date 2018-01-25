@@ -9,7 +9,7 @@ module.exports = class StatusCommand extends commando.Command {
             group: 'pelt',
             memberName: 'status',
             description: 'Player stats for pelting.',
-            examples: [ 'status', 'status @Dog' ],
+            examples: [ '!status', '!status @Dog' ],
             argsPromptLimit: 0,
             args: [
                 {
@@ -40,7 +40,7 @@ module.exports = class StatusCommand extends commando.Command {
             embed.setDescription(
                 `**XP**: ${stats.xp}\n` + 
                 `**HP**: ${stats.hp}\n` +
-                `**Description**: *${stats.description}\n\n` +
+                `**Description**: *${stats.description}*\n\n` +
                 `**__Inventory__**:`
             );
         }

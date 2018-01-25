@@ -9,7 +9,7 @@ module.exports = class SetDescriptionCommand extends commando.Command {
             group: 'pelt',
             memberName: 'set-desc',
             description: 'Sets a user\'s description.',
-            examples: [ '!set-description \"A really mean dude with an attitude\"', '!set-description @Dog \"A really mean dude with an attitude\"' ],
+            examples: [ '!set-description \"A really mean dude with attitude\"', '!set-description \"A really mean dude with attitude\" @Dog' ],
             argsPromptLimit: 0,
             argsSingleQuotes: true,
             args: [
@@ -43,6 +43,6 @@ module.exports = class SetDescriptionCommand extends commando.Command {
 
         this.client.pointSystem.set(user.id, stats);
 
-        message.channel.send(`Updated description for ${user} to \"description\"`);
+        message.channel.send(`Updated description for ${user} to \"${description}\"`);
     }
 }
