@@ -110,8 +110,6 @@ module.exports = class DiceRollCommand extends commando.Command {
             }
         }
 
-        console.log(operatorGroups.length);
-
         if(operatorGroups.length > 0) {
             embed.setDescription(`${message.author} rolled ${original_sum} {${operatorGroups.join(',')}} = **${sum}**.`);
         } else {

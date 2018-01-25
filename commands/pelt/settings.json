@@ -1,0 +1,42 @@
+{
+    "name": "points",
+    "levels" : [
+        {
+            "xp": 0
+        },
+        {
+            "xp": 3
+        },
+        {
+            "xp": 8
+        },
+        {
+            "xp": 16
+        },
+        {
+            "xp": 26
+        },
+        {
+            "xp": 31
+        },
+        {
+            "xp": 51
+        },
+        {
+            "xp": 76
+        },
+        {
+            "xp": 110
+        },
+        {
+            "xp": 150
+        }
+    ],
+    "items" : {
+        "pebble" : {
+            "name": "Pebble",
+            "atk": 1,
+            "description": "A useless pebble.  Commonly found in shoes."
+        }
+    }
+}
