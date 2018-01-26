@@ -11,7 +11,7 @@ module.exports = class TrapCommand extends commando.Command {
             description: 'Sabotage a word or phrase to deal damage the next time a user says it in chat.',
             examples: [ '!trap ', '!status @Dog' ],
             argsPromptLimit: 0,
-            // guildOnly: true,
+            guildOnly: true,
             args: [
                 {
                     key: 'phrase',

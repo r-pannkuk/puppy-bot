@@ -55,9 +55,9 @@ module.exports = class BattleSystem {
     }
 
     checkForTraps(message) {
-        // if(message.channel.type !== 'text') {
-        //     return;
-        // }
+        if(message.channel.type !== 'text') {
+            return;
+        }
 
         var content = message.content.toLowerCase();
         var traps = this._traps;
