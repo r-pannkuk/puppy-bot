@@ -1,5 +1,5 @@
 const MusicPlayer = require('./core/MusicPlayer.js');
-const PointSystem = require('./core/PointSystem.js');
+const BattleSystem = require('./core/BattleSystem.js');
 
 require('dotenv').config();
 
@@ -21,9 +21,15 @@ client.setProvider(
     new commando.SQLiteProvider(db))
 ).catch(console.error);
 
-/* Create a new point system object. */
-const pointSettings = require('./commands/pelt/settings.json');
-client.pointSystem = new PointSystem(pointSettings);
+/* Create a new battle system object. */
+const battleSettings = require('./commands/pelt/settings.json');
+client.battleSystem = new BattleSystem(battleSettings);
+
+client.on('message', (message) => {
+    if(message.author !== client.user) {
+        client.battleSystem.checkForTraps(message);
+    }
+});
 
 /* MusicPlayer added to bot. */
 client.musicPlayer = new MusicPlayer({
@@ -51,6 +57,6 @@ client.on('ready', () => {
             type: 'LISTENING'
         }
     });
-})
+});
 
 client.login(process.env.TOKEN);

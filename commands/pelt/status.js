@@ -8,7 +8,7 @@ module.exports = class StatusCommand extends commando.Command {
             name: 'status',
             group: 'pelt',
             memberName: 'status',
-            description: 'Player stats for pelting.',
+            description: 'Player stats for battle.',
             examples: [ '!status', '!status @Dog' ],
             argsPromptLimit: 0,
             args: [
@@ -30,7 +30,7 @@ module.exports = class StatusCommand extends commando.Command {
             user = message.author;
         }
 
-        const stats = this.client.pointSystem.retrieve(user.id);
+        const stats = this.client.battleSystem.retrieve(user.id);
 
         var embed = new Discord.RichEmbed()
         .setColor('DARK_RED')
