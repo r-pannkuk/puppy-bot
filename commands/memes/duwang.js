@@ -34,7 +34,7 @@ module.exports = class DuwangCommands extends commando.Command {
         }, function (err, results) {
             // Trim white space and carriage return from the call
             if(results === undefined) {
-                results = '';
+                results = [];
             }
             results = results.map((value) => value.replace(/\s+/g, ''));
             message.channel.send({
