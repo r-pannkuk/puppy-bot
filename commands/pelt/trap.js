@@ -41,7 +41,42 @@ module.exports = class TrapCommand extends commando.Command {
             }
 
             // Damage is done in hours
-            var damage = Math.floor((Date.now() - trap.startTime) / (60*60*1000));
+            var hours = Math.floor((Date.now() - trap.startTime) / (60*60*1000));
+
+            var damage = 0;
+
+            for(var i = 0; i < hours; ++i) {
+                ++damage;
+
+                // 8 Hours
+                if(i >= 8) {
+                    ++damage;
+                }
+                // 1 Day
+                if(i >= 24) {
+                    ++damage;
+                }
+                // 3 Days
+                if(i >= 72) {
+                    ++damage;
+                }
+                // 1 Week
+                if(i >= 168) {
+                    ++damage;
+                }
+                // 2 Weeks
+                if(i >= 336) {
+                    ++damage;
+                }
+                // 3 Weeks
+                if(i >= 504) {
+                    ++damage;
+                }
+                // 4 Weeks
+                if(i >= 672) {
+                    ++damage;
+                }
+            }
 
             victimStats.hp -= damage;
 
@@ -52,11 +87,11 @@ module.exports = class TrapCommand extends commando.Command {
 
             embed.setDescription(
                 `**Phrase**: ${trap.phrase}\n` + 
-                `**Owner**: ${owner}\n` +
+                `**Owner**: <@${owner.id}>\n` +
                 `**Damage**: ${damage}\n\n` + 
                 `**Victim**: ${victim}\n` +
                 `**Remaining Health**: ${victimStats.hp}\n\n` +
-                `*Traps do 1 damage for every hour they go untriggered.*`);
+                `*Traps deal more damage the longer they are alive for.*`);
 
             embed.setFooter(`Trap set at ${new Date(trap.startTime).toString()}`, owner.avatarUrl);
 
@@ -64,10 +99,14 @@ module.exports = class TrapCommand extends commando.Command {
         });
 
         if(success) {
-            message.channel.send(`New trap set for phrase: "${phrase}"`);
+            message.channel.send(`New trap set for phrase: "${phrase}"`)
+            .then(msg => {
+                msg.delete(10000);
+                message.delete(10000);
+            });
         }
         else {
-            message.channel.send(`Trap phrase was already found.`);
+            message.channel.send(`Trap phrase was already found, or you've already set too many traps.`);
         }
     }
 }

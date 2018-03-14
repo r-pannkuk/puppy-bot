@@ -34,9 +34,9 @@
     ],
     "items" : {
         "pebble" : {
-            "name": "Pebble",
+            "name": "Paper Knife",
             "atk": 1,
-            "description": "A useless pebble.  Commonly found in shoes."
+            "description": "Made from the strongest wet paper.  Mildly annoying."
         }
     }
 }
