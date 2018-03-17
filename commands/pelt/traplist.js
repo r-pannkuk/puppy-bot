@@ -16,17 +16,17 @@ module.exports = class TrapListCommand extends commando.Command {
 
     
     async run(message) {
-        var traps = Object.keys(this.client.battleSystem.trapList());
-        if(traps.length > 0) {
-            var string = "";
-            for(var i in traps) {
-                string += `[${traps[i]}],`;
-            }
-            string = string.substr(0, string.length - 1);
-            message.channel.send(string);
-        }
-        else {
-            message.channel.send("No traps found.");
-        }
+        // var traps = Object.keys(this.client.battleSystem.trapList());
+        // if(traps.length > 0) {
+        //     var string = "";
+        //     for(var i in traps) {
+        //         string += `[${traps[i]}],`;
+        //     }
+        //     string = string.substr(0, string.length - 1);
+        //     message.channel.send(string);
+        // }
+        // else {
+        //     message.channel.send("No traps found.");
+        // }
     }
 }
