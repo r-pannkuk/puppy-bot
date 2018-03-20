@@ -71,8 +71,6 @@ client.on('ready', () => {
             type: 'LISTENING'
         }
     });
-
-    console.log(client.battleSystem.trapList());
 });
 
 client.login(process.env.TOKEN);
