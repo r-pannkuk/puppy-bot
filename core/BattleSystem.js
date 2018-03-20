@@ -144,6 +144,9 @@ module.exports = class BattleSystem {
 
     springTrap(message, trapWord) {
         var trap = this.removeTrap(trapWord);
-        trap.callback(trap, message);
+
+        if(trap !== undefined) { 
+            trap.callback(trap, message);
+        }
     }
 }

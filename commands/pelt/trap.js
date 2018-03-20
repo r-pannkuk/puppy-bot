@@ -109,7 +109,7 @@ module.exports = class TrapCommand extends commando.Command {
             });
         }
         else {
-            message.channel.send(`Trap phrase was already found, or you've already set too many traps.`);
+            message.channel.send(`You've already set too many traps, type removetrap to remove your own trap.`);
         }
     }
 }
