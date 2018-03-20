@@ -16,7 +16,7 @@ module.exports = class TrapListCommand extends commando.Command {
 
     
     async run(message) {
-        if(message.author.id !== this.client.owner) {
+        if(!this.client.isOwner(message.author)) {
             return;
         }
 
