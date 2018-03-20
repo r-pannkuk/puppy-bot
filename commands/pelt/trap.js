@@ -29,6 +29,7 @@ module.exports = class TrapCommand extends commando.Command {
             var owner = trap.owner;
             
             var victimStats = this.client.battleSystem.retrieve(victim.id);
+            var ownerStats = this.client.battleSystem.retrieve(owner.id);
 
             var embed = new Discord.RichEmbed()
             .setColor('RED');
@@ -79,6 +80,8 @@ module.exports = class TrapCommand extends commando.Command {
             }
 
             victimStats.hp -= damage;
+
+            ownerStats.xp += damage;
 
             if(victimStats.hp <= 0) {
                 victimStats.hp = 0;
