@@ -40,14 +40,16 @@ module.exports = class StatusCommand extends commando.Command {
             embed.setDescription(
                 `**XP**: ${stats.xp}\n` + 
                 `**HP**: ${stats.hp}\n` +
-                `**Description**: *${stats.description}*\n\n` +
+                `**Traps Active**: ${(stats.trapActive !== undefined && stats.trapActive) ? 1 : 0}\n` +
+                `**Description**: *${stats.description}*\n` +
                 `**__Inventory__**:`
             );
         }
         else {
             embed.setDescription(
                 `**XP**: ${stats.xp}\n` + 
-                `**HP**: ${stats.hp}\n\n` +
+                `**HP**: ${stats.hp}\n` +
+                `**Traps Active**: ${(stats.trapActive !== undefined && stats.trapActive) ? 1 : 0}\n\n` +
                 `**__Inventory__**:`
             );
         }

@@ -53,6 +53,7 @@ client.reminders = new ReminderManager({
 client.registry.registerGroups([
     [ 'rng', 'Random Number Generators' ],
     [ 'pelt', 'PvP System for Abusing Scrubs' ],
+    [ 'traps', 'Set trap phrases that explode when players say them in chat.' ],
     [ 'memes', 'Memes and Stupidity' ],
     [ 'music', 'General music player for Youtube and Soundcloud' ],
     [ 'reminders', 'Set reminders and notifications for yourself.' ],

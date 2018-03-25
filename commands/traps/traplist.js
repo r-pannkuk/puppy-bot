@@ -6,7 +6,7 @@ module.exports = class TrapListCommand extends commando.Command {
     constructor(client) {
         super(client, {
             name: 'traplist',
-            group: 'pelt',
+            group: 'traps',
             memberName: 'traplist',
             description: 'List all active traps.  Only usable by admin.',
             examples: [ '!traplist' ],

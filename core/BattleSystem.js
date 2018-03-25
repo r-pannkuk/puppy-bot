@@ -29,6 +29,23 @@ module.exports = class BattleSystem {
             if(this._enmap.get('traps') === undefined) {
                 console.log("Traps not found, creating.");
                 this._enmap.set('traps', {});
+            } else {
+                var traps = this._enmap.get('traps');
+                var defaultCallback = () => console.log('No Callback');
+
+                for(var trapKey in traps) {
+                    
+                    var phrase = traps[trapKey].phrase;
+                    var ownerId = (traps[trapKey].owner !== undefined) ? traps[trapKey].owner.id : traps[trapKey].ownerId;
+                    var startTime = traps[trapKey].startTime;
+                    var callback = (traps[trapKey].callback === undefined) ? () => defaultCallback : traps[trapKey].callback;
+                    var message = (traps[trapKey].messageId === undefined) ? -1 : { id: traps[trapKey].messageId };
+
+                    var trap = this.generateTrap(phrase, ownerId, startTime, callback, message);
+                    traps[trapKey] = trap;
+                }
+
+                this._enmap.set('traps', traps);
             }
         });
     }
@@ -62,6 +79,26 @@ module.exports = class BattleSystem {
         this._enmap.set('users', users);
     }
 
+    damage(victim, damage, attacker) {
+        var victimStats = this.retrieve(victim.id);
+        var attackerStats = this.retrieve(attacker.id);
+        
+        if(victim.id !== attacker.id) {
+            attackerStats.xp += damage;
+        }
+
+        victimStats.hp -= damage;
+
+        if(victimStats.hp <= 0) {
+            victimStats.hp = 0;
+        }
+
+        this.set(victim.id, victimStats);
+        this.set(attacker.id, attackerStats);
+
+        return victimStats.hp;
+    }
+
     addTrap(message, phrase, user, callback) {
         var traps = this._enmap.get('traps');
         var key = phrase.toLowerCase();
@@ -76,26 +113,65 @@ module.exports = class BattleSystem {
             return false;
         }
 
-        traps[key] = {
-            phrase: phrase,
-            owner: {
-                id: user.id,
-                avatarUrl: user.avatarUrl,
-                username: user.username
-            },
-            startTime: Date.now(),
-            callback: callback,
-            messageId: message.id
-        };
+        traps[key] = this.generateTrap(phrase, user.id, Date.now(), callback, message);
 
         status.trapActive = true;
-
 
         this._enmap.set('traps', traps);
 
         this.set(user.id, status);
 
         return true;
+    }
+
+    generateTrap(phrase, owner_id, startTime, callback, message) {
+        return {
+            phrase: phrase,
+            ownerId: owner_id,
+            startTime: startTime,
+            callback: callback,
+            messageId: message.id,
+            getDamage: function() {
+                var hours = Math.floor((Date.now() - this.startTime) / (60*60*1000));
+    
+                var damage = 0;
+    
+                for(var i = 0; i < hours; ++i) {
+                    ++damage;
+    
+                    // 8 Hours
+                    if(i >= 8) {
+                        ++damage;
+                    }
+                    // 1 Day
+                    if(i >= 24) {
+                        ++damage;
+                    }
+                    // 3 Days
+                    if(i >= 72) {
+                        ++damage;
+                    }
+                    // 1 Week
+                    if(i >= 168) {
+                        ++damage;
+                    }
+                    // 2 Weeks
+                    if(i >= 336) {
+                        ++damage;
+                    }
+                    // 3 Weeks
+                    if(i >= 504) {
+                        ++damage;
+                    }
+                    // 4 Weeks
+                    if(i >= 672) {
+                        ++damage;
+                    }
+                }
+    
+                return damage;
+            }
+        };
     }
 
     checkForTraps(message) {
@@ -129,7 +205,7 @@ module.exports = class BattleSystem {
 
         var trap = traps[trapWord];
 
-        var status = this.retrieve(trap.owner.id);
+        var status = this.retrieve(trap.ownerId);
 
         delete traps[trapWord];
 
@@ -137,13 +213,14 @@ module.exports = class BattleSystem {
 
         this._enmap.set('traps', traps);
 
-        this.set(trap.owner.id, status);
+        this.set(trap.ownerId, status);
 
         return trap;
     }
 
     springTrap(message, trapWord) {
         var trap = this.removeTrap(trapWord);
+        this.damage(message.author.id, trap.getDamage(), trap.ownerId);
 
         if(trap !== undefined) { 
             trap.callback(trap, message);

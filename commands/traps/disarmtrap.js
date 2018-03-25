@@ -6,7 +6,7 @@ module.exports = class DisarmTrapCommand extends commando.Command {
     constructor(client) {
         super(client, {
             name: 'disarmtrap',
-            group: 'pelt',
+            group: 'traps',
             memberName: 'disarmtrap',
             description: 'Attempt to disarm a trap before it goes off.  Has a 99% chance of working.  Probably.',
             examples: [ '!disarmtrap test' ],

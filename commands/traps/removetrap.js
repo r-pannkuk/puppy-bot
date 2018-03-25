@@ -6,7 +6,7 @@ module.exports = class RemoveTrapCommand extends commando.Command {
     constructor(client) {
         super(client, {
             name: 'removetrap',
-            group: 'pelt',
+            group: 'traps',
             memberName: 'removetrap',
             description: 'Removes the last trap set by the command sender.',
             examples: [ '!removetrap test' ],
@@ -19,7 +19,7 @@ module.exports = class RemoveTrapCommand extends commando.Command {
     async run(message) {
         var traps = Object.values(this.client.battleSystem.trapList());
 
-        var trap = traps.find(t => t.owner.id === message.author.id);
+        var trap = traps.find(t => t.ownerId === message.author.id);
 
         if(trap !== undefined) {
             this.client.battleSystem.removeTrap(trap.phrase);
