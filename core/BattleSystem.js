@@ -53,7 +53,7 @@ module.exports = class BattleSystem {
                     .setColor('RED');
         
                     if(owner.id === victim.id) {
-                        embed.setAuthor(`${owner.username} Blew Themselves Up!`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Skull_and_crossbones.svg/2000px-Skull_and_crossbones.svg.png')
+                        embed.setAuthor(`${owner.username} Blew Themselves Up!`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Skull_and_crossbones.svg/2000px-Skull_and_crossbones.svg.png');
                     } 
                     else {
                         embed.setAuthor(`${owner.username}'s Trap Sprung!`, owner.avatarUrl);
@@ -112,11 +112,11 @@ module.exports = class BattleSystem {
         this._enmap.set('users', users);
     }
 
-    damage(victim, damage, attacker) {
-        var victimStats = this.retrieve(victim.id);
-        var attackerStats = this.retrieve(attacker.id);
+    damage(victimId, damage, attackerId) {
+        var victimStats = this.retrieve(victimId);
+        var attackerStats = this.retrieve(attackerId);
         
-        if(victim.id !== attacker.id) {
+        if(victimId !== attackerId) {
             attackerStats.xp += damage;
         }
 
@@ -126,8 +126,8 @@ module.exports = class BattleSystem {
             victimStats.hp = 0;
         }
 
-        this.set(victim.id, victimStats);
-        this.set(attacker.id, attackerStats);
+        this.set(victimId, victimStats);
+        this.set(attackerId, attackerStats);
 
         return victimStats.hp;
     }
@@ -259,4 +259,4 @@ module.exports = class BattleSystem {
             trap.callback(trap, message);
         }
     }
-}
+};
