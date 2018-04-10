@@ -45,39 +45,6 @@ module.exports = class BattleSystem {
                     traps[trapKey] = trap;
                 }
 
-                traps['nativeland'] = this.generateTrap('nativeland', '174037015858249730', new Date('2018-03-20T03:16:00'), (trap, message) => {
-                    var victim = message.author;
-                    var owner = this.client.users.get(trap.ownerId);
-                    
-                    var embed = new Discord.RichEmbed()
-                    .setColor('RED');
-        
-                    if(owner.id === victim.id) {
-                        embed.setAuthor(`${owner.username} Blew Themselves Up!`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Skull_and_crossbones.svg/2000px-Skull_and_crossbones.svg.png');
-                    } 
-                    else {
-                        embed.setAuthor(`${owner.username}'s Trap Sprung!`, owner.avatarUrl);
-                    }
-        
-                    var victimStats = this.client.battleSystem.retrieve(victim.id);
-        
-                    if(victimStats.hp === 0) {
-                        embed.setThumbnail('https://www.galabid.com/wp-content/uploads/2017/11/rip-gravestone-md.png');
-                    }
-        
-                    embed.setDescription(
-                        `**Phrase**: ${trap.phrase}\n` + 
-                        `**Owner**: ${owner}\n` +
-                        `**Damage**: ${trap.getDamage()}\n\n` + 
-                        `**Victim**: ${victim}\n` +
-                        `**Remaining Health**: ${victimStats.hp}\n\n` +
-                        `*Traps deal more damage the longer they are alive for.*`);
-        
-                    embed.setFooter(`Trap set at ${new Date(trap.startTime).toString()}`, owner.avatarUrl);
-        
-                    message.channel.send(embed);
-                }, {id: '-1'});
-
                 this._enmap.set('traps', traps);
             }
         });
@@ -224,7 +191,6 @@ module.exports = class BattleSystem {
             if(content === `!disarmtrap ${validKey}`) {
                 return;
             }
-
             this.springTrap(message, validKey);
         }
     }
@@ -253,9 +219,10 @@ module.exports = class BattleSystem {
 
     springTrap(message, trapWord) {
         var trap = this.removeTrap(trapWord);
-        this.damage(message.author.id, trap.getDamage(), trap.ownerId);
+        var authorId = message.author.id;
+        this.damage(authorId, trap.getDamage(), trap.ownerId);
 
-        if(trap !== undefined) { 
+        if(trap !== undefined) {
             trap.callback(trap, message);
         }
     }
