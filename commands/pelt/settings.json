@@ -32,11 +32,11 @@
             "xp": 150
         }
     ],
-    "items" : {
-        "pebble" : {
+    "items" : [
+        {
             "name": "Paper Knife",
             "atk": 1,
             "description": "Made from the strongest wet paper.  Mildly annoying."
         }
-    }
+    ]
 }

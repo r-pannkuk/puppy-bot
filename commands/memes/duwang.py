@@ -54,7 +54,7 @@ def main():
     new_img.paste(duwang, (0,0))
 
     # determine if this is a URL
-    if(re.match('/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g', sys.argv[1])):
+    if(re.match('/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/g', sys.argv[1])):
         user_img = Image.open(urllib.request.urlretrieve(location)[0])
 
         # scale image to proper dimensions for a picture

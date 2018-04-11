@@ -11,7 +11,7 @@ module.exports = class AdminTrapCommand extends commando.Command {
             description: 'Admin tool for adding traps with a custom timestamp.',
             examples: [ '!admintrap <phrase> <user> <timestamp>' ],
             argsPromptLimit: 0,
-            adminOnly: true,
+            ownerOnly: true,
             args: [
                 {
                     key: 'phrase',

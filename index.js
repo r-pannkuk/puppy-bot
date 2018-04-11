@@ -27,9 +27,18 @@ client.setProvider(
 const battleSettings = require('./commands/pelt/settings.json');
 client.battleSystem = new BattleSystem(battleSettings);
 
+
+/* Message callbacks for follow-up commands. */
+client.messageCallbacks = [
+    client.battleSystem.checkForTraps.bind(client.battleSystem),
+    (message) => { console.log(`Is ${message.author.username} owner: ${client.isOwner(message.author).toString()}`)}
+];
+
 client.on('message', (message) => {
     if(message.author !== client.user) {
-        client.battleSystem.checkForTraps(message);
+        for(var i in client.messageCallbacks) {
+            client.messageCallbacks[i](message);
+        }
     }
 });
 
