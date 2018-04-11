@@ -9,7 +9,7 @@ module.exports = class AdminTrapCommand extends commando.Command {
             group: 'traps',
             memberName: 'admintrap',
             description: 'Admin tool for adding traps with a custom timestamp.',
-            examples: [ '!admintrap <phrase> <user> <timestamp>' ],
+            examples: [ '!admintrap <phrase> <userId> <timestamp>' ],
             argsPromptLimit: 0,
             ownerOnly: true,
             args: [
@@ -19,9 +19,9 @@ module.exports = class AdminTrapCommand extends commando.Command {
                     type: 'string',
                 },
                 {
-                    key: 'owner',
-                    prompt: "Enter the owner for the trap.",
-                    type: 'user'
+                    key: 'ownerId',
+                    prompt: "Enter the owner's id for the trap.",
+                    type: 'int'
                 },
                 {
                     key: 'date',
@@ -42,7 +42,7 @@ module.exports = class AdminTrapCommand extends commando.Command {
     }
 
     
-    async run(msg, { phrase, owner, date }) {
+    async run(msg, { phrase, ownerId, date }) {
         if(!this.client.isOwner(msg.author)) {
             return;
         }
@@ -56,14 +56,14 @@ module.exports = class AdminTrapCommand extends commando.Command {
             return false;
         }
 
-        var status = this.client.battleSystem.retrieve(owner.id);
+        var status = this.client.battleSystem.retrieve(ownerId);
 
         if('trapActive' in status && status.trapActive) {
             msg.channel.send('User already has a trap set.');
             return false;
         }
 
-        traps[key] = this.client.battleSystem.generateTrap(key, owner.id, Date.parse(date), (trap, message) => {
+        traps[key] = this.client.battleSystem.generateTrap(key, ownerId, Date.parse(date), (trap, message) => {
             var victim = message.author;
             var owner = this.client.users.get(trap.ownerId);
             
@@ -98,7 +98,7 @@ module.exports = class AdminTrapCommand extends commando.Command {
 
         status.trapActive = true;
 
-        this.client.battleSystem.set(owner.id, status);
+        this.client.battleSystem.set(ownerId, status);
         
         this.client.battleSystem._enmap.set('traps', traps);
 
