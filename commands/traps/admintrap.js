@@ -21,7 +21,7 @@ module.exports = class AdminTrapCommand extends commando.Command {
                 {
                     key: 'ownerId',
                     prompt: "Enter the owner's id for the trap.",
-                    type: 'int'
+                    type: 'number'
                 },
                 {
                     key: 'date',
