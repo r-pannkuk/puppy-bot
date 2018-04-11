@@ -21,7 +21,7 @@ module.exports = class AdminTrapCommand extends commando.Command {
                 {
                     key: 'ownerId',
                     prompt: "Enter the owner's id for the trap.",
-                    type: 'number'
+                    type: 'string'
                 },
                 {
                     key: 'date',
@@ -65,35 +65,37 @@ module.exports = class AdminTrapCommand extends commando.Command {
 
         traps[key] = this.client.battleSystem.generateTrap(key, ownerId, Date.parse(date), (trap, message) => {
             var victim = message.author;
-            var owner = this.client.users.get(trap.ownerId);
+            console.log(trap.ownerId);
+            var owner = this.client.fetchUser(trap.ownerId).then((owner) => {
             
-            var embed = new Discord.RichEmbed()
-            .setColor('RED');
+                var embed = new Discord.RichEmbed()
+                .setColor('RED');
 
-            if(owner.id === victim.id) {
-                embed.setAuthor(`${owner.username} Blew Themselves Up!`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Skull_and_crossbones.svg/2000px-Skull_and_crossbones.svg.png')
-            } 
-            else {
-                embed.setAuthor(`${owner.username}'s Trap Sprung!`, owner.avatarUrl);
-            }
+                if(owner.id === victim.id) {
+                    embed.setAuthor(`${owner.username} Blew Themselves Up!`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Skull_and_crossbones.svg/2000px-Skull_and_crossbones.svg.png')
+                } 
+                else {
+                    embed.setAuthor(`${owner.username}'s Trap Sprung!`, owner.avatarUrl);
+                }
 
-            var victimStats = this.client.battleSystem.retrieve(victim.id);
+                var victimStats = this.client.battleSystem.retrieve(victim.id);
 
-            if(victimStats.hp === 0) {
-                embed.setThumbnail('https://www.galabid.com/wp-content/uploads/2017/11/rip-gravestone-md.png');
-            }
+                if(victimStats.hp === 0) {
+                    embed.setThumbnail('https://www.galabid.com/wp-content/uploads/2017/11/rip-gravestone-md.png');
+                }
 
-            embed.setDescription(
-                `**Phrase**: ${trap.phrase}\n` + 
-                `**Owner**: ${owner}\n` +
-                `**Damage**: ${trap.getDamage()}\n\n` + 
-                `**Victim**: ${victim}\n` +
-                `**Remaining Health**: ${victimStats.hp}\n\n` +
-                `*Traps deal more damage the longer they are alive for.*`);
+                embed.setDescription(
+                    `**Phrase**: ${trap.phrase}\n` + 
+                    `**Owner**: ${owner}\n` +
+                    `**Damage**: ${trap.getDamage()}\n\n` + 
+                    `**Victim**: ${victim}\n` +
+                    `**Remaining Health**: ${victimStats.hp}\n\n` +
+                    `*Traps deal more damage the longer they are alive for.*`);
 
-            embed.setFooter(`Trap set at ${new Date(trap.startTime).toString()}`, owner.avatarUrl);
+                embed.setFooter(`Trap set at ${new Date(trap.startTime).toString()}`, owner.avatarUrl);
 
-            message.channel.send(embed);
+                message.channel.send(embed);
+            });
         }, msg);
 
         status.trapActive = true;

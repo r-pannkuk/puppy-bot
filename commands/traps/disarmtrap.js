@@ -11,14 +11,7 @@ module.exports = class DisarmTrapCommand extends commando.Command {
             description: 'Attempt to disarm a trap before it goes off.  Has a 99% chance of working.  Probably.',
             examples: [ '!disarmtrap test' ],
             argsPromptLimit: 0,
-            guildOnly: true,
-            args: [
-                {
-                    key: 'phrase',
-                    prompt: "Enter the phrase you want to disarm.  It will probably work.",
-                    type: 'string'
-                }
-            ]
+            guildOnly: true
         });
     }
 

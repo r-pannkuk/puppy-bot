@@ -188,7 +188,7 @@ module.exports = class BattleSystem {
 
         if(validKey !== undefined) {
 
-            if(content === `!disarmtrap ${validKey}`) {
+            if(content === `!disarmtrap ${validKey}` || content === `!removetrap ${validKey}`) {
                 return;
             }
             this.springTrap(message, validKey);
