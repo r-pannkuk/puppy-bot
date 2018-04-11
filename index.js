@@ -12,7 +12,7 @@ const Sqlite = require('sqlite');
 
 /* Bot client creation. */
 const client = new commando.Client({
-    owner: process.env.USER,
+    owner: process.env.OWNER,
     unknownCommandResponse: false,
     disableEveryone: true
 });
