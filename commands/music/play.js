@@ -29,6 +29,8 @@ module.exports = class PlayCommand extends commando.Command {
     async run(message, { source }) {
         var client = this.client;
 
+        console.log("Play");
+
         client.musicPlayer.enqueue(source, function(err, videoInfo) {
             client.musicPlayer.play(videoInfo, message);
         });

@@ -48,23 +48,31 @@ module.exports = class MusicPlayer {
         this._voiceChannel = message.member.voiceChannel;
         var musicPlayer = this;
 
-        this._voiceChannel.join().then(function(connection) {
+        this._voiceChannel.join().then((connection) => {
+            var stream;
+
             if(videoInfo.type === 'YouTube') {
-                var stream = ytdl(videoInfo.url, {
+                stream = ytdl(videoInfo.url, {
                     filter: 'audioonly'
                 });
-
-                var skipRequest = 0;
-                var skippers = [];
-
-                musicPlayer._dispatcher = connection.playStream(stream);
+            } else if(videoInfo.type === 'Soundcloud') {
+                // SoundCloud download
             }
+
+            var skipRequest = 0;
+            var skippers = [];
+
+            musicPlayer._dispatcher = connection.playOpusStream(stream);
+
+            musicPlayer._dispatcher.on('error', console.error);
         }).catch(console.error);
     }
 
     stop() {
-        this._dispatcher.end();
-        this._voiceChannel.leave();
+        if(this._queue.length !== 0) {
+            this._dispatcher.end();
+            this._voiceChannel.leave();
+        }
     }
 
 

@@ -30,8 +30,7 @@ client.battleSystem = new BattleSystem(battleSettings);
 
 /* Message callbacks for follow-up commands. */
 client.messageCallbacks = [
-    client.battleSystem.checkForTraps.bind(client.battleSystem),
-    (message) => { console.log(`Is ${message.author.username} owner: ${client.isOwner(message.author).toString()}`)}
+    client.battleSystem.checkForTraps.bind(client.battleSystem)
 ];
 
 client.on('message', (message) => {
