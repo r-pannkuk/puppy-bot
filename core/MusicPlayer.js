@@ -53,6 +53,7 @@ module.exports = class MusicPlayer {
 
             if(videoInfo.type === 'YouTube') {
                 stream = ytdl(videoInfo.url, {
+                    quality: 'highestaudio',
                     filter: 'audioonly'
                 });
             } else if(videoInfo.type === 'Soundcloud') {
@@ -62,7 +63,11 @@ module.exports = class MusicPlayer {
             var skipRequest = 0;
             var skippers = [];
 
-            musicPlayer._dispatcher = connection.playOpusStream(stream);
+            musicPlayer._dispatcher = connection.playStream(stream, {
+                volume: 1,
+                passes: 50,
+                bitrate: 512000
+            });
 
             musicPlayer._dispatcher.on('error', console.error);
         }).catch(console.error);
