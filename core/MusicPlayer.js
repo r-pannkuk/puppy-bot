@@ -16,36 +16,47 @@ module.exports = class MusicPlayer {
         this._voiceChannel = null;
     }
 
-    enqueue(source, callback) {
+    enqueue(source, fetchCallback, playCallback) {
         var musicPlayer = this;
 
-        this.getID(source, function(err, data) {
+        this.getID(source, function(err, { type, id }) {
             if(err) {
-                callback(err, null);
+                fetchCallback(err, null);
             }
 
-            musicPlayer._queue.push(data);
-
-            if(data.type === 'YouTube') {
-                fetchYT(data.id, function(err, videoInfo) {
+            if(type === 'YouTube') {
+                fetchYT(id, function(err, videoInfo) {
                     if(err) {
                         console.log(err);
                         return;
                     }
 
                     videoInfo.type = 'YouTube';
-    
+                    videoInfo.callback = playCallback;
+
+                    musicPlayer._queue.push(videoInfo);
+
                     console.log("Added to queue: **" + videoInfo.title + "**");
-
-                    callback(null, videoInfo);
-                })
-
+        
+                    fetchCallback(null, videoInfo);
+                });
             }
-        })
+
+            else if(type === 'Soundcloud') {
+                // TBD
+            }
+        });
     }
 
-    play(videoInfo, message) {
-        this._voiceChannel = message.member.voiceChannel;
+    setChannel(channel) {
+        this._voiceChannel = channel;
+    }
+
+    play(videoInfo, voiceChannel) {
+        if(voiceChannel !== undefined) {
+            this.setChannel(voiceChannel);
+        }
+
         var musicPlayer = this;
 
         this._voiceChannel.join().then((connection) => {
@@ -60,24 +71,57 @@ module.exports = class MusicPlayer {
                 // SoundCloud download
             }
 
-            var skipRequest = 0;
-            var skippers = [];
-
             musicPlayer._dispatcher = connection.playStream(stream, {
                 volume: 1,
                 passes: 50,
                 bitrate: 512000
             });
 
+            videoInfo.callback(videoInfo);
+
+            musicPlayer._isPlaying = true;
+
             musicPlayer._dispatcher.on('error', console.error);
+
+            musicPlayer._dispatcher.on('end', () => {
+
+                musicPlayer._queue.shift();
+
+                if(musicPlayer._queue.length === 0) {
+                    musicPlayer.stop();
+                } else {
+                    musicPlayer.play(musicPlayer._queue[0]);
+                }
+            })
         }).catch(console.error);
     }
 
+    skip() {
+        this._dispatcher.end();
+    }
+
     stop() {
-        if(this._queue.length !== 0) {
+        if(this._dispatcher !== null) {
             this._dispatcher.end();
+        }
+
+        if(this._voiceChannel !== null) {
             this._voiceChannel.leave();
         }
+
+        this._queue = [];
+        this._isPlaying = false;
+        this._voiceChannel = null;
+    }
+
+    pause() {
+        this._dispatcher.pause();
+        this._isPlaying = false;
+    }
+
+    resume() {
+        this._dispatcher.resume();
+        this._isPlaying = true;
     }
 
 

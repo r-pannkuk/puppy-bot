@@ -28,11 +28,18 @@ module.exports = class PlayCommand extends commando.Command {
 
     async run(message, { source }) {
         var client = this.client;
+        var messageChannel = message.channel;
 
         console.log("Play");
 
         client.musicPlayer.enqueue(source, function(err, videoInfo) {
-            client.musicPlayer.play(videoInfo, message);
+            messageChannel.send(`Added track: **${videoInfo.title}**`);
+
+            if(!client.musicPlayer._isPlaying) {
+                client.musicPlayer.play(videoInfo, message.member.voiceChannel);
+            }
+        }, function(videoInfo) {
+            messageChannel.send(`Now playing: **${videoInfo.title}**`);
         });
     }
 }

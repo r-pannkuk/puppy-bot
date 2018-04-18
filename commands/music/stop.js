@@ -17,6 +17,8 @@ module.exports = class StopCommand extends commando.Command {
     async run(message, { source }) {
         var client = this.client;
 
+        message.channel.send("Stopping music playback.");
+
         client.musicPlayer.stop();
     }
 }
