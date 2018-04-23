@@ -73,7 +73,7 @@ module.exports = class MusicPlayer {
 
             musicPlayer._dispatcher = connection.playStream(stream, {
                 volume: 1,
-                passes: 3,
+                passes: 2,
                 bitrate: 128000
             });
 

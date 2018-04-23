@@ -11,6 +11,13 @@ module.exports = class BattleSystem {
         });
 
         this._enmap.defer.then(() => {
+            if(this._enmap.get('admin') === undefined) {
+                console.log("Admin settings not found, creating.");
+                this._enmap.set('admin', {
+                    trapChannelID: null
+                });
+            }
+
             if(this._enmap.get('users') === undefined) {
                 console.log("Users not found, creating.");
                 this._enmap.set('users', {});
@@ -29,25 +36,20 @@ module.exports = class BattleSystem {
             if(this._enmap.get('traps') === undefined) {
                 console.log("Traps not found, creating.");
                 this._enmap.set('traps', {});
-            } else {
-                var traps = this._enmap.get('traps');
-                var defaultCallback = () => console.log('No Callback');
-
-                for(var trapKey in traps) {
-                    
-                    var phrase = traps[trapKey].phrase;
-                    var ownerId = (traps[trapKey].owner !== undefined) ? traps[trapKey].owner.id : traps[trapKey].ownerId;
-                    var startTime = traps[trapKey].startTime;
-                    var callback = (traps[trapKey].callback === undefined) ? () => defaultCallback : traps[trapKey].callback;
-                    var message = (traps[trapKey].messageId === undefined) ? -1 : { id: traps[trapKey].messageId };
-
-                    var trap = this.generateTrap(phrase, ownerId, startTime, callback, message);
-                    traps[trapKey] = trap;
-                }
-
-                this._enmap.set('traps', traps);
             }
         });
+    }
+
+    getTrapChannel() {
+        return this._enmap.get('admin').trapChannelID;
+    }
+
+    setTrapChannel(channel) {
+        var admin = this._enmap.get('admin');
+
+        admin.trapChannelID = channel.id;
+
+        this._enmap.set('admin', admin);
     }
     
     retrieve(user_id) {
@@ -224,6 +226,45 @@ module.exports = class BattleSystem {
 
         if(trap !== undefined) {
             trap.callback(trap, message);
+        }
+    }
+
+    defaultTrapCallback(trap, message) {
+        var victim = message.author;
+        var owner = message.client.users.get(trap.ownerId);
+        
+        var embed = new Discord.RichEmbed()
+        .setColor('RED');
+
+        if(owner.id === victim.id) {
+            embed.setAuthor(`${owner.username} Blew Themselves Up!`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Skull_and_crossbones.svg/2000px-Skull_and_crossbones.svg.png')
+        } 
+        else {
+            embed.setAuthor(`${owner.username}'s Trap Sprung!`, owner.avatarUrl);
+        }
+
+        var victimStats = this.retrieve(victim.id);
+
+        if(victimStats.hp === 0) {
+            embed.setThumbnail('https://www.galabid.com/wp-content/uploads/2017/11/rip-gravestone-md.png');
+        }
+
+        embed.setDescription(
+            `**Phrase**: ${trap.phrase}\n` + 
+            `**Owner**: ${owner}\n` +
+            `**Damage**: ${trap.getDamage()}\n\n` + 
+            `**Victim**: ${victim}\n` +
+            `**Remaining Health**: ${victimStats.hp}\n\n` +
+            `*Traps deal more damage the longer they are alive for.*`);
+        embed.setFooter(`Trap set at ${new Date(trap.startTime).toString()}`, owner.avatarUrl);
+
+        message.channel.send(embed);
+
+        var trapChannelID = this.getTrapChannel();
+
+        if(trapChannelID !== null) {
+            var channel = message.client.channels.get(trapChannelID);
+            channel.send(embed);
         }
     }
 };
