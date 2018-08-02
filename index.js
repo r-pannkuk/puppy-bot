@@ -10,6 +10,9 @@ const commando = require('discord.js-commando');
 const path = require('path');
 const Sqlite = require('sqlite');
 
+/* Setting up message listeners for callback messages */
+const checkForTraps = require('./messageListeners/checkForTraps');
+
 /* Bot client creation. */
 const client = new commando.Client({
     owner: process.env.OWNER,
@@ -29,14 +32,14 @@ client.battleSystem = new BattleSystem(battleSettings);
 
 
 /* Message callbacks for follow-up commands. */
-client.messageCallbacks = [
-    client.battleSystem.checkForTraps.bind(client.battleSystem)
+const messageCallbacks = [
+    checkForTraps
 ];
 
 client.on('message', (message) => {
     if(message.author !== client.user) {
-        for(var i in client.messageCallbacks) {
-            client.messageCallbacks[i](message);
+        for(var i in messageCallbacks) {
+            messageCallbacks[i](message, client);
         }
     }
 });
@@ -59,6 +62,7 @@ client.reminders = new ReminderManager({
 /* Command group registry. */
 
 client.registry.registerGroups([
+    [ 'admin', 'Admin functions.' ],
     [ 'rng', 'Random Number Generators' ],
     [ 'pelt', 'PvP System for Abusing Scrubs' ],
     [ 'traps', 'Set trap phrases that explode when players say them in chat.' ],

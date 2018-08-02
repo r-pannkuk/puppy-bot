@@ -7,6 +7,7 @@ from PIL import Image, ImageFont, ImageDraw
 import hashlib
 import time
 import urllib.request
+import urllib
 from stat import S_ISREG, ST_CTIME, ST_MODE
 import sys
 import os
@@ -54,14 +55,22 @@ def main():
     new_img.paste(duwang, (0,0))
 
     # determine if this is a URL
-    if(re.match('/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/g', sys.argv[1])):
+    if(urllib.parse.urlparse(location).scheme != ""):
+        
+        font = ImageFont.truetype("./commands/memes/animeace2_ital.ttf", 13)
+        font_height = font.getsize('T')[1] + 4
+        max_width = font.getsize('WWWWWWWWWW')[0]
+
         user_img = Image.open(urllib.request.urlretrieve(location)[0])
 
         # scale image to proper dimensions for a picture
         user_img.thumbnail((78,44))
 
         # Simply post the new image in the right spot, adjusting for width
-        new_img.paste(user_img, (204 + (int)((78 - user_img.width) / 2),57))
+        new_img.paste(user_img, (204 + (int)((78 - user_img.width) / 2),57), user_img)
+
+        ImageDraw.Draw(new_img).text((214, 20), "What a", fill=(0,0,0,255), font=font)
+        ImageDraw.Draw(new_img).text((206, 34), "beautiful", fill=(0,0,0,255), font=font)
 
     # otherwise use text
     else:

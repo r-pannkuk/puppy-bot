@@ -101,6 +101,14 @@ module.exports = class BattleSystem {
         return victimStats.hp;
     }
 
+    increaseXp(userId, xpAmount) {
+        var userStats = this.retrieve(userId);
+
+        
+
+        this.set(userId, userStats);
+    }
+
     addTrap(message, phrase, user, callback) {
         var traps = this._enmap.get('traps');
         var key = phrase.toLowerCase();
@@ -176,27 +184,6 @@ module.exports = class BattleSystem {
         };
     }
 
-    checkForTraps(message) {
-        if(message.channel.type !== 'text') {
-            return;
-        }
-
-        var content = message.content.toLowerCase();
-        var traps = this._enmap.get('traps');
-
-        var validKey = Object.keys(traps).find(key => 
-            content.indexOf(key) > -1 && traps[key].messageId !== message.id
-        );
-
-        if(validKey !== undefined) {
-
-            if(content === `!disarmtrap ${validKey}` || content === `!removetrap ${validKey}`) {
-                return;
-            }
-            this.springTrap(message, validKey);
-        }
-    }
-
     trapList() {
         return this._enmap.get('traps');
     }
@@ -237,7 +224,7 @@ module.exports = class BattleSystem {
         .setColor('RED');
 
         if(owner.id === victim.id) {
-            embed.setAuthor(`${owner.username} Blew Themselves Up!`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Skull_and_crossbones.svg/2000px-Skull_and_crossbones.svg.png')
+            embed.setAuthor(`${owner.username} Blew Themselves Up!`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Skull_and_crossbones.svg/2000px-Skull_and_crossbones.svg.png');
         } 
         else {
             embed.setAuthor(`${owner.username}'s Trap Sprung!`, owner.avatarUrl);
