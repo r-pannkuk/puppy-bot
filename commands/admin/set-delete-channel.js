@@ -11,6 +11,8 @@ module.exports = class SetDeleteChannel extends commando.Command {
             description: 'Stores a text channel for reporting deleted messages.',
             examples: [ '!set-delete-channel #channel' ],
             argsPromptLimit: 0,
+            guildOnly: true,
+            userPermissions: Discord.Permissions.FLAGS.MANAGE_CHANNELS,
             args: [
                 {
                     key: 'channel',
@@ -31,7 +33,7 @@ module.exports = class SetDeleteChannel extends commando.Command {
                 if(channel !== null) {
                     var embed = new Discord.RichEmbed();
                     embed.setAuthor(message.author.username, message.author.displayAvatarURL);
-                    embed.setTitle(message.channel.name)
+                    embed.setTitle(`#${message.channel.name}`)
                     embed.setTimestamp(message.timestamp);
                     embed.setDescription(message.content);
                     channel.send(embed);
