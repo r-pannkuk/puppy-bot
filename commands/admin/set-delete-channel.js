@@ -27,21 +27,22 @@ module.exports = class SetDeleteChannel extends commando.Command {
     
     async run(message, { channel }) {
         var client = this.client;
-        if(message.author !== client.user) {
-            if(channel !== null) {
-                client.removeAllListeners('messageDelete');
-                client.on('messageDelete', (message) => {
+        if(channel !== null) {
+            client.removeAllListeners('messageDelete');
+            client.on('messageDelete', (message) => {
+                if(message.author !== client.user && message.content.indexOf("!trap") !== 0) {  
                     var createdDate = new Date(message.createdTimestamp);
                     var m = moment.tz(createdDate, 'America/New_York');
                     channel.send(`(${m.format('YYYY-MM-DD h:mm:ss a')}) Deleted message from **${message.author.username}** [${message.channel}]:\n${message.content}`);
-                });
+                }
                 
-            }
-            else {
-                console.log('channel not found');
-            }
+            });
+            
+            message.channel.send(`Deletion channel set to ${channel}.`);
         }
-        message.channel.send(`Deletion channel set to ${channel}.`);
+        else {
+            console.log('channel not found');
+        }
 
 
     }
