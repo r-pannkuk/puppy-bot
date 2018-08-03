@@ -2,6 +2,7 @@ const MusicPlayer = require('./core/MusicPlayer.js');
 const BattleSystem = require('./core/BattleSystem.js');
 const Notepad = require('./core/Notepad.js');
 const ReminderManager = require('./core/ReminderManager.js');
+const moment = require('moment');
 
 require('dotenv').config();
 
