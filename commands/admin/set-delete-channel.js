@@ -33,11 +33,26 @@ module.exports = class SetDeleteChannel extends commando.Command {
                 if(message.author !== client.user && message.content.indexOf("!trap") !== 0) {  
                     var createdDate = new Date(message.createdTimestamp);
                     var m = moment.tz(createdDate, 'America/New_York');
-                    channel.send(`(${m.format('YYYY-MM-DD h:mm:ss a')}) Deleted message from **${message.author.username}** [${message.channel}]:\n${message.content}`);
+                    var content = `(${m.format('YYYY-MM-DD h:mm:ss a')}) Deleted message from **${message.author.username}** [${message.channel}]:\n${message.content}`;
+                    var attachment = message.attachments.first();
+
+                    if(attachment !== undefined) {
+                        var newAttachment = new Discord.Attachment(attachment.proxyURL, attachment.filename);
+                        channel.send(content, newAttachment)
+                        .catch((error) => {
+                            console.error(error);
+                            channel.send(`ERROR: Unable to fetch attachment at: ${attachment.proxyURL}`);
+                        });
+                    } else if(message.embeds.length > 0) {
+                        channel.send(content, new Discord.RichEmbed(message.embeds[0]));
+                    } else {
+                        channel.send(content);
+                    }
+                    
                 }
                 
             });
-            
+
             message.channel.send(`Deletion channel set to ${channel}.`);
         }
         else {
