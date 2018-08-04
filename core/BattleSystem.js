@@ -11,13 +11,6 @@ module.exports = class BattleSystem {
         });
 
         this._enmap.defer.then(() => {
-            if(this._enmap.get('admin') === undefined) {
-                console.log("Admin settings not found, creating.");
-                this._enmap.set('admin', {
-                    trapChannelID: null
-                });
-            }
-
             if(this._enmap.get('users') === undefined) {
                 console.log("Users not found, creating.");
                 this._enmap.set('users', {});
@@ -38,18 +31,6 @@ module.exports = class BattleSystem {
                 this._enmap.set('traps', {});
             }
         });
-    }
-
-    getTrapChannel() {
-        return this._enmap.get('admin').trapChannelID;
-    }
-
-    setTrapChannel(channel) {
-        var admin = this._enmap.get('admin');
-
-        admin.trapChannelID = channel.id;
-
-        this._enmap.set('admin', admin);
     }
     
     retrieve(user_id) {
@@ -247,11 +228,11 @@ module.exports = class BattleSystem {
 
         message.channel.send(embed);
 
-        var trapChannelID = this.getTrapChannel();
+        var trapChannelID = message.client.admin.getTrapChannel();
 
         if(trapChannelID !== null) {
             var channel = message.client.channels.get(trapChannelID);
-            channel.send(embed);
+            channel.send(embed).catch((error) => console.log(error));
         }
     }
 };

@@ -1,3 +1,4 @@
+const Admin = require('./core/Admin.js');
 const MusicPlayer = require('./core/MusicPlayer.js');
 const BattleSystem = require('./core/BattleSystem.js');
 const Notepad = require('./core/Notepad.js');
@@ -12,10 +13,11 @@ const path = require('path');
 const Sqlite = require('sqlite');
 
 /* Setting up message listeners for callback messages */
-const checkForTraps = require('./messageListeners/checkForTraps');
+const checkForTraps = require('./messageListeners/checkForTraps.js');
+const echoDeletedMessage = require('./messageListeners/echoDeletedMessage.js')
 
 /* Bot client creation. */
-const client = new commando.Client({
+var client = new commando.Client({
     owner: process.env.OWNER,
     unknownCommandResponse: false,
     disableEveryone: true
@@ -45,6 +47,23 @@ client.on('message', (message) => {
     }
 });
 
+const messageDeleteCallbacks = [
+    echoDeletedMessage
+];
+
+client.on('messageDelete', (message) => {
+    if(message.author !== client.user) {
+        for(var i in messageDeleteCallbacks) {
+            messageDeleteCallbacks[i](message, client);
+        }
+    }
+});
+
+/* Admin system for server management. */
+client.admin = new Admin({
+    name: "Admin"
+});
+
 /* MusicPlayer added to bot. */
 client.musicPlayer = new MusicPlayer({
     youtube: process.env.YOUTUBE
@@ -59,6 +78,7 @@ client.notepad = new Notepad({
 client.reminders = new ReminderManager({
     name: "Reminders"
 });
+
 
 /* Command group registry. */
 

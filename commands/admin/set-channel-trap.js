@@ -5,13 +5,14 @@ const Discord = require('discord.js');
 module.exports = class TrapChannelCommand extends commando.Command {
     constructor(client) {
         super(client, {
-            name: 'trapchannel',
-            group: 'traps',
-            memberName: 'trapchannel',
+            name: 'set-channel-trap',
+            group: 'admin',
+            memberName: 'set-channel-trap',
             description: 'Admin tool for setting a channel for posting trap messages.',
-            examples: [ '!trapchannel <channel>' ],
+            examples: [ '!set-channel-trap <channel>' ],
             argsPromptLimit: 0,
-            ownerOnly: true,
+            guildOnly: true,
+            userPermissions: Discord.Permissions.FLAGS.MANAGE_CHANNELS,
             args: [
                 {
                     key: 'channel',
@@ -25,16 +26,12 @@ module.exports = class TrapChannelCommand extends commando.Command {
 
     
     async run(msg, { channel }) {
-        if(!this.client.isOwner(msg.author)) {
-            return;
-        }
-
         if(channel !== '') {
-            this.client.battleSystem.setTrapChannel(channel);
+            this.client.admin.setTrapChannel(channel);
     
             msg.channel.send(`Trap channel set successfully.  Traps will now be posted in ${channel}`);
         } else {
-            var channel = this.client.channels.get(this.client.battleSystem.getTrapChannel());
+            var channel = this.client.channels.get(this.client.admin.getTrapChannel());
             msg.channel.send(`Trap channel currently set to ${channel}.`);
         }
 
