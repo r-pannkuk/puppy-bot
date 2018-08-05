@@ -1,15 +1,14 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
-const moment = require('moment');
 
 
-module.exports = class SetChannelDelete extends commando.Command {
+module.exports = class AddChannelGroup extends commando.Command {
     constructor(client) {
         super(client, {
-            name: 'set-channel-delete',
+            name: 'add-channel-group',
             group: 'admin',
-            memberName: 'set-channel-delete',
-            description: 'Stores a text channel for reporting deleted messages.',
+            memberName: 'add-channel-group',
+            description: 'Creates a new group and role for discussion.',
             examples: [ '!set-channel-delete #channel' ],
             argsPromptLimit: 0,
             guildOnly: true,

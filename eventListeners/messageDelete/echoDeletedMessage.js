@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const moment = require('moment');
 
-module.exports = function(message, client) {
+module.exports = function(client, message) {
     if(message.channel.type !== 'text') {
         return;
     }
@@ -18,13 +18,11 @@ module.exports = function(message, client) {
             var newAttachment = new Discord.Attachment(attachment.proxyURL, attachment.filename);
             echoChannel.send(content, newAttachment)
             .catch((error) => {
-                console.error(error);
                 echoChannel.send(`ERROR: Unable to fetch attachment at: ${attachment.proxyURL}`);
             });
         } else if(message.embeds.length > 0) {
             echoChannel.send(content, new Discord.RichEmbed(message.embeds[0]));
         } else {
-            console.log(echoChannel);
             echoChannel.send(content);
         }
         

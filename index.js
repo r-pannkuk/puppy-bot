@@ -3,18 +3,15 @@ const MusicPlayer = require('./core/MusicPlayer.js');
 const BattleSystem = require('./core/BattleSystem.js');
 const Notepad = require('./core/Notepad.js');
 const ReminderManager = require('./core/ReminderManager.js');
-const moment = require('moment');
 
 require('dotenv').config();
 
 const Discord = require('discord.js');
 const commando = require('discord.js-commando');
-const path = require('path');
 const Sqlite = require('sqlite');
-
-/* Setting up message listeners for callback messages */
-const checkForTraps = require('./messageListeners/checkForTraps.js');
-const echoDeletedMessage = require('./messageListeners/echoDeletedMessage.js')
+const moment = require('moment');
+const path = require('path');
+const fs = require('fs');
 
 /* Bot client creation. */
 var client = new commando.Client({
@@ -32,32 +29,6 @@ client.setProvider(
 /* Create a new battle system object. */
 const battleSettings = require('./commands/pelt/settings.json');
 client.battleSystem = new BattleSystem(battleSettings);
-
-
-/* Message callbacks for follow-up commands. */
-const messageCallbacks = [
-    checkForTraps
-];
-
-client.on('message', (message) => {
-    if(message.author !== client.user) {
-        for(var i in messageCallbacks) {
-            messageCallbacks[i](message, client);
-        }
-    }
-});
-
-const messageDeleteCallbacks = [
-    echoDeletedMessage
-];
-
-client.on('messageDelete', (message) => {
-    if(message.author !== client.user) {
-        for(var i in messageDeleteCallbacks) {
-            messageDeleteCallbacks[i](message, client);
-        }
-    }
-});
 
 /* Admin system for server management. */
 client.admin = new Admin({
@@ -95,16 +66,31 @@ client.registry.registerGroups([
 client.registry.registerDefaults();
 client.registry.registerCommandsIn(__dirname + '/commands');
 
-/* Startup */
 
-client.on('ready', () => {
-    client.user.setPresence({
-        status: 'online',
-        game: {
-            name: 'Woof!',
-            type: 'LISTENING'
-        }
+
+/* Setting up message listeners for callback messages */
+var messageListenerDirectory = path.join(__dirname, "eventListeners");
+var callbacks = {};
+
+fs.readdirSync(messageListenerDirectory).forEach((eventDir) => {
+    callbacks[eventDir] = [];
+
+    eventListenerPath = path.join(messageListenerDirectory, eventDir);
+
+    fs.readdirSync(eventListenerPath).forEach(listener => {
+        var eventListener = path.join(eventListenerPath, listener);
+        callbacks[eventDir].push(require(eventListener));
     });
 });
+
+Object.keys(callbacks).forEach(event => {
+    callbacks[event].forEach((listener) => {
+        client.on(event, (...args) => {
+            listener(client, ...args);
+        });
+    });
+});
+
+/* Startup */
 
 client.login(process.env.TOKEN);

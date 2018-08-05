@@ -1,4 +1,4 @@
-module.exports = function(message, client) {
+module.exports = function(client, message) {
     if(message.channel.type !== 'text') {
         return;
     }

@@ -2,7 +2,7 @@ const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
 
-module.exports = class TrapChannelCommand extends commando.Command {
+module.exports = class SetChannelTrap extends commando.Command {
     constructor(client) {
         super(client, {
             name: 'set-channel-trap',
