@@ -11,6 +11,7 @@ module.exports = function(client, messageReaction, user) {
         // Need a check for emoji's here
         roles.forEach(role => {
             member.removeRole(role, 'User unsubscribed to role.');
+            member.send(`You've been removed from ${role.name}.`);
         });
     }
 };

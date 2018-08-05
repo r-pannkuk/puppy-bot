@@ -11,6 +11,7 @@ module.exports = function(client, messageReaction, user) {
         // Need a check for emoji's here
         roles.forEach(role => {
             member.addRole(role, 'User automatically subscribed to role.');
+            member.send(`You've been added to ${role.name}.`);
         });
     }
 };
