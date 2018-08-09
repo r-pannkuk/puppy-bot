@@ -3,6 +3,13 @@ module.exports = function(client, message) {
         return;
     }
 
+    if(message.author === client.user) {
+        return;
+    }
+
+    console.log(message.author);
+    console.log(client.user);
+
     var content = message.content.toLowerCase();
     var traps = client.battleSystem._enmap.get('traps');
 
