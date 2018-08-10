@@ -96,7 +96,7 @@ module.exports = class AddGroupChannel extends commando.Command {
                 msg.channel.send(`New channel ${channel} created under ${categoryName.toUpperCase()} for ${role}.`);
     
                 msg.guild.channels.get(msg.client.admin.getRoleChannel()).send(
-                    `New role created: ${role}.  React with \:white_check_mark: to be added.`
+                    `${role} - React with \:white_check_mark: to be added to the group and access ${channel}`
                 ).then(msg => {
                     msg.react("✅");
                 });
