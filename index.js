@@ -22,17 +22,19 @@ client.setProvider(new EnmapProvider(path.join(__dirname, 'settings.sqlite3'))).
 /* Command group registry. */
 
 client.registry.registerGroups([
-    [ 'admin', 'Admin functions.' ],
+    [ 'admin', 'Admin Functions' ],
     [ 'rng', 'Random Number Generators' ],
     [ 'pelt', 'PvP System for Abusing Scrubs' ],
-    [ 'traps', 'Set trap phrases that explode when players say them in chat.' ],
+    [ 'traps', 'Trap Phrases which Explode' ],
     [ 'memes', 'Memes and Stupidity' ],
-    [ 'music', 'General music player for Youtube and Soundcloud' ],
-    [ 'reminders', 'Set reminders and notifications for yourself.' ],
-    [ 'notes', 'Notes that can be set or reclaimed at any time.' ]
+    [ 'music', 'Music Player' ],
+    [ 'reminders', 'Reminders and Notifications' ],
+    [ 'notes', 'User Notes' ],
+    [ 'games', 'Commands for Games' ]
 ]);
 client.registry.registerDefaults();
 client.registry.registerCommandsIn(__dirname + '/commands');
+client.registry.registerCommandsIn(__dirname + '/commands/games');
 
 
 /* Setting up message listeners for callback messages */

@@ -3,6 +3,7 @@ const MusicPlayer = require('../../core/MusicPlayer.js');
 const BattleSystem = require('../../core/BattleSystem.js');
 const Notepad = require('../../core/Notepad.js');
 const ReminderManager = require('../../core/ReminderManager.js');
+const GameManager = require('../../core/GameManager.js');
 
 const GuildSettingsHelper = require('../../node_modules/discord.js-commando/src/providers/helper.js')
 
@@ -28,5 +29,8 @@ module.exports = function(client, guild) {
 
         /* ReminderManager added to bot. */
         guild.reminders = new ReminderManager(guild.settings);
+
+        /* Game manager for managing game keys and settings. */
+        guild.gameManager = new GameManager(guild.settings);
     });
 }
