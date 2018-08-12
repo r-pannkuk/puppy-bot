@@ -15,11 +15,11 @@ module.exports = class SkipCommand extends commando.Command {
     }
 
     async run(message, { source }) {
-        var client = this.client;
+        var guild = message.guild;
 
-        if(client.musicPlayer._isPlaying) {
+        if(guild.musicPlayer.isPlaying()) {
             message.channel.send("Skipping track.");
-            client.musicPlayer.skip();
+            guild.musicPlayer.skip();
         }
     }
 }

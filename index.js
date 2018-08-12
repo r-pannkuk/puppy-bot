@@ -1,8 +1,4 @@
-const Admin = require('./core/Admin.js');
-const MusicPlayer = require('./core/MusicPlayer.js');
-const BattleSystem = require('./core/BattleSystem.js');
-const Notepad = require('./core/Notepad.js');
-const ReminderManager = require('./core/ReminderManager.js');
+const EnmapProvider = require('./core/EnmapProvider.js');
 
 require('dotenv').config();
 
@@ -21,35 +17,7 @@ var client = new commando.Client({
 });
 
 /* Guild settings load. */
-client.setProvider(
-    Sqlite.open(path.join(__dirname, 'settings.sqlite3')).then(db =>
-    new commando.SQLiteProvider(db))
-).catch(console.error);
-
-/* Create a new battle system object. */
-const battleSettings = require('./commands/pelt/settings.json');
-client.battleSystem = new BattleSystem(battleSettings);
-
-/* Admin system for server management. */
-client.admin = new Admin({
-    name: "Admin"
-});
-
-/* MusicPlayer added to bot. */
-client.musicPlayer = new MusicPlayer({
-    youtube: process.env.YOUTUBE
-});
-
-/* Notepad for user notes. */
-client.notepad = new Notepad({
-    name: "Notes"
-});
-
-/* ReminderManager added to bot. */
-client.reminders = new ReminderManager({
-    name: "Reminders"
-});
-
+client.setProvider(new EnmapProvider(path.join(__dirname, 'settings.sqlite3'))).catch(console.error);
 
 /* Command group registry. */
 
@@ -65,7 +33,6 @@ client.registry.registerGroups([
 ]);
 client.registry.registerDefaults();
 client.registry.registerCommandsIn(__dirname + '/commands');
-
 
 
 /* Setting up message listeners for callback messages */

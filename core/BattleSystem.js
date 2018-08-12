@@ -1,78 +1,94 @@
-const Enmap = require('enmap');
-const EnmapSQLite = require('enmap-sqlite');
 const Discord = require('discord.js');
 
-module.exports = class BattleSystem {
-    constructor(settings) {
-        this._enmap = new Enmap({
-            provider: new EnmapSQLite({
-                name: settings.name
-            })
-        });
+const config = require("../commands/pelt/config.json");
 
-        this._enmap.defer.then(() => {
-            if(this._enmap.get('users') === undefined) {
-                console.log("Users not found, creating.");
-                this._enmap.set('users', {});
-            }
-    
-            if(this._enmap.get('items') === undefined) {
-                console.log("Items not found, creating.");
-                this._enmap.set('items', settings.items);
-            }
-    
-            if(this._enmap.get('levels') === undefined) {
-                console.log("Levels not found, creating.");
-                this._enmap.set('levels', settings.levels);
-            }
-    
-            if(this._enmap.get('traps') === undefined) {
-                console.log("Traps not found, creating.");
-                this._enmap.set('traps', {});
-            }
-        });
+module.exports = class BattleSystem {
+    constructor(guildSettings) {
+        if (guildSettings.get('battle') === undefined) {
+            console.log("Battle settings not found, creating.");
+            guildSettings.set('battle', {});
+        }
+        
+        this.guildSettings = guildSettings;
+
+        var battle = guildSettings.get('battle');
+
+        if (battle.users === undefined) {
+            console.log("Users not found, creating.");
+            battle.users = {};
+        }
+
+        if (battle.items === undefined) {
+            console.log("Items not found, creating.");
+            battle.items = config.items;
+        }
+
+        if (battle.levels === undefined) {
+            console.log("Levels not found, creating.");
+            battle.levels = config.levels;
+        }
+
+        if (battle.traps === undefined) {
+            console.log("Traps not found, creating.");
+            battle.traps = {};
+        }
+
+        this.guildSettings.set('battle', battle);
     }
-    
+
+    get settings() { return this.guildSettings.get('battle'); }
+    set settings(settings) { this.guildSettings.set('battle', settings); }
+
+    get users() { return this.settings.users; }
+    get items() { return this.settings.items; }
+    get levels() { return this.settings.levels; }
+    get traps() { return this.settings.traps; }
+
+    set users(obj) { var newSettings = this.settings; newSettings.users = obj; this.settings = newSettings; }
+    set items(obj) { var newSettings = this.settings; newSettings.items = obj; this.settings = newSettings; }
+    set levels(obj) { var newSettings = this.settings; newSettings.levels = obj; this.settings = newSettings; }
+    set traps(obj) { var newSettings = this.settings; newSettings.traps = obj; this.settings = newSettings; }
+
     retrieve(user_id) {
-        var users = this._enmap.get('users');
+        var users = this.users;
 
         var stats = users[user_id];
 
-        if(stats === undefined) {
+        if (stats === undefined) {
             stats = {
                 xp: 0,
                 inventory: [
-                    this._enmap.get('items').pebble
+                    this.items.pebble
                 ],
                 hp: 10
             };
 
             users[user_id] = stats;
 
-            this._enmap.set('users', users);
+            this.users = users;
         }
 
         return stats;
     }
 
     set(user, stats) {
-        var users = this._enmap.get('users');
+        var users = this.users;
         users[user] = stats;
 
-        this._enmap.set('users', users);
+        this.users = users;
     }
 
     damage(victimId, damage, attackerId) {
         var victimStats = this.retrieve(victimId);
         var attackerStats = this.retrieve(attackerId);
-        
-        if(victimId !== attackerId) {
+
+        if (victimId !== attackerId) {
             attackerStats.xp += damage;
         }
 
         victimStats.hp -= damage;
 
-        if(victimStats.hp <= 0) {
+        if (victimStats.hp <= 0) {
             victimStats.hp = 0;
         }
 
@@ -85,22 +101,20 @@ module.exports = class BattleSystem {
     increaseXp(userId, xpAmount) {
         var userStats = this.retrieve(userId);
 
-        
-
         this.set(userId, userStats);
     }
 
     addTrap(message, phrase, user, callback) {
-        var traps = this._enmap.get('traps');
+        var traps = this.traps;
         var key = phrase.toLowerCase();
 
-        if(Object.keys(traps).indexOf(key) > -1) {
+        if (Object.keys(traps).indexOf(key) > -1) {
             return false;
         }
 
         var status = this.retrieve(user.id);
 
-        if('trapActive' in status && status.trapActive) {
+        if ('trapActive' in status && status.trapActive) {
             return false;
         }
 
@@ -108,7 +122,7 @@ module.exports = class BattleSystem {
 
         status.trapActive = true;
 
-        this._enmap.set('traps', traps);
+        this.traps = traps;
 
         this.set(user.id, status);
 
@@ -122,55 +136,55 @@ module.exports = class BattleSystem {
             startTime: startTime,
             callback: callback,
             messageId: message.id,
-            getDamage: function() {
-                var hours = Math.floor((Date.now() - this.startTime) / (60*60*1000));
-    
+            getDamage: function () {
+                var hours = Math.floor((Date.now() - this.startTime) / (60 * 60 * 1000));
+
                 var damage = 0;
-    
-                for(var i = 0; i < hours; ++i) {
+
+                for (var i = 0; i < hours; ++i) {
                     ++damage;
-    
+
                     // 8 Hours
-                    if(i >= 8) {
+                    if (i >= 8) {
                         ++damage;
                     }
                     // 1 Day
-                    if(i >= 24) {
+                    if (i >= 24) {
                         ++damage;
                     }
                     // 3 Days
-                    if(i >= 72) {
+                    if (i >= 72) {
                         ++damage;
                     }
                     // 1 Week
-                    if(i >= 168) {
+                    if (i >= 168) {
                         ++damage;
                     }
                     // 2 Weeks
-                    if(i >= 336) {
+                    if (i >= 336) {
                         ++damage;
                     }
                     // 3 Weeks
-                    if(i >= 504) {
+                    if (i >= 504) {
                         ++damage;
                     }
                     // 4 Weeks
-                    if(i >= 672) {
+                    if (i >= 672) {
                         ++damage;
                     }
                 }
-    
+
                 return damage;
             }
         };
     }
 
     trapList() {
-        return this._enmap.get('traps');
+        return this.traps;
     }
 
     removeTrap(trapWord) {
-        var traps = this._enmap.get('traps');
+        var traps = this.traps;
 
         var trap = traps[trapWord];
 
@@ -180,7 +194,7 @@ module.exports = class BattleSystem {
 
         status.trapActive = false;
 
-        this._enmap.set('traps', traps);
+        this.traps = traps;
 
         this.set(trap.ownerId, status);
 
@@ -192,7 +206,7 @@ module.exports = class BattleSystem {
         var authorId = message.author.id;
         this.damage(authorId, trap.getDamage(), trap.ownerId);
 
-        if(trap !== undefined) {
+        if (trap !== undefined) {
             trap.callback(trap, message);
         }
     }
@@ -200,27 +214,27 @@ module.exports = class BattleSystem {
     defaultTrapCallback(trap, message) {
         var victim = message.author;
         var owner = message.client.users.get(trap.ownerId);
-        
-        var embed = new Discord.RichEmbed()
-        .setColor('RED');
 
-        if(owner.id === victim.id) {
+        var embed = new Discord.RichEmbed()
+            .setColor('RED');
+
+        if (owner.id === victim.id) {
             embed.setAuthor(`${owner.username} Blew Themselves Up!`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Skull_and_crossbones.svg/2000px-Skull_and_crossbones.svg.png');
-        } 
+        }
         else {
             embed.setAuthor(`${owner.username}'s Trap Sprung!`, owner.avatarUrl);
         }
 
         var victimStats = this.retrieve(victim.id);
 
-        if(victimStats.hp === 0) {
+        if (victimStats.hp === 0) {
             embed.setThumbnail('https://www.galabid.com/wp-content/uploads/2017/11/rip-gravestone-md.png');
         }
 
         embed.setDescription(
-            `**Phrase**: ${trap.phrase}\n` + 
+            `**Phrase**: ${trap.phrase}\n` +
             `**Owner**: ${owner}\n` +
-            `**Damage**: ${trap.getDamage()}\n\n` + 
+            `**Damage**: ${trap.getDamage()}\n\n` +
             `**Victim**: ${victim}\n` +
             `**Remaining Health**: ${victimStats.hp}\n\n` +
             `*Traps deal more damage the longer they are alive for.*`);
@@ -228,9 +242,9 @@ module.exports = class BattleSystem {
 
         message.channel.send(embed);
 
-        var trapChannelID = message.client.admin.getTrapChannel();
+        var trapChannelID = message.guild.admin.getTrapChannel();
 
-        if(trapChannelID !== null) {
+        if (trapChannelID !== null) {
             var channel = message.client.channels.get(trapChannelID);
             channel.send(embed).catch((error) => console.log(error));
         }

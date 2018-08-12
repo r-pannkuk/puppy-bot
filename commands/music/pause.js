@@ -15,14 +15,14 @@ module.exports = class PauseCommand extends commando.Command {
     }
 
     async run(message, { source }) {
-        var client = this.client;
+        var guild = message.guild;
 
-        if(client.musicPlayer._isPlaying) {
+        if(guild.musicPlayer.isPlaying()) {
             message.channel.send("Pausing music playback. Use !resume to continue.");
     
-            client.musicPlayer.pause();
+            guild.musicPlayer.pause();
         } else {
-            message.channel.send("No music is currently playing.");
+            guild.channel.send("No music is currently playing.");
         }
 
     }

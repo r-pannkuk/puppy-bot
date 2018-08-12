@@ -20,7 +20,7 @@ module.exports = class TrapListCommand extends commando.Command {
             return;
         }
 
-        var traps = Object.keys(this.client.battleSystem.trapList());
+        var traps = Object.keys(message.guild.battleSystem.trapList());
         if(traps.length > 0) {
             var string = "";
             for(var i in traps) {

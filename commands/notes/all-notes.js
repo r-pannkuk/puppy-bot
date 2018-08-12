@@ -15,7 +15,7 @@ module.exports = class AllNotesCommand extends commando.Command {
 
     
     async run(message) {
-        var keys = this.client.notepad.getKeys(message.author.id);
+        var keys = message.guild.notepad.getKeys(message.author.id);
         if(keys.length === 0) {
             message.channel.send("No keys found. Please enter a note first.");
             return;

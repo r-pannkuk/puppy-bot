@@ -47,7 +47,7 @@ module.exports = class AdminTrapCommand extends commando.Command {
             return;
         }
 
-        var traps = this.client.battleSystem._enmap.get('traps');
+        var traps = message.guild.battleSystem._enmap.get('traps');
 
         var key = phrase.toLowerCase();
 
@@ -56,20 +56,25 @@ module.exports = class AdminTrapCommand extends commando.Command {
             return false;
         }
 
-        var status = this.client.battleSystem.retrieve(ownerId);
+        var status = message.guild.battleSystem.retrieve(ownerId);
 
         if('trapActive' in status && status.trapActive) {
             msg.channel.send('User already has a trap set.');
             return false;
         }
 
-        traps[key] = this.client.battleSystem.generateTrap(key, ownerId, Date.parse(date), this.client.battleSystem.defaultTrapCallback.bind(this.client.battleSystem), msg);
+        traps[key] = message.guild.battleSystem.generateTrap(
+            key, 
+            ownerId, 
+            Date.parse(date), 
+            message.guild.battleSystem.defaultTrapCallback.bind(message.guild.battleSystem), 
+            msg);
 
         status.trapActive = true;
 
-        this.client.battleSystem.set(ownerId, status);
+        message.guild.battleSystem.set(ownerId, status);
         
-        this.client.battleSystem._enmap.set('traps', traps);
+        message.guild.battleSystem._enmap.set('traps', traps);
 
         msg.channel.send("Trap set succesfully.");
     }

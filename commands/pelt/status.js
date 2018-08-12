@@ -30,7 +30,7 @@ module.exports = class StatusCommand extends commando.Command {
             user = message.author;
         }
 
-        const stats = this.client.battleSystem.retrieve(user.id);
+        const stats = message.guild.battleSystem.retrieve(user.id);
 
         var embed = new Discord.RichEmbed()
         .setColor('DARK_RED')

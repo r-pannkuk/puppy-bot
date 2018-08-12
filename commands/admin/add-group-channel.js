@@ -16,7 +16,9 @@ module.exports = class AddGroupChannel extends commando.Command {
             ],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: Discord.Permissions.FLAGS.MANAGE_CHANNELS,
+            userPermissions: [
+                Discord.Permissions.FLAGS.MANAGE_CHANNELS
+            ],
             args: [
                 {
                     key: 'channel',
@@ -92,10 +94,10 @@ module.exports = class AddGroupChannel extends commando.Command {
                 }
             ]
     
-            msg.client.admin.addNewChannel(msg.guild, channelName, categoryName, overwrites, (channel) => {
+            msg.guild.admin.addNewChannel(msg.guild, channelName, categoryName, overwrites, (channel) => {
                 msg.channel.send(`New channel ${channel} created under ${categoryName.toUpperCase()} for ${role}.`);
     
-                msg.guild.channels.get(msg.client.admin.getRoleChannel()).send(
+                msg.guild.channels.get(msg.guild.admin.roleChannelID).send(
                     `${role} - React with \:white_check_mark: to be added to the group and access ${channel}`
                 ).then(msg => {
                     msg.react("✅");
@@ -104,7 +106,7 @@ module.exports = class AddGroupChannel extends commando.Command {
         };
         
         if(guildRole === null || guildRole === undefined) {
-            msg.client.admin.createRole(msg.guild, roleName, createChannelCallback);
+            msg.guild.admin.createRole(msg.guild, roleName, createChannelCallback);
         } else {
             createChannelCallback(guildRole);
         }

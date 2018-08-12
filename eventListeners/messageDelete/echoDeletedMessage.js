@@ -14,7 +14,7 @@ module.exports = function(client, message) {
         return;
     }
 
-    var echoChannel = message.client.channels.get(client.admin.getDeleteChannel());
+    var echoChannel = message.client.channels.get(guild.admin.getDeleteChannel());
 
     var createdDate = new Date(message.createdTimestamp);
     var m = moment.tz(createdDate, 'America/New_York');

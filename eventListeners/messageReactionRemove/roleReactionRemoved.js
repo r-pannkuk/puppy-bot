@@ -5,7 +5,7 @@ module.exports = function(client, messageReaction, user) {
 
     var member = channel.members.get(user.id);
 
-    if(channel.id === client.admin.getRoleChannel()) {
+    if(channel.id === message.guild.admin.getRoleChannel()) {
         var roles = message.mentions.roles;
 
         // Need a check for emoji's here

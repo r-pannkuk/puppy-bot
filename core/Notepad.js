@@ -2,60 +2,62 @@ const Enmap = require('enmap');
 const EnmapSQLite = require('enmap-sqlite');
 
 module.exports = class Notepad {
-    constructor(settings) {
-        this._enmap = new Enmap({
-            provider: new EnmapSQLite({
-                name: settings.name
-            })
-        });
+    constructor(guildSettings) {
+        this.guildSettings = guildSettings;
 
-        this.retrieve = function(user) {
-            var notes = this._enmap.get(user);
-
-            if(notes === undefined) {
-                notes = {};
-                this._enmap.set(user, notes);
-            }
-
-            return notes;
-        }
+        this.guildSettings.get('notes', {});
     }
 
-    setNote(user, key, note) {
-        var notes = this.retrieve(user);
+    get notes() { return this.guildSettings.get('notes'); }
+    set notes(notes) { this.guildSettings.set('notes', notes); }
 
-        notes[key] = {
+    setNote(user, key, note) {
+        if(!(user.id in this.notes)) {
+            this.notes[user.id] = {};
+        }
+
+        this.notes[user.id][key] = {
             description: note,
             timestamp: new Date()
         };
 
-        this._enmap.set(user, notes);
+        this.notes = notes;
     }
 
     getNote(user, key) {
-        var notes = this.retrieve(user);
-
-        if(key in notes) {
-            return notes[key];
+        if(!(user.id in this.notes)) {
+            return undefined;
         }
 
-        return undefined;
+        if(!(key in this.notes[user.id])) {
+            return undefined;
+        }
+
+        return this.notes[user.id][key];
     }
 
     deleteNote(user, key) {
-        var notes = this.retrieve(user);
+        var notes = this.guildSettings.get('notes');
 
-        if(key in notes) {
-            delete notes[key];
+        if(!(user.id in notes)) {
+            return undefined;
         }
 
-        this._enmap.set(user, notes);
+        if(!(key in notes[user.id])) {
+            return undefined;
+        }
+
+        var note = notes[user.id][key];
+
+        delete notes[user.id][key];
+
+        this.guildSettings.set('notes', notes);
+
+        return note;
     }
 
     getKeys(user) {
-        var notes = this.retrieve(user);
-
-        var sortedKeys = Object.keys(notes).sort((a, b) => a.timestamp - b.timestamp);
+        var sortedKeys = Object.keys(this.notes).sort((a, b) => a.timestamp - b.timestamp);
 
         return sortedKeys;
     }

@@ -28,11 +28,11 @@ module.exports = class SetChannelDelete extends commando.Command {
     
     async run(msg, { channel }) {
         if(channel !== '') {
-            this.client.admin.setDeleteChannel(channel);
+            msg.guild.admin.deleteChannelID = channel.id;
     
             msg.channel.send(`Deletion channel set to ${channel}.`);
         } else {
-            var channel = this.client.channels.get(this.client.admin.getDeleteChannel());
+            var channel = this.client.channels.get(msg.guild.admin.deleteChannelID);
             msg.channel.send(`Deletion channel currently set to ${channel}.`);
         }
     }

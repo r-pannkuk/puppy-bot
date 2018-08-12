@@ -28,7 +28,7 @@ module.exports = class SetNoteCommand extends commando.Command {
 
     
     async run(message, { noteKey, note }) {
-        this.client.notepad.setNote(message.author.id, noteKey, note);
+        message.guild.notepad.setNote(message.author.id, noteKey, note);
 
         message.channel.send(`${noteKey} created succesfully.`);
     }

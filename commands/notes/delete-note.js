@@ -23,7 +23,7 @@ module.exports = class DeleteNoteCommand extends commando.Command {
 
     
     async run(message, { noteKey }) {
-        this.client.notepad.deleteNote(message.author.id, noteKey);
+        message.guild.notepad.deleteNote(message.author.id, noteKey);
 
         message.channel.send(`${noteKey} deleted from your notes.`);
     }

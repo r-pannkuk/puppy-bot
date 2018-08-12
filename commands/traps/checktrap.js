@@ -16,7 +16,7 @@ module.exports = class CheckTrapCommand extends commando.Command {
 
     
     async run(message) {
-        var traps = Object.values(this.client.battleSystem.trapList());
+        var traps = Object.values(message.guild.battleSystem.trapList());
         var authorTraps = traps.filter(trap => trap.ownerId === message.author.id);
 
         var promise = message.author.createDM();

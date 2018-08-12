@@ -8,8 +8,13 @@ const URL = require('url');
 const getYTID = require('get-youtube-id');
 
 module.exports = class MusicPlayer {
-    constructor(settings) {
-        this._apiKeyYT = settings.youtube;
+    constructor(guildSettings, config) {
+        /**
+         * @name guildSettings - The settings for the guild the music player is in.
+         */
+        this.guildSettings = guildSettings;
+
+        this._apiKeyYT = config.youtube;
         this._queue = [];
         this._isPlaying = false;
         this._dispatcher = null;
@@ -122,6 +127,10 @@ module.exports = class MusicPlayer {
     resume() {
         this._dispatcher.resume();
         this._isPlaying = true;
+    }
+
+    isPlaying() {
+        return this._isPlaying;
     }
 
 

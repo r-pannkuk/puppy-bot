@@ -15,12 +15,12 @@ module.exports = class ResumeCommand extends commando.Command {
     }
 
     async run(message, { source }) {
-        var client = this.client;
+        var guild = message.guild;
 
-        if(!client.musicPlayer._isPlaying && client.musicPlayer._queue.length > 0) {
+        if(!guild.musicPlayer.isPlaying() && guild.musicPlayer._queue.length > 0) {
             message.channel.send("Playback resumed.");
 
-            client.musicPlayer.resume();
+            guild.musicPlayer.resume();
         } else {
             message.channel.send("No music is currently paused.");
         }

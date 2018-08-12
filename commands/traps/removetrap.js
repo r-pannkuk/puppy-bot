@@ -26,12 +26,12 @@ module.exports = class RemoveTrapCommand extends commando.Command {
     
     async run(message, { phrase }) {
         if(!phrase) {
-            var traps = Object.values(this.client.battleSystem.trapList());
+            var traps = Object.values(message.guild.battleSystem.trapList());
     
             var trap = traps.find(t => t.ownerId === message.author.id);
     
             if(trap !== undefined) {
-                this.client.battleSystem.removeTrap(trap.phrase);
+                message.guild.battleSystem.removeTrap(trap.phrase);
 
                 message.channel.send('Trap removed succesfully.');
             }
@@ -40,11 +40,11 @@ module.exports = class RemoveTrapCommand extends commando.Command {
             }
         }
         else {
-            var traps = this.client.battleSystem.trapList();
+            var traps = message.guild.battleSystem.trapList();
             var sanitizedPhrase = phrase.toLowerCase();
 
             if(Object.keys(traps).indexOf(sanitizedPhrase) > -1) {
-                var trap = this.client.battleSystem.removeTrap(sanitizedPhrase);
+                var trap = message.guild.battleSystem.removeTrap(sanitizedPhrase);
 
                 var owner = this.client.users.get(trap.ownerId);
     

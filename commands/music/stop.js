@@ -15,10 +15,10 @@ module.exports = class StopCommand extends commando.Command {
     }
 
     async run(message, { source }) {
-        var client = this.client;
+        var guild = message.guild;
 
         message.channel.send("Stopping music playback.");
 
-        client.musicPlayer.stop();
+        guild.musicPlayer.stop(message.guild);
     }
 }

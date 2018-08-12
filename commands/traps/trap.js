@@ -24,7 +24,11 @@ module.exports = class TrapCommand extends commando.Command {
 
     
     async run(message, { phrase }) {
-        var success = this.client.battleSystem.addTrap(message, phrase, message.author, this.client.battleSystem.defaultTrapCallback.bind(this.client.battleSystem));
+        var success = message.guild.battleSystem.addTrap(
+            message, 
+            phrase, 
+            message.author, 
+            message.guild.battleSystem.defaultTrapCallback.bind(message.guild.battleSystem));
 
         if(success) {
             message.channel.send(`New trap set for phrase: "${phrase}"`)

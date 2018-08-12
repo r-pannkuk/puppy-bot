@@ -37,11 +37,11 @@ module.exports = class SetDescriptionCommand extends commando.Command {
             user = message.author;
         }
 
-        var stats = this.client.battleSystem.retrieve(user.id);
+        var stats = message.guild.battleSystem.retrieve(user.id);
 
         stats.description = description;
 
-        this.client.battleSystem.set(user.id, stats);
+        message.guild.battleSystem.set(user.id, stats);
 
         message.channel.send(`Updated description for ${user} to \"${description}\"`);
     }

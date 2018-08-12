@@ -1,26 +1,29 @@
-const Enmap = require('enmap');
-const EnmapSQLite = require('enmap-sqlite');
 const Discord = require('discord.js');
 
 module.exports = class Admin {
-    constructor(settings) {
-        this._enmap = new Enmap({
-            provider: new EnmapSQLite({
-                name: settings.name
-            })
-        });
+    constructor(guildSettings) {
+        if(guildSettings.get('admin') === undefined) {
+            console.log("Admin settings not found, creating.");
+            guildSettings.set('admin', {
+                deleteChannelID: null,
+                trapChannelID: null,
+                roleChannelID: null
+            });
+        }
 
-        this._enmap.defer.then(() => {
-            if(this._enmap.get('admin') === undefined) {
-                console.log("Admin settings not found, creating.");
-                this._enmap.set('admin', {
-                    deleteChannelID: null,
-                    trapChannelID: null,
-                    roleChannelID: null
-                });
-            }
-        });
+        this.guildSettings = guildSettings;
     }
+
+    get settings() { return this.guildSettings.get('admin'); }
+    set settings(settings) { this.guildSettings.set('admin', settings); }
+
+    get deleteChannelID() { return this.settings.deleteChannelID; }
+    get trapChannelID() { return this.settings.trapChannelID; }
+    get roleChannelID() { return this.settings.roleChannelID; }
+
+    set deleteChannelID(channelID) { var newSettings = this.settings; newSettings.deleteChannelID = channelID; this.settings = newSettings; }
+    set trapChannelID(channelID) { var newSettings = this.settings; newSettings.trapChannelID = channelID; this.settings = newSettings; }
+    set roleChannelID(channelID) { var newSettings = this.settings; newSettings.roleChannelID = channelID; this.settings = newSettings; }
 
     addNewChannel(guild, channelName, categoryName, overwrites, callback) {
         guild.createChannel(channelName, 'text', overwrites)
@@ -60,41 +63,5 @@ module.exports = class Admin {
     removeRole(user, role, reason, callback) {
         user.removeRole(role, reason)
             .then(callback);
-    }
-
-    getRoleChannel() {
-        return this._enmap.get('admin').roleChannelID;
-    }
-
-    getDeleteChannel() {
-        return this._enmap.get('admin').deleteChannelID;
-    }
-
-    getTrapChannel() {
-        return this._enmap.get('admin').trapChannelID;
-    }
-
-    setTrapChannel(channel) {
-        var admin = this._enmap.get('admin');
-
-        admin.trapChannelID = channel.id;
-
-        this._enmap.set('admin', admin);
-    }
-
-    setDeleteChannel(channel) {
-        var admin = this._enmap.get('admin');
-
-        admin.deleteChannelID = channel.id;
-
-        this._enmap.set('admin', admin);
-    }
-
-    setRoleChannel(channel) {
-        var admin = this._enmap.get('admin');
-
-        admin.roleChannelID = channel.id;
-
-        this._enmap.set('admin', admin);
     }
 }

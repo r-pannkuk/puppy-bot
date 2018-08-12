@@ -27,11 +27,11 @@ module.exports = class SetChannelTrap extends commando.Command {
     
     async run(msg, { channel }) {
         if(channel !== '') {
-            this.client.admin.setTrapChannel(channel);
+            msg.guild.admin.trapChannelID = channel.id;
     
             msg.channel.send(`Trap channel set successfully.  Traps will now be posted in ${channel}`);
         } else {
-            var channel = this.client.channels.get(this.client.admin.getTrapChannel());
+            var channel = this.client.channels.get(msg.guild.admin.trapChannelID);
             msg.channel.send(`Trap channel currently set to ${channel}.`);
         }
 

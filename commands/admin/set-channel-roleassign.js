@@ -27,11 +27,11 @@ module.exports = class SetChannelRoleAssign extends commando.Command {
     
     async run(msg, { channel }) {
         if(channel !== '') {
-            this.client.admin.setRoleChannel(channel);
+            msg.guild.admin.roleChannelID = channel.id;
     
             msg.channel.send(`Role channel set successfully.  Reactions monitored in ${channel} will be used for role assignments.`);
         } else {
-            var channel = this.client.channels.get(this.client.admin.getRoleChannel());
+            var channel = this.client.channels.get(msg.guild.admin.roleChannelID);
             msg.channel.send(`Role assignment channel currently set to ${channel}.`);
         }
 

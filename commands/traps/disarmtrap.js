@@ -17,11 +17,11 @@ module.exports = class DisarmTrapCommand extends commando.Command {
 
     
     async run(message, { phrase }) {
-        var traps = this.client.battleSystem.trapList();
+        var traps = message.guild.battleSystem.trapList();
         var sanitizedPhrase = phrase.toLowerCase();
 
         if(Object.keys(traps).indexOf(sanitizedPhrase) > -1) {
-            this.client.battleSystem.removeTrap(sanitizedPhrase);
+            message.guild.battleSystem.removeTrap(sanitizedPhrase);
 
             message.channel.send('Trap removed succesfully.');
         }

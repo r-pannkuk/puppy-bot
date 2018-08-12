@@ -23,7 +23,7 @@ module.exports = class GetNoteCommand extends commando.Command {
 
     
     async run(message, { noteKey }) {
-        var note = this.client.notepad.getNote(message.author.id, noteKey);
+        var note = message.guild.notepad.getNote(message.author.id, noteKey);
         if(note === undefined) {
             message.send()
         }
