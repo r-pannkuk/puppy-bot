@@ -152,7 +152,7 @@ module.exports = class MHWHost extends commando.Command {
 
                 var richEmbed = new Discord.RichEmbed()
                 .setTitle(result.name)
-                .setDescription(`https://monsterhunterworld.wiki.fextralife.com/${result.slug.replace('-', '+')}`)
+                .setDescription(`https://monsterhunterworld.wiki.fextralife.com/${result.name.replace(/([ ]|[-])/g, '+')}`)
                 .setFooter(result.id + ':' + result.slug);
 
                 
