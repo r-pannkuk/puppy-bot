@@ -118,8 +118,6 @@ module.exports = class MHWHost extends commando.Command {
                 return true;
             });
 
-            console.log(results.length);
-
             if(results.length > 1) {
                 results = results.map(result => `#**${result.id}**: ${result.name} ${(result.slug !== undefined) ? '(*' + result.slug + '*)\n' : ''}`);
 
@@ -153,9 +151,13 @@ module.exports = class MHWHost extends commando.Command {
                 var result = results[0];
 
                 var richEmbed = new Discord.RichEmbed()
-                .setThumbnail(result.assets.imageFemale)
                 .setTitle(result.name)
                 .setFooter(result.id + ':' + result.slug);
+
+                
+                if(result.assets !== undefined && result.assets.imageFemale !== undefined) {
+                    richEmbed.setThumbnail(result.assets.imageFemale);
+                }
 
                 switch(query) {
                 case 'armor':
