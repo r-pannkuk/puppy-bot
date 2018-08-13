@@ -118,10 +118,33 @@ module.exports = class MHWHost extends commando.Command {
                 return true;
             });
 
-            if(results.length > 1) {
-                results = results.map(result => `#**${result.id}**: ${result.name} (*${result.slug}*)`);
+            console.log(results.length);
 
-                message.channel.send(`Found results for [${message.argString}]:\n${results.join('\n')}`);
+            if(results.length > 1) {
+                results = results.map(result => `#**${result.id}**: ${result.name} ${(result.slug !== undefined) ? '(*' + result.slug + '*)\n' : ''}`);
+
+                results = [`Found results for [${message.argString} ]:\n`].concat(results);
+
+                var length = 0;
+                var index = 0;
+                var LIMIT = 2000;
+
+                var parts = [""];
+
+                for(var i in results) {
+                    if(length + results[i].length > 2000) {
+                        ++index;
+                        length = 0;
+
+                        parts.push("");
+                    }
+
+                    parts[index] += results[i];
+                    length += results[i].length;
+                }
+
+                message.channel.send(`Found ${results.length} results for [${message.argString} ].  Sent to ${message.author}.`);
+                parts.forEach(conjoinedText => message.author.send(conjoinedText));
             }
             else if(results.length === 0) {
                 message.channel.send(`No results found for [${message.argString}].`);
