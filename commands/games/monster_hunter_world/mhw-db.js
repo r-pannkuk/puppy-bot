@@ -141,7 +141,7 @@ module.exports = class MHWHost extends commando.Command {
                     length += results[i].length;
                 }
 
-                message.channel.send(`Found ${results.length} results for [${message.argString} ].  Sent to ${message.author}.`);
+                message.channel.send(`Found ${results.length - 1} results for [${message.argString} ].  Sent to ${message.author}.`);
                 parts.forEach(conjoinedText => message.author.send(conjoinedText));
             }
             else if(results.length === 0) {
@@ -152,11 +152,12 @@ module.exports = class MHWHost extends commando.Command {
 
                 var richEmbed = new Discord.RichEmbed()
                 .setTitle(result.name)
+                .setDescription(`https://monsterhunterworld.wiki.fextralife.com/${result.slug.replace('-', '+')}`)
                 .setFooter(result.id + ':' + result.slug);
 
                 
-                if(result.assets !== undefined && result.assets.imageFemale !== undefined) {
-                    richEmbed.setThumbnail(result.assets.imageFemale);
+                if(result.assets !== undefined) {
+                    richEmbed.setThumbnail(result.assets.imageFemale || results.assets.icon || results.assets.image);
                 }
 
                 switch(query) {
@@ -178,7 +179,16 @@ module.exports = class MHWHost extends commando.Command {
                 case 'weapon':
                 case 'weapons':
                 Object.keys(result).forEach(key => {
-                    if(!this.isEmpty(result[key])) richEmbed.addField(key, JSON.stringify(result[key]));
+                    if(!this.isEmpty(result[key]))  {
+                        var string = JSON.stringify(result[key]);
+    
+                        if(string.length > 1024) {
+                            return;
+                        }
+                        
+                        richEmbed.addField(key, JSON.stringify(result[key]));
+                    }
+                    
                 });
                 break;
                 }
