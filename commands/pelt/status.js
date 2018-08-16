@@ -36,44 +36,42 @@ module.exports = class StatusCommand extends commando.Command {
         .setColor('DARK_RED')
         .setAuthor(user.username, user.displayAvatarURL);
 
-        if('description' in stats) {
-            embed.setDescription(
-                `**XP**: ${stats.xp}\n` + 
-                `**HP**: ${stats.hp}\n` +
-                `**Traps Active**: ${(stats.trapActive !== undefined && stats.trapActive) ? 1 : 0}\n` +
-                `**Description**: *${stats.description}*\n` +
-                `**__Inventory__**:`
-            );
-        }
-        else {
-            embed.setDescription(
-                `**XP**: ${stats.xp}\n` + 
-                `**HP**: ${stats.hp}\n` +
-                `**Traps Active**: ${(stats.trapActive !== undefined && stats.trapActive) ? 1 : 0}\n\n` +
-                `**__Inventory__**:`
-            );
-        }
-        
-        for(var index in stats.inventory) {
-            const item = stats.inventory[index];
+        var descriptionString = `**XP**: ${stats.xp}
+        **HP**: ${stats.hp}
+        **Traps Active**: ${(stats.trapActive !== undefined && stats.trapActive) ? 1 : 0}\n`;
 
-            if('effect' in item) {
-                embed.addField(
-                    item.name, 
-                    `__ATK__: ${item.atk}\n` + 
-                    `__Description__: *${item.description}*\n` + 
-                    `__Bonus Effect__: *${item.effectDescription}*\n`
-                );
-            }
-            else {
-                embed.addField(
-                    item.name,
-                    `__ATK__: ${item.atk}\n` + 
-                    `__Description__: *${item.description}*\n`
-                );
+        if('description' in stats) {
+            descriptionString +=  `**Description**: *${stats.description}*\n`
+        }
+
+        if(stats.inventory && stats.inventory.length > 0) {
+            descriptionString += `**__Inventory__**:\n`;
+
+            for(var index in stats.inventory) {
+                const item = stats.inventory[index];
+    
+                if(item) {
+                    if('effect' in item) {
+                        embed.addField(
+                            item.name, 
+                            `__ATK__: ${item.atk}
+                            __Description__: *${item.description}*
+                            __Bonus Effect__: *${item.effectDescription}*\n`
+                        );
+                    }
+                    else {
+                        embed.addField(
+                            item.name,
+                            `__ATK__: ${item.atk}
+                            __Description__: *${item.description}*\n`
+                        );
+                    }
+                }
             }
         }
+
+        embed.setDescription(descriptionString);
 
         message.embed(embed);
     }
-}
+};

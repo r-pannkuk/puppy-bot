@@ -49,23 +49,38 @@ module.exports = class BattleSystem {
     set levels(obj) { var newSettings = this.settings; newSettings.levels = obj; this.settings = newSettings; }
     set traps(obj) { var newSettings = this.settings; newSettings.traps = obj; this.settings = newSettings; }
 
+    serialize_user(user_id) {
+        var users = this.users;
+        var storedUser = users[user_id];
+
+        var defaultUser = {
+            id: 1,
+            xp: 0,
+            inventory: [
+                this.items.find(item => item.id === 1)
+            ],
+            hp: 0
+        }
+
+        storedUser.id = storedUser.id || defaultUser.id;
+        storedUser.xp = storedUser.id || defaultUser.xp;
+        storedUser.inventory = storedUser.inventory || defaultUser.inventory;
+        storedUser.hp = storedUser.hp = storedUser.hp || defaultUser.hp;
+
+        users[user_id] = storedUser;
+
+        this.users = users;
+
+        return storedUser;
+    }
+
     retrieve(user_id) {
         var users = this.users;
 
         var stats = users[user_id];
 
         if (stats === undefined) {
-            stats = {
-                xp: 0,
-                inventory: [
-                    this.items.pebble
-                ],
-                hp: 10
-            };
-
-            users[user_id] = stats;
-
-            this.users = users;
+            stats = serialize_user(user_id);
         }
 
         return stats;
@@ -242,7 +257,7 @@ module.exports = class BattleSystem {
 
         message.channel.send(embed);
 
-        var trapChannelID = message.guild.admin.getTrapChannel();
+        var trapChannelID = message.guild.admin.trapChannelID;
 
         if (trapChannelID !== null) {
             var channel = message.client.channels.get(trapChannelID);

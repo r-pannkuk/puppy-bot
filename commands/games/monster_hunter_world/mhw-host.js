@@ -9,6 +9,7 @@ module.exports = class MHWHost extends commando.Command {
             name: 'mhw-host',
             group: 'games',
             memberName: 'mhw-host',
+            aliases: [ 'mhwhost', 'mh-host', 'mhhost', 'hostmh', 'host mh', 'host mhw' ],
             description: 'Applies a new Monster Hunter World host.',
             guildOnly: true,
             examples: [ '!mhw-host <room key>', 
