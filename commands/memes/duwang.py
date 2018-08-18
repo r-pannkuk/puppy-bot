@@ -1,8 +1,3 @@
-# 'WOLVERINE CRUSH' meme generator
-# JS Kouri
-# 8/2014
-# No restrictions on use
-
 from PIL import Image, ImageFont, ImageDraw
 import hashlib
 import time
