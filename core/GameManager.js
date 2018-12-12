@@ -49,13 +49,13 @@ module.exports = class GameManager {
             this.initGame(gameKey);
         }
 
-        return Object.entries(this.games[gameKey]).map( (user, fields) => {
+        return Object.entries(this.games[gameKey]).map( keyValue => {
             var obj = {
-                "user": user
+                "user": keyValue[0]
             };
             
-            if(fieldKey in fields) {
-                obj[fieldKey] = fields[fieldKey];
+            if(fieldKey in keyValue[1]) {
+                obj[fieldKey] = keyValue[1][fieldKey];
             }
 
             return obj;
