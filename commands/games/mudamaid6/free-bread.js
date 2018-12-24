@@ -20,6 +20,6 @@ module.exports = class FreeBreadCommand extends commando.Command {
 
     
     async run(message) {
-        message.channel.send(message.guild.emojis.get('522930879853625429'));
+        message.channel.send(`${message.guild.emojis.get('522930879853625429')}`);
     }
 }
