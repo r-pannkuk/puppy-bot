@@ -26,19 +26,19 @@ module.exports = class WaifuSnaipuCommand extends commando.Command {
 
     
     async run(message, {waifu}) {
-        var guild = message.guild;
+        // var guild = message.guild;
 
-        if(waifu !== '') {
-            guild.gameManager.set(GameKeys.Mudamaid6, message.author.id, 'waifu', waifu);
-        }
+        // if(waifu !== '') {
+        //     guild.gameManager.set(GameKeys.Mudamaid6, message.author.id, 'waifu', waifu);
+        // }
 
-        var waifuTracker = guild.gameManager.get(GameKeys.Mudamaid6, message.author.id, 'waifu');
+        // var waifuTracker = guild.gameManager.get(GameKeys.Mudamaid6, message.author.id, 'waifu');
 
-        if(waifuTracker !== undefined) {
-            message.channel.send(`Tracking ${message.author}'s Waifu / Husbando: ${waifuTracker}`);
-        }
-        else {
-            message.channel.send(`Not currently tracking a waifu or husbando.`);
+        // if(waifuTracker !== undefined) {
+        //     message.channel.send(`Tracking ${message.author}'s Waifu / Husbando: ${waifuTracker}`);
+        // }
+        // else {
+        //     message.channel.send(`Not currently tracking a waifu or husbando.`);
         }
     }
 }
