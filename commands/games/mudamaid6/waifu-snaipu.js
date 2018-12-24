@@ -39,6 +39,6 @@ module.exports = class WaifuSnaipuCommand extends commando.Command {
         // }
         // else {
         //     message.channel.send(`Not currently tracking a waifu or husbando.`);
-        }
+        // }
     }
 }
