@@ -1,7 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
 import hashlib
 import time
-import urllib.request
 import urllib
 from stat import S_ISREG, ST_CTIME, ST_MODE
 import sys
