@@ -1,4 +1,4 @@
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import hashlib
 import time
 import urllib.request

@@ -24,14 +24,13 @@ module.exports = class DuwangCommands extends commando.Command {
     }
 
     async run(message, { source }) {
-        pyShell.PythonShell.run('duwang.py', {
+        pyShell.run('duwang.py', {
             mode: 'text',
-            pythonPath: 'C:\\Users\\rpann\\AppData\\Local\\Programs\\Python\\Python37-32',
-            // pythonPath: '/usr/bin/python3.5',
-            pythonOptions: ['-u'],
+            pythonOptions: ['-u'], 
             scriptPath: './commands/memes/scripts/',
             args: [ source ]
         }, function (err, results) {
+            console.log(err);
             // Trim white space and carriage return from the call
             if(results === undefined) {
                 results = [];
