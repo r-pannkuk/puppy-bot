@@ -12,7 +12,6 @@ module.exports = class EmojiUsage extends commando.Command {
             examples: [ '!emoji-usage' ],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: Discord.Permissions.FLAGS.MANAGE_CHANNELS,
             args: [
                 {
                     key: 'user',

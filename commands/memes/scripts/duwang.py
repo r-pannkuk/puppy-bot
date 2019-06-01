@@ -15,7 +15,7 @@ MIN_THRESHOLD = 10
 
 def main():
     if(len(sys.argv) == 1 or sys.argv[1] == ''):
-        print("./commands/memes/duwang_original.jpg")
+        print("./commands/memes/templates/duwang_original.jpg")
         return
 
 
@@ -41,7 +41,7 @@ def main():
             os.remove(path)
 
     # open base image to be used as the basis for the new one
-    duwang = Image.open("./commands/memes/duwang_text.png")
+    duwang = Image.open("./commands/memes/templates/duwang_text.png")
     
     # create a new empty image with alpha, set to base image size
     new_img = Image.new('RGBA', (312,175))
@@ -52,7 +52,7 @@ def main():
     # determine if this is a URL
     if(urllib.parse.urlparse(location).scheme != ""):
         
-        font = ImageFont.truetype("./commands/memes/animeace2_ital.ttf", 13)
+        font = ImageFont.truetype("./commands/memes/fonts/animeace2_ital.ttf", 13)
         font_height = font.getsize('T')[1] + 4
         max_width = font.getsize('WWWWWWWWWW')[0]
 
@@ -69,7 +69,7 @@ def main():
 
     # otherwise use text
     else:
-        font = ImageFont.truetype("./commands/memes/animeace2_ital.ttf", 13)
+        font = ImageFont.truetype("./commands/memes/fonts/animeace2_ital.ttf", 13)
         font_height = font.getsize('T')[1] + 4
         max_width = font.getsize('WWWWWWWWWW')[0]
 

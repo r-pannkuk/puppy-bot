@@ -15,7 +15,6 @@ module.exports = class MHWHostChannel extends commando.Command {
             examples: [ '!mhw-host-channel #channel' ],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: Discord.Permissions.FLAGS.MANAGE_CHANNELS,
             args: [
                 {
                     key: 'channel',

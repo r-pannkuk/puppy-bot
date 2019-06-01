@@ -12,7 +12,6 @@ module.exports = class SetChannelTrap extends commando.Command {
             examples: [ '!set-channel-trap <channel>' ],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: Discord.Permissions.FLAGS.MANAGE_CHANNELS,
             args: [
                 {
                     key: 'channel',

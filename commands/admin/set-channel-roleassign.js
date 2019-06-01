@@ -12,7 +12,6 @@ module.exports = class SetChannelRoleAssign extends commando.Command {
             examples: [ '!set-channel-roleassign <channel>' ],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: Discord.Permissions.FLAGS.MANAGE_CHANNELS,
             args: [
                 {
                     key: 'channel',

@@ -1,7 +1,5 @@
 const commando = require('discord.js-commando');
-const Discord = require('discord.js');
 const pyShell = require('python-shell');
-const path = require('path');
 
 
 module.exports = class DuwangCommands extends commando.Command {
@@ -26,11 +24,12 @@ module.exports = class DuwangCommands extends commando.Command {
     }
 
     async run(message, { source }) {
-        pyShell.run('duwang.py', {
+        pyShell.PythonShell.run('duwang.py', {
             mode: 'text',
-            pythonPath: '/usr/bin/python3.5',
+            pythonPath: 'C:\\Users\\rpann\\AppData\\Local\\Programs\\Python\\Python37-32',
+            // pythonPath: '/usr/bin/python3.5',
             pythonOptions: ['-u'],
-            scriptPath: './commands/memes/',
+            scriptPath: './commands/memes/scripts/',
             args: [ source ]
         }, function (err, results) {
             // Trim white space and carriage return from the call
