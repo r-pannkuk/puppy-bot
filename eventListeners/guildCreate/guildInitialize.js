@@ -4,6 +4,7 @@ const BattleSystem = require('../../core/BattleSystem.js');
 const Notepad = require('../../core/Notepad.js');
 const ReminderManager = require('../../core/ReminderManager.js');
 const GameManager = require('../../core/GameManager.js');
+const Challonge = require('../../core/Challonge.js');
 
 const GuildSettingsHelper = require('../../node_modules/discord.js-commando/src/providers/helper.js')
 
@@ -22,6 +23,11 @@ module.exports = function(client, guild) {
         /* MusicPlayer added to bot. */
         guild.musicPlayer = new MusicPlayer(guild.settings, {
             youtube: process.env.YOUTUBE
+        });
+
+        /* Challonge manager added to bot. */
+        guild.challonge = new Challonge(guild.settings, {
+            apiKey: process.env.CHALLONGE
         });
 
         /* Notepad for user notes. */

@@ -34,6 +34,11 @@ module.exports = class BattleSystem {
         }
 
         this.guildSettings.set('battle', battle);
+
+        for(var user in this.users) {
+            this.serialize_user(user);
+        }
+
     }
 
     get settings() { return this.guildSettings.get('battle'); }
@@ -80,7 +85,7 @@ module.exports = class BattleSystem {
         var stats = users[user_id];
 
         if (stats === undefined) {
-            stats = serialize_user(user_id);
+            stats = this.serialize_user(user_id);
         }
 
         return stats;

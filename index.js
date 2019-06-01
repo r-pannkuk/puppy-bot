@@ -4,7 +4,6 @@ require('dotenv').config();
 
 const Discord = require('discord.js');
 const commando = require('discord.js-commando');
-const Sqlite = require('sqlite');
 const moment = require('moment');
 const path = require('path');
 const fs = require('fs');
@@ -30,7 +29,8 @@ client.registry.registerGroups([
     [ 'music', 'Music Player' ],
     [ 'reminders', 'Reminders and Notifications' ],
     [ 'notes', 'User Notes' ],
-    [ 'games', 'Commands for Games' ]
+    [ 'games', 'Commands for Games' ],
+    [ 'tournament', 'Commands for tournament creation and viewing']
 ]);
 client.registry.registerDefaults();
 client.registry.registerCommandsIn(__dirname + '/commands');
