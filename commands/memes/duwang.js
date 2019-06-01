@@ -26,7 +26,8 @@ module.exports = class DuwangCommands extends commando.Command {
     async run(message, { source }) {
         pyShell.run('duwang.py', {
             mode: 'text',
-            pythonOptions: ['-u'], 
+            pythonOptions: ['-u'],
+            pythonPath: 'python3',
             scriptPath: './commands/memes/scripts/',
             args: [ source ]
         }, function (err, results) {
