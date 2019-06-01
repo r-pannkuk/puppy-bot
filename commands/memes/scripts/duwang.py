@@ -1,7 +1,8 @@
 from PIL import Image, ImageDraw, ImageFont
 import hashlib
 import time
-import urllib
+from urllib.parse import urlparse
+from urllib.request import urlretrieve
 from stat import S_ISREG, ST_CTIME, ST_MODE
 import sys
 import os
@@ -49,13 +50,13 @@ def main():
     new_img.paste(duwang, (0,0))
 
     # determine if this is a URL
-    if(urllib.parse.urlparse(location).scheme != ""):
+    if(urlparse(location).scheme != ""):
         
         font = ImageFont.truetype("./commands/memes/fonts/animeace2_ital.ttf", 13)
         font_height = font.getsize('T')[1] + 4
         max_width = font.getsize('WWWWWWWWWW')[0]
 
-        user_img = Image.open(urllib.request.urlretrieve(location)[0])
+        user_img = Image.open(urlretrieve(location)[0])
 
         # scale image to proper dimensions for a picture
         user_img.thumbnail((78,44))
