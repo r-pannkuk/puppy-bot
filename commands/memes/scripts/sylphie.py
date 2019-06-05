@@ -49,7 +49,7 @@ def main():
     # Paste the base image onto the new one before edits take place
     new_img.paste(sylphie, (0,0))
 
-    full_string = f"But I don't want to do more! I want to {sys.argv[1]}! I'm good at {sys.argv[1]}ing! You can't make me do those other things!"
+    full_string = "But I don't want to do more! I want to {}! I'm good at {}ing! You can't make me do those other things!".format(sys.argv[1], sys.argv[1])
 
     font = ImageFont.truetype("./commands/memes/fonts/calibri.TTF", 25)
     italic_font = ImageFont.truetype("./commands/memes/fonts/calibrii.TTF", 25)
