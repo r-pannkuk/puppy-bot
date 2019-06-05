@@ -24,7 +24,7 @@ module.exports = class DuwangCommands extends commando.Command {
         });
     }
 
-    async run(message, { source }) {
+    async run(message, { action }) {
         pyShell.run('sylphie.py', {
             mode: 'text',
             pythonOptions: ['-u'],
