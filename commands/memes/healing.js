@@ -10,7 +10,7 @@ module.exports = class DuwangCommands extends commando.Command {
             aliases: ['healing', 'sylphie'],
             memberName: 'healing',
             description: 'This is really dumb.',
-            examples: ['!healing', '!healing code'],
+            examples: ['!healing', '!healing program'],
             argsPromptLimit: 0,
             args: [
                 {
@@ -25,7 +25,7 @@ module.exports = class DuwangCommands extends commando.Command {
     }
 
     async run(message, { source }) {
-        pyShell.run('healing.py', {
+        pyShell.run('sylphie.py', {
             mode: 'text',
             pythonOptions: ['-u'],
             pythonPath: 'python3',
