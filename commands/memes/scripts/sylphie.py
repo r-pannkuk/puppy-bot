@@ -51,8 +51,8 @@ def main():
 
     full_string = "But I don't want to do more! I want to {}! I'm good at {}ing! You can't make me do those other things!".format(sys.argv[1], sys.argv[1])
 
-    font = ImageFont.truetype("./commands/memes/fonts/calibri.TTF", 25)
-    italic_font = ImageFont.truetype("./commands/memes/fonts/calibrii.TTF", 25)
+    font = ImageFont.truetype("./commands/memes/fonts/calibri.ttf", 25)
+    italic_font = ImageFont.truetype("./commands/memes/fonts/calibrii.ttf", 25)
     font_height = font.getsize('T')[1] * 1.5
     max_width = font.getsize('But I don\'t want to heal! I ant to do those other things! You can\'t make me')[0]
 
