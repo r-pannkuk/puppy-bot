@@ -15,7 +15,7 @@ MIN_THRESHOLD = 10
 
 def main():
     if(len(sys.argv) == 1 or sys.argv[1] == ''):
-        print("./commands/memes/templates/sylphie_original.jpg")
+        print("./commands/memes/templates/sylphie_original.png")
         return
 
 
