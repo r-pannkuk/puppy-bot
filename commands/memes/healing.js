@@ -30,7 +30,7 @@ module.exports = class DuwangCommands extends commando.Command {
             pythonOptions: ['-u'],
             pythonPath: 'python3',
             scriptPath: './commands/memes/scripts/',
-            args: [ source ]
+            args: [ action ]
         }, function (err, results) {
             console.log(err);
             // Trim white space and carriage return from the call
