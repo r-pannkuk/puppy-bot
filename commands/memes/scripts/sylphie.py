@@ -51,9 +51,9 @@ def main():
 
     full_string = "But I don't want to do more! I want to {}! I'm good at {}ing! You can't make me do those other things!".format(sys.argv[1], sys.argv[1])
 
-    font = ImageFont.truetype("./commands/memes/fonts/calibri.ttf", 25)
+    normal_font = ImageFont.truetype("./commands/memes/fonts/calibri.ttf", 25)
     italic_font = ImageFont.truetype("./commands/memes/fonts/calibrii.ttf", 25)
-    font_height = font.getsize('T')[1] * 1.5
+    font_height = normal_font.getsize('T')[1] * 1.5
 
     # original offset excludes the first "But I don't want..." in order to get italicized
     true_x_offset = 549
@@ -62,27 +62,49 @@ def main():
     x_offset = 920
     y_offset = 935
 
-    ImageDraw.Draw(new_img).text((true_x_offset, y_offset), 'But I don\'t ', fill=(31,26,19,240), font=font)
-    ImageDraw.Draw(new_img).text((x_offset_want_1, y_offset), 'want', fill=(31,26,19,240), font=italic_font)
-    ImageDraw.Draw(new_img).text((719, y_offset), ' to do more! I ', fill=(31,26,19,240), font=font)
-    ImageDraw.Draw(new_img).text((x_offset_want_2, y_offset), 'want', fill=(31,26,19,240), font=italic_font)
+    input_length = len(sys.argv[1])
+
+    italicized_characters = [13, 14, 15, 16, 46 + input_length, 47 + input_length, 48 + input_length, 49 + input_length]
+
+    # ImageDraw.Draw(new_img).text((true_x_offset, y_offset), 'But I don\'t ', fill=(31,26,19,240), font=font)
+    # ImageDraw.Draw(new_img).text((x_offset_want_1, y_offset), 'want', fill=(31,26,19,240), font=italic_font)
+    # ImageDraw.Draw(new_img).text((719, y_offset), ' to do more! I ', fill=(31,26,19,240), font=font)
+    # ImageDraw.Draw(new_img).text((x_offset_want_2, y_offset), 'want', fill=(31,26,19,240), font=italic_font)
 
     line_count = 1
 
+    character_count = 0
+
     for line in textwrap.wrap(full_string, width=80):
-        text = line
+        # text = line
         
-        # Need to offset first line to capture the above italics
-        if line_count == 1:
-            text = line[35:]
+        # # Need to offset first line to capture the above italics
+        # if line_count == 1:
+        #     text = line[35:]
 
-        ImageDraw.Draw(new_img).text((x_offset, y_offset), text, fill=(31,26,19,240), font=font)
+        # ImageDraw.Draw(new_img).text((x_offset, y_offset), text, fill=(31,26,19,240), font=font)
 
-        # Reseting offset to make sure the text lines up
+        # # Reseting offset to make sure the text lines up
+        # x_offset = true_x_offset
+        # y_offset += font_height
+
+        # line_count += 1
+
         x_offset = true_x_offset
-        y_offset += font_height
 
-        line_count += 1
+        for character in line:
+            character_count += 1
+
+            if character_count in italicized_characters:
+                font = italic_font
+            else:
+                font = normal_font
+
+            ImageDraw.Draw(new_img).text((x_offset, y_offset), character, fill=(31,26,19,240), font=font)
+
+            x_offset += font.getsize(character)[0]
+
+        y_offset += font_height
 
 
     # save
