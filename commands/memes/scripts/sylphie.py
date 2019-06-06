@@ -54,16 +54,18 @@ def main():
     font = ImageFont.truetype("./commands/memes/fonts/calibri.ttf", 25)
     italic_font = ImageFont.truetype("./commands/memes/fonts/calibrii.ttf", 25)
     font_height = font.getsize('T')[1] * 1.5
-    max_width = font.getsize('But I don\'t want to heal! I ant to do those other things! You can\'t make me')[0]
 
     # original offset excludes the first "But I don't want..." in order to get italicized
     true_x_offset = 549
-    italics_x_offset = 664
-    x_offset = 723
+    x_offset_want_1 = 664
+    x_offset_want_2 = 865
+    x_offset = 920
     y_offset = 935
 
     ImageDraw.Draw(new_img).text((true_x_offset, y_offset), 'But I don\'t ', fill=(31,26,19,240), font=font)
-    ImageDraw.Draw(new_img).text((italics_x_offset, y_offset), 'want', fill=(31,26,19,240), font=italic_font)
+    ImageDraw.Draw(new_img).text((x_offset_want_1, y_offset), 'want', fill=(31,26,19,240), font=italic_font)
+    ImageDraw.Draw(new_img).text((719, y_offset), ' to do more! I ', fill=(31,26,19,240), font=font)
+    ImageDraw.Draw(new_img).text((x_offset_want_2, y_offset), 'want', fill=(31,26,19,240), font=italic_font)
 
     line_count = 1
 
@@ -72,7 +74,7 @@ def main():
         
         # Need to offset first line to capture the above italics
         if line_count == 1:
-            text = line[17:]
+            text = line[35:]
 
         ImageDraw.Draw(new_img).text((x_offset, y_offset), text, fill=(31,26,19,240), font=font)
 
