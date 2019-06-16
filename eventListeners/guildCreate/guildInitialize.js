@@ -5,11 +5,7 @@ const Notepad = require('../../core/Notepad.js');
 const ReminderManager = require('../../core/ReminderManager.js');
 const GameManager = require('../../core/GameManager.js');
 const Challonge = require('../../core/Challonge.js');
-
-const GuildSettingsHelper = require('../../node_modules/discord.js-commando/src/providers/helper.js')
-
-const Discord = require('discord.js')
-const commando = require('discord.js-commando')
+const PointSystem = require('../../core/Points.js');
 
 module.exports = function(client, guild) {
 
@@ -25,16 +21,19 @@ module.exports = function(client, guild) {
             youtube: process.env.YOUTUBE
         });
 
+        /* Betting system for awarding users. */
+        guild.pointSystem = new PointSystem(guild.settings);
+
         /* Challonge manager added to bot. */
         guild.challonge = new Challonge(guild.settings, {
             apiKey: process.env.CHALLONGE
         });
 
         /* Notepad for user notes. */
-        guild.notepad = new Notepad(guild.settings);
+        // guild.notepad = new Notepad(guild.settings);
 
         /* ReminderManager added to bot. */
-        guild.reminders = new ReminderManager(guild.settings);
+        // guild.reminders = new ReminderManager(guild.settings);
 
         /* Game manager for managing game keys and settings. */
         guild.gameManager = new GameManager(guild.settings);

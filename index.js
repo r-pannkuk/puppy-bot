@@ -16,10 +16,10 @@ var client = new commando.Client({
 });
 
 /* Guild settings load. */
-client.setProvider(new EnmapProvider(path.join(__dirname, 'settings.sqlite3'))).catch(console.error);
+var provider = new EnmapProvider('global');
+client.setProvider(provider).catch(console.error);
 
 /* Command group registry. */
-
 client.registry.registerGroups([
     [ 'admin', 'Admin Functions' ],
     [ 'rng', 'Random Number Generators' ],
@@ -30,7 +30,8 @@ client.registry.registerGroups([
     [ 'reminders', 'Reminders and Notifications' ],
     [ 'notes', 'User Notes' ],
     [ 'games', 'Commands for Games' ],
-    [ 'tournament', 'Commands for tournament creation and viewing']
+    [ 'tournament', 'Commands for tournament creation and viewing'],
+    [ 'points', 'A system for betting and awarding points for users.']
 ]);
 client.registry.registerDefaults();
 client.registry.registerCommandsIn(__dirname + '/commands');
