@@ -4,9 +4,7 @@ module.exports = function (client) {
     client.guilds.forEach(guild => {
         guildInitialize(client, guild);
 
-        if (guild.admin.roleChannelID !== null) {
-            client.channels.find(c => c.id === guild.admin.roleChannelID).fetchMessages();
-        }
+        guild.channels.filter(c => c.type === 'text').forEach(c => c.fetchMessages());
     });
 };
 
