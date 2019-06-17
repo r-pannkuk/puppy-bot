@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 module.exports = function(client, message) {
     if(message.channel.type !== 'text') {

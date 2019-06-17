@@ -66,7 +66,13 @@ class BetPool {
     }
 
     awardAll() {
-        this._bets.forEach((b) => b.award(this.lastUser));
+        var totalPayout = this._bets.reduce((sum, b) => sum + b._wager, 0);
+        var individualPayout = Math.floor(totalPayout / this._bets.length);
+
+        this._bets.forEach((b) => b.award({
+            payout: individualPayout,
+            granter: this.lastUser
+        }));
 
         this._status = BetPool.STATUS.Awarded;
     }

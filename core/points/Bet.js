@@ -59,15 +59,16 @@ class Bet extends PointChange {
         this._status = Bet.STATUS.Lost;
     }
 
-    award(granter) {
+    award({payout, granter = owner}) {
         if (this._status !== Bet.STATUS.Won) return;
 
         this._status = Bet.STATUS.Awarded;
+        this._payout = payout;
 
         var award = new Award({
             _granter: granter,
             _user: this._user,
-            _amount: this._payout,
+            _amount: payout,
             _source: new Source({
                 _type: Source.TYPE.Bet,
                 _id: this._id
