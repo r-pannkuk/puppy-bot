@@ -10,8 +10,8 @@ module.exports = function(client, message) {
     var content = message.content.toLowerCase();
     var traps = message.guild.battleSystem.traps;
 
-    var validKey = Object.keys(traps).find(key => 
-        content.indexOf(key) > -1 && traps[key].messageId !== message.id
+    var validKey = Object.keys(traps).find(key => {console.log(traps[key]);
+        content.indexOf(key) > -1 && traps[key].messageId !== message.id; }
     );
 
     if(validKey !== undefined) {

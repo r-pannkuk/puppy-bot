@@ -7,8 +7,14 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Node",
+            "name": "Node (Single-File)",
             "program": "${file}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Node",
+            "program": "${workspaceFolder}/index.js"
         },
         {
             "name": "Python",

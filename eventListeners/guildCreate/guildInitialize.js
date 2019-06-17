@@ -5,7 +5,7 @@ const Notepad = require('../../core/Notepad.js');
 const ReminderManager = require('../../core/ReminderManager.js');
 const GameManager = require('../../core/GameManager.js');
 const Challonge = require('../../core/Challonge.js');
-const PointSystem = require('../../core/Points.js');
+const PointSystem = require('../../core/points/Points.js');
 
 module.exports = function(client, guild) {
 

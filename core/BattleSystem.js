@@ -2,6 +2,94 @@ const Discord = require('discord.js');
 
 const config = require("../commands/pelt/config.json");
 
+class User {
+    constructor({
+        _id = null,
+        _createdAt = Date.now(),
+        _inventory = [],
+        _stats = { 
+            experience: 0, 
+            health: 0 
+        },
+        _traps = []
+    }) {
+        this._id = _id;
+        this._createdAt = _createdAt;
+        this._inventory = _inventory;
+        this._stats = _stats;
+        this._traps = _traps;
+    }
+
+    get id() { return this._id; }
+    get stats() { return this._stats; }
+    get experience() { return this._stats.experience; }
+    get health() { return this._stats.health; }
+    get createdAt() { return this._createdAt; }
+    get inventory() { return this._inventory; }
+    get traps() { return this._traps; }
+
+    set stats(obj) { this._stats = obj; }
+    set health(amount) { this._stats.health = amount; }
+    set experience(amount) { this._stats.experience = amount; }
+}
+
+class Trap {
+    constructor({
+        phrase = null,
+        ownerId = null,
+        createdAt = Date.now(),
+        callback = null,
+        messageId = null,
+        getDamage = function () {
+            var hours = Math.floor((Date.now() - this.createdAt) / (60 * 60 * 1000));
+
+            var damage = 0;
+
+            for (var i = 0; i < hours; ++i) {
+                ++damage;
+
+                // 8 Hours
+                if (i >= 8) {
+                    ++damage;
+                }
+                // 1 Day
+                if (i >= 24) {
+                    ++damage;
+                }
+                // 3 Days
+                if (i >= 72) {
+                    ++damage;
+                }
+                // 1 Week
+                if (i >= 168) {
+                    ++damage;
+                }
+                // 2 Weeks
+                if (i >= 336) {
+                    ++damage;
+                }
+                // 3 Weeks
+                if (i >= 504) {
+                    ++damage;
+                }
+                // 4 Weeks
+                if (i >= 672) {
+                    ++damage;
+                }
+            }
+
+            return damage;
+        }
+    }) {
+        this.phrase = phrase;
+        this.ownerId = ownerId;
+        this.createdAt = createdAt;
+        this.callback = callback;
+        this.messageId = messageId;
+        this.getDamage = getDamage;
+    }
+}
+
 module.exports = class BattleSystem {
     constructor(guildSettings) {
         if (guildSettings.get('battle') === undefined) {
@@ -42,7 +130,7 @@ module.exports = class BattleSystem {
     }
 
     get settings() { return this.guildSettings.get('battle'); }
-    set settings(settings) { this.guildSettings.set('battle', settings); }
+    set settings(obj) { this.guildSettings.set('battle', obj); }
 
     get users() { return this.settings.users; }
     get items() { return this.settings.items; }
@@ -55,34 +143,21 @@ module.exports = class BattleSystem {
     set traps(obj) { var newSettings = this.settings; newSettings.traps = obj; this.settings = newSettings; }
 
     serialize_user(user_id) {
-        var users = this.users;
-        var storedUser = users[user_id];
+        var temp = this.users;
+        var storedUser = temp[user_id];
 
-        var defaultUser = {
-            id: 1,
-            xp: 0,
-            inventory: [
-                this.items.find(item => item.id === 1)
-            ],
-            hp: 0
-        }
+        // Creating a user object from existing user, or creating new one if none exists.
+        var user = new User(storedUser || {_id: user_id});
 
-        storedUser.id = storedUser.id || defaultUser.id;
-        storedUser.xp = storedUser.id || defaultUser.xp;
-        storedUser.inventory = storedUser.inventory || defaultUser.inventory;
-        storedUser.hp = storedUser.hp = storedUser.hp || defaultUser.hp;
+        temp[user_id] = user;
 
-        users[user_id] = storedUser;
+        this.users = temp;
 
-        this.users = users;
-
-        return storedUser;
+        return user;
     }
 
     retrieve(user_id) {
-        var users = this.users;
-
-        var stats = users[user_id];
+        var stats = this.users[user_id];
 
         if (stats === undefined) {
             stats = this.serialize_user(user_id);
@@ -92,39 +167,41 @@ module.exports = class BattleSystem {
     }
 
     set(user, stats) {
-        var users = this.users;
-        users[user] = stats;
+        var temp = this.users;
+        temp[user] = stats;
 
-        this.users = users;
+        this.users = temp;
     }
 
     damage(victimId, damage, attackerId) {
-        var victimStats = this.retrieve(victimId);
-        var attackerStats = this.retrieve(attackerId);
+        var victim = this.retrieve(victimId);
+        var attacker = this.retrieve(attackerId);
 
         if (victimId !== attackerId) {
-            attackerStats.xp += damage;
+            attacker.experience += damage;
         }
 
-        victimStats.hp -= damage;
+        victim.health -= damage;
 
-        if (victimStats.hp <= 0) {
-            victimStats.hp = 0;
+        if (victim.health <= 0) {
+            victim.health = 0;
         }
 
-        this.set(victimId, victimStats);
-        this.set(attackerId, attackerStats);
+        this.set(victimId, victim);
+        this.set(attackerId, attacker);
 
-        return victimStats.hp;
+        return victim.health;
     }
 
     increaseXp(userId, xpAmount) {
-        var userStats = this.retrieve(userId);
+        var user = this.retrieve(userId);
 
-        this.set(userId, userStats);
+        user.experience += xpAmount;
+
+        this.set(userId, user);
     }
 
-    addTrap(message, phrase, user, callback) {
+    addTrap(messageId, phrase, user, callback) {
         var traps = this.traps;
         var key = phrase.toLowerCase();
 
@@ -132,71 +209,27 @@ module.exports = class BattleSystem {
             return false;
         }
 
-        var status = this.retrieve(user.id);
+        var userObj = this.retrieve(user.id);
 
-        if ('trapActive' in status && status.trapActive) {
+        if (userObj.traps.length >= 1) {
             return false;
         }
 
-        traps[key] = this.generateTrap(phrase, user.id, Date.now(), callback, message);
+        traps[key] = new Trap({
+            phrase: phrase, 
+            user: user.id, 
+            createdAt: Date.now(), 
+            callback: callback, 
+            messageId: messageId
+        });
 
-        status.trapActive = true;
+        userObj.traps.push(traps[key]);
 
         this.traps = traps;
 
-        this.set(user.id, status);
+        this.set(user.id, userObj);
 
         return true;
-    }
-
-    generateTrap(phrase, owner_id, startTime, callback, message) {
-        return {
-            phrase: phrase,
-            ownerId: owner_id,
-            startTime: startTime,
-            callback: callback,
-            messageId: message.id,
-            getDamage: function () {
-                var hours = Math.floor((Date.now() - this.startTime) / (60 * 60 * 1000));
-
-                var damage = 0;
-
-                for (var i = 0; i < hours; ++i) {
-                    ++damage;
-
-                    // 8 Hours
-                    if (i >= 8) {
-                        ++damage;
-                    }
-                    // 1 Day
-                    if (i >= 24) {
-                        ++damage;
-                    }
-                    // 3 Days
-                    if (i >= 72) {
-                        ++damage;
-                    }
-                    // 1 Week
-                    if (i >= 168) {
-                        ++damage;
-                    }
-                    // 2 Weeks
-                    if (i >= 336) {
-                        ++damage;
-                    }
-                    // 3 Weeks
-                    if (i >= 504) {
-                        ++damage;
-                    }
-                    // 4 Weeks
-                    if (i >= 672) {
-                        ++damage;
-                    }
-                }
-
-                return damage;
-            }
-        };
     }
 
     trapList() {
@@ -208,15 +241,15 @@ module.exports = class BattleSystem {
 
         var trap = traps[trapWord];
 
-        var status = this.retrieve(trap.ownerId);
+        var user = this.retrieve(trap.ownerId);
 
         delete traps[trapWord];
 
-        status.trapActive = false;
+        user.traps.splice(user.traps.indexOf(trapWord), 1);
 
         this.traps = traps;
 
-        this.set(trap.ownerId, status);
+        this.set(trap.ownerId, user);
 
         return trap;
     }
@@ -247,7 +280,7 @@ module.exports = class BattleSystem {
 
         var victimStats = this.retrieve(victim.id);
 
-        if (victimStats.hp === 0) {
+        if (victimStats.health === 0) {
             embed.setThumbnail('https://www.galabid.com/wp-content/uploads/2017/11/rip-gravestone-md.png');
         }
 
@@ -256,9 +289,9 @@ module.exports = class BattleSystem {
             `**Owner**: ${owner}\n` +
             `**Damage**: ${trap.getDamage()}\n\n` +
             `**Victim**: ${victim}\n` +
-            `**Remaining Health**: ${victimStats.hp}\n\n` +
+            `**Remaining Health**: ${victimStats.health}\n\n` +
             `*Traps deal more damage the longer they are alive for.*`);
-        embed.setFooter(`Trap set at ${new Date(trap.startTime).toString()}`, owner.avatarUrl);
+        embed.setFooter(`Trap set at ${new Date(trap.createdAt).toString()}`, owner.avatarUrl);
 
         message.channel.send(embed);
 
