@@ -41,6 +41,10 @@ module.exports = class PenaltyCommand extends commando.Command {
             _id: message._id
         });
 
+        if(amount < 0) {
+            amount = amount * -1;
+        }
+
         var award = message.guild.pointSystem.penalizeUser(
             user,
             message.author,
