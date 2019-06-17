@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const Source = require('./Source.js');
 const Bet = require('./Bet.js');
+const uuid = require('uuid/v1');
 
 class BetPool {
     constructor({
@@ -12,7 +13,7 @@ class BetPool {
         _bets = [],
         _status = BetPool.STATUS.Pending
     }) {
-        this._id = BetPool.id++;
+        this._id = uuid();
         this._message = _message;
         this._source = _source;
         this._owner = _owner;
@@ -76,7 +77,5 @@ class BetPool {
         this._status = BetPool.STATUS.Refunded;
     }
 }
-
-BetPool.id = 1;
 
 module.exports = BetPool;

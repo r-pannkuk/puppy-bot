@@ -8,11 +8,11 @@ class Source {
     }
 }
 
-Source.TYPE = {
+module.exports = Source;
+
+module.exports.TYPE = {
     Custom: 1,
     Command: 2,
     Bet: 3,
     Match: 4
 }
-
-module.exports = Source;

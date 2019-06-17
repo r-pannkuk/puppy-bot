@@ -37,7 +37,7 @@ module.exports = class CheckTrapCommand extends commando.Command {
                     embed.setDescription(
                         `**Phrase**: ${trap.phrase}\n` + 
                         `**Owner**: ${owner}\n` +
-                        `**Time Set**: ${new Date(trap.startTime).toString()}\n` +
+                        `**Time Set**: ${new Date(trap.createdAt).toString()}\n` +
                         `**Current Damage**: ${trap.getDamage()}\n` +
                         `*Traps deal more damage the longer they are alive for.*`
                     );

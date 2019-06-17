@@ -1,3 +1,5 @@
+const uuid = require('uuid/v1');
+
 class PointChange {
     constructor({
         _type = null,
@@ -6,7 +8,7 @@ class PointChange {
         _amount = 0,
         _source = null
     }) {
-        this._id = ++PointChange.id;
+        this._id = uuid();
         this._type = _type;
         this._granter = _granter;
         this._user = _user;
@@ -14,7 +16,7 @@ class PointChange {
         this._source = _source;
 
         if(this._granter !== null) {
-            this._granter.grants.push(this);
+            this._granter.grants.push(this.id);
         }
 
         if(this._user !== null) {
@@ -30,7 +32,6 @@ class PointChange {
     get source() { return this._source; }
 }
 
-PointChange.id = 0;
 PointChange.TYPE = {
     Penalty: 1,
     Award: 2,

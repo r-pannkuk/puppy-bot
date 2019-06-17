@@ -19,7 +19,7 @@ module.exports = class User {
         this._grants = _grants;
     }
 
-    get id() { return this.id; }
+    get id() { return this._id; }
     get accounts() { return this._accounts; }
     get createdAt() { return this._createdAt; }
     get currentBalance() { return this._currentBalance; }
@@ -34,7 +34,7 @@ module.exports = class User {
     get grantedPenalties() { return this._grants.filter(g => g.amount < 0); }
 
     addPointChange(pointChange) {
-        this._changes.push(pointChange);
+        this._changes.push(pointChange.id);
         this._currentBalance += pointChange.amount;
 
         if(pointChange.amount > 0) this._lifetimeBalance += pointChange.amount;
