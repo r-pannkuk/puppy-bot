@@ -21,11 +21,11 @@ module.exports = class TrapListCommand extends commando.Command {
             return;
         }
 
-        var traps = Object.keys(message.guild.battleSystem.trapList());
+        var traps = Object.values(message.guild.battleSystem.trapList());
         if(traps.length > 0) {
             var string = "";
             for(var i in traps) {
-                string += `[${traps[i]}],`;
+                string += `[${traps[i].phrase}],`;
             }
             string = string.substr(0, string.length - 1);
             message.channel.send(string);

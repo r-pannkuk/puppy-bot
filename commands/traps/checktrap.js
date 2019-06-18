@@ -16,19 +16,18 @@ module.exports = class CheckTrapCommand extends commando.Command {
 
     
     async run(message) {
-        var traps = Object.values(message.guild.battleSystem.trapList());
-        var authorTraps = traps.filter(trap => trap.ownerId === message.author.id);
+        var user = message.guild.battleSystem.retrieve(message.author.id);
 
         var promise = message.author.createDM();
 
-        if(authorTraps.length === 0) {
+        if(user.traps.length === 0) {
             promise.then( channel => channel.send('No trap was found.') );
         } else {
             promise.then( channel => {
 
-                for(var trapKey in authorTraps) {
-                    var trap = authorTraps[trapKey];
-                    var owner = this.client.users.get(trap.ownerId);
+                for(var i in user.traps) {
+                    var trap = message.guild.battleSystem.getTrap(user.traps[i]);
+                    var owner = this.client.users.get(trap.user._id);
                     var embed = new Discord.RichEmbed()
                     .setColor('RED');
                     

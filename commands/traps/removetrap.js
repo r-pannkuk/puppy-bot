@@ -28,7 +28,7 @@ module.exports = class RemoveTrapCommand extends commando.Command {
         if(!phrase) {
             var traps = Object.values(message.guild.battleSystem.trapList());
     
-            var trap = traps.find(t => t.ownerId === message.author.id);
+            var trap = traps.find(t => t.user.id === message.author.id);
     
             if(trap !== undefined) {
                 message.guild.battleSystem.removeTrap(trap.phrase);

@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const uuid = require('uuid/v1');
 
 const config = require("../commands/pelt/config.json");
 
@@ -7,9 +8,9 @@ class User {
         _id = null,
         _createdAt = Date.now(),
         _inventory = [],
-        _stats = { 
-            experience: 0, 
-            health: 0 
+        _stats = {
+            experience: 0,
+            health: 0
         },
         _traps = []
     }) {
@@ -31,12 +32,30 @@ class User {
     set stats(obj) { this._stats = obj; }
     set health(amount) { this._stats.health = amount; }
     set experience(amount) { this._stats.experience = amount; }
+
+    damage(attacker, amount) {
+        if (this.id !== attacker.id) {
+            attacker.experience += amount;
+        }
+
+        this.health -= amount;
+
+        if (this.health <= 0) {
+            this.health = 0;
+        }
+
+        return this.health;
+    }
+
+    increaseXp(xpAmount) {
+        user.experience += xpAmount;
+    }
 }
 
 class Trap {
     constructor({
         phrase = null,
-        ownerId = null,
+        user = null,
         createdAt = Date.now(),
         callback = null,
         messageId = null,
@@ -81,8 +100,9 @@ class Trap {
             return damage;
         }
     }) {
+        this.id = uuid();
         this.phrase = phrase;
-        this.ownerId = ownerId;
+        this.user = user;
         this.createdAt = createdAt;
         this.callback = callback;
         this.messageId = messageId;
@@ -96,7 +116,7 @@ module.exports = class BattleSystem {
             console.log("Battle settings not found, creating.");
             guildSettings.set('battle', {});
         }
-        
+
         this.guildSettings = guildSettings;
 
         var battle = guildSettings.get('battle');
@@ -123,7 +143,7 @@ module.exports = class BattleSystem {
 
         this.guildSettings.set('battle', battle);
 
-        for(var user in this.users) {
+        for (var user in this.users) {
             this.serialize_user(user);
         }
 
@@ -132,26 +152,19 @@ module.exports = class BattleSystem {
     get settings() { return this.guildSettings.get('battle'); }
     set settings(obj) { this.guildSettings.set('battle', obj); }
 
-    get users() { return this.settings.users; }
-    get items() { return this.settings.items; }
-    get levels() { return this.settings.levels; }
     get traps() { return this.settings.traps; }
-
-    set users(obj) { var newSettings = this.settings; newSettings.users = obj; this.settings = newSettings; }
-    set items(obj) { var newSettings = this.settings; newSettings.items = obj; this.settings = newSettings; }
-    set levels(obj) { var newSettings = this.settings; newSettings.levels = obj; this.settings = newSettings; }
-    set traps(obj) { var newSettings = this.settings; newSettings.traps = obj; this.settings = newSettings; }
+    get users() { return this.settings.users; }
 
     serialize_user(user_id) {
-        var temp = this.users;
-        var storedUser = temp[user_id];
+        var temp = this.settings;
+        var storedUser = temp.users[user_id];
 
         // Creating a user object from existing user, or creating new one if none exists.
-        var user = new User(storedUser || {_id: user_id});
+        var user = new User(storedUser || { _id: user_id });
 
-        temp[user_id] = user;
+        temp.users[user_id] = user;
 
-        this.users = temp;
+        this.settings = temp;
 
         return user;
     }
@@ -166,46 +179,18 @@ module.exports = class BattleSystem {
         return stats;
     }
 
-    set(user, stats) {
-        var temp = this.users;
-        temp[user] = stats;
+    set(user_id, stats) {
+        var temp = this.settings;
+        temp.users[user_id] = stats;
 
-        this.users = temp;
+        this.settings = temp;
     }
 
-    damage(victimId, damage, attackerId) {
-        var victim = this.retrieve(victimId);
-        var attacker = this.retrieve(attackerId);
-
-        if (victimId !== attackerId) {
-            attacker.experience += damage;
-        }
-
-        victim.health -= damage;
-
-        if (victim.health <= 0) {
-            victim.health = 0;
-        }
-
-        this.set(victimId, victim);
-        this.set(attackerId, attacker);
-
-        return victim.health;
-    }
-
-    increaseXp(userId, xpAmount) {
-        var user = this.retrieve(userId);
-
-        user.experience += xpAmount;
-
-        this.set(userId, user);
-    }
-
-    addTrap(messageId, phrase, user, callback) {
-        var traps = this.traps;
+    addTrap(message, phrase, user, callback) {
+        var temp = this.settings;
         var key = phrase.toLowerCase();
 
-        if (Object.keys(traps).indexOf(key) > -1) {
+        if (Object.values(temp.traps).find(t => t.phrase.indexOf(key) > -1)) {
             return false;
         }
 
@@ -215,58 +200,66 @@ module.exports = class BattleSystem {
             return false;
         }
 
-        traps[key] = new Trap({
-            phrase: phrase, 
-            user: user.id, 
-            createdAt: Date.now(), 
-            callback: callback, 
-            messageId: messageId
+        var newTrap = new Trap({
+            phrase: phrase,
+            user: userObj,
+            createdAt: Date.now(),
+            callback: callback,
+            messageId: message.id
         });
 
-        userObj.traps.push(traps[key]);
+        temp.traps[newTrap.id] = newTrap;
 
-        this.traps = traps;
+        userObj.traps.push(newTrap.id);
+        temp.users[userObj.id] = userObj;
 
-        this.set(user.id, userObj);
+        this.guildSettings.set('battle', temp);
 
         return true;
     }
 
     trapList() {
-        return this.traps;
+        return this.settings.traps;
+    }
+
+    getTrap(id) {
+        return new Trap(this.settings.traps[id]);
     }
 
     removeTrap(trapWord) {
-        var traps = this.traps;
+        var temp = this.settings;
+        var trap = Object.values(temp.traps).find(t => t.phrase === trapWord);
+        var user = this.retrieve(trap.user._id);
 
-        var trap = traps[trapWord];
+        user.traps.splice(user.traps.indexOf(trap.id), 1);
 
-        var user = this.retrieve(trap.ownerId);
+        delete temp.traps[trap.id];
+        temp.users[user.id] = user;
 
-        delete traps[trapWord];
-
-        user.traps.splice(user.traps.indexOf(trapWord), 1);
-
-        this.traps = traps;
-
-        this.set(trap.ownerId, user);
+        this.settings = temp;
 
         return trap;
     }
 
     springTrap(message, trapWord) {
         var trap = this.removeTrap(trapWord);
-        var authorId = message.author.id;
-        this.damage(authorId, trap.getDamage(), trap.ownerId);
+        
+        var temp = this.settings;
+        var owner = this.retrieve(message.author.id);
+        var victim = this.retrieve(trap.user.id)
+
+        victim.damage(owner, trap.getDamage());
 
         if (trap !== undefined) {
             trap.callback(trap, message);
         }
+
+        this.settings = temp;
     }
 
     defaultTrapCallback(trap, message) {
         var victim = message.author;
-        var owner = message.client.users.get(trap.ownerId);
+        var owner = message.client.users.get(trap.user.id);
 
         var embed = new Discord.RichEmbed()
             .setColor('RED');

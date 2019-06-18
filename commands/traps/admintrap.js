@@ -12,6 +12,7 @@ module.exports = class AdminTrapCommand extends commando.Command {
             examples: [ '!admintrap <phrase> <userId> <timestamp>' ],
             argsPromptLimit: 0,
             ownerOnly: true,
+            userPermissions: [ Discord.Permissions.FLAGS.ADMINISTRATOR ],
             args: [
                 {
                     key: 'phrase',

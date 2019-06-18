@@ -1,22 +1,22 @@
-module.exports = function(client, message) {
-    if(message.channel.type !== 'text') {
+module.exports = function (client, message) {
+    if (message.channel.type !== 'text') {
         return;
     }
 
-    if(message.author === client.user) {
+    if (message.author === client.user) {
         return;
     }
 
     var content = message.content.toLowerCase();
     var traps = message.guild.battleSystem.traps;
 
-    var validKey = Object.keys(traps).find(key => {console.log(traps[key]);
-        content.indexOf(key) > -1 && traps[key].messageId !== message.id; }
-    );
+    var validTraps = Object.values(traps).filter(t => content.indexOf(t.phrase) > -1 && t.messageId !== message.id);
+    var validKeys = validTraps.reduce((p, t) => { p.push(t.phrase); return p; }, []);
 
-    if(validKey !== undefined) {
+    for (i in validKeys) {
+        var validKey = validKeys[i];
 
-        if(content === `!disarmtrap ${validKey}` || content === `!removetrap ${validKey}`) {
+        if (content === `!disarmtrap ${validKey}` || content === `!removetrap ${validKey}`) {
             return;
         }
 

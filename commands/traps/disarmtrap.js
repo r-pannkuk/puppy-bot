@@ -11,7 +11,14 @@ module.exports = class DisarmTrapCommand extends commando.Command {
             description: 'Attempt to disarm a trap before it goes off.  Has a 99% chance of working.  Probably.',
             examples: [ '!disarmtrap test' ],
             argsPromptLimit: 0,
-            guildOnly: true
+            guildOnly: true,
+            args: [
+                {
+                    key: 'phrase',
+                    prompt: "Enter the phrase you want attempt a disarm on.",
+                    type: 'string'
+                }
+            ]
         });
     }
 
@@ -20,7 +27,7 @@ module.exports = class DisarmTrapCommand extends commando.Command {
         var traps = message.guild.battleSystem.trapList();
         var sanitizedPhrase = phrase.toLowerCase();
 
-        if(Object.keys(traps).indexOf(sanitizedPhrase) > -1) {
+        if(Object.values(traps).find(t => t.phrase.indexOf(sanitizedPhrase) > -1)) {
             message.guild.battleSystem.removeTrap(sanitizedPhrase);
 
             message.channel.send('Trap removed succesfully.');

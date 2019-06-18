@@ -8,7 +8,7 @@ module.exports = class TrapCommand extends commando.Command {
             group: 'traps',
             memberName: 'trap',
             description: 'Sabotage a word or phrase to deal damage the next time a user says it in chat.',
-            examples: [ '!trap ', '!status @Dog' ],
+            examples: ['!trap ', '!status @Dog'],
             argsPromptLimit: 0,
             guildOnly: true,
             args: [
@@ -21,20 +21,22 @@ module.exports = class TrapCommand extends commando.Command {
         });
     }
 
-    
+
     async run(message, { phrase }) {
         var success = message.guild.battleSystem.addTrap(
-            message, 
-            phrase, 
-            message.author, 
+            message,
+            phrase,
+            message.author,
             message.guild.battleSystem.defaultTrapCallback.bind(message.guild.battleSystem));
 
-        if(success) {
+        var duration = 10000;
+
+        if (success) {
             message.channel.send(`New trap set for phrase: "${phrase}"`)
-            .then(msg => {
-                msg.delete(10000);
-                message.delete(10000);
-            });
+                .then(msg => {
+                    msg.delete(duration).catch(console.err);
+                    message.delete(duration).catch(console.err);
+                });
         }
         else {
             message.channel.send(`You've already set too many traps, type removetrap to remove your own trap.`);
