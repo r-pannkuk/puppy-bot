@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 const Source = require('../../core/points/Source.js');
 
@@ -35,6 +36,11 @@ module.exports = class AwardCommand extends commando.Command {
     }
 
     async run(message, { user, amount, reason }) {
+        var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR;
+        if(!bool) {
+            message.channel.send('You must have permissions to use this command.');
+        }
+
         var source = new Source({
             _type: Source.TYPE.Command,
             _id: message._id

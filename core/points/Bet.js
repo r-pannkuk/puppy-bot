@@ -14,6 +14,7 @@ class Bet extends PointChange {
         _source = null,
         _status = Bet.STATUS.Pending
     }) {
+        assert(_betPool.options.any(o => _outcome === o), 'Bets must use an option from the betting pool.');
         assert(_betPool._status === 1, 'Bets cannot be added to unopen Bet Pools.');
         assert(_user.currentBalance >= _wager, 'A user cannot bet more than they have.');
 
@@ -24,14 +25,14 @@ class Bet extends PointChange {
             _type: PointChange.TYPE.Bet
         });
 
-        this._betPool = _betPool;
+        this._betPool = _betPool._id;
         this._wager = _wager;
         this._payout = _payout;
         this._outcome = _outcome;
         this._status = _status;
 
         this._user.bets.push(this);
-        this._betPool.bets.push(this);
+        _betPool.bets.push(this);
     }
 
     static get STATUS() {

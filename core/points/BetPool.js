@@ -10,8 +10,10 @@ class BetPool {
         _owner = null,
         _lastEditedBy = null,
         _lastEdited = Date.now(),
+        _options = [],
+        _betSize = 0,
         _bets = [],
-        _status = BetPool.STATUS.Pending
+        _status = BetPool.STATE.Pending
     }) {
         this._id = uuid();
         this._message = _message;
@@ -19,11 +21,13 @@ class BetPool {
         this._owner = _owner;
         this._lastEditedBy = _lastEditedBy;
         this._lastEdited = _lastEdited;
+        this._options = _options;
+        this._betSize = _betSize;
         this._bets = _bets;
         this._status = _status;
     }
 
-    static get STATUS() {
+    static get STATE() {
         return {
             Pending: -1,
             Open: 1,
@@ -37,8 +41,23 @@ class BetPool {
     get source() { return this._source; }
     get owner() { return this._owner; }
     get lastUser() { return this._lastEditedBy || this._owner; }
+    get options() { return this._options; }
     get bets() { return this._bets; }
-    get status() { return this._status; }
+    get betSize() { return this._betSize; }
+    get status() {
+        switch (this._status) {
+            case BetPool.STATE.Pending:
+                return 'Pending';
+            case BetPool.STATE.Open:
+                return 'Open';
+            case BetPool.STATE.Closed:
+                return 'Closed';
+            case BetPool.STATE.Awarded:
+                return 'Awarded;'
+            case BetPool.STATE.Refunded:
+                return 'Refunded';
+        }
+    }
 
     updateEditor(modifier) {
         this._lastEditedBy = modifier;
@@ -47,12 +66,12 @@ class BetPool {
 
     open(modifier) {
         this.updateEditor(modifier);
-        this._status = BetPool.STATUS.Open;
+        this._status = BetPool.STATE.Open;
     }
 
     close(modifier) {
         this.updateEditor(modifier);
-        this._status = BetPool.STATUS.Closed;
+        this._status = BetPool.STATE.Closed;
     }
 
     complete(modifier, condition) {
@@ -74,13 +93,13 @@ class BetPool {
             granter: this.lastUser
         }));
 
-        this._status = BetPool.STATUS.Awarded;
+        this._status = BetPool.STATE.Awarded;
     }
 
     refundAll() {
         this._bets.forEach((b) => b.refund(this.lastUser));
 
-        this._status = BetPool.STATUS.Refunded;
+        this._status = BetPool.STATE.Refunded;
     }
 }
 
