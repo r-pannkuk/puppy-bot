@@ -8,6 +8,7 @@ const assert = require('assert');
 
 var granter = new User({ _id: 'admin' });
 var winner = new User({ _id: 'winner' });
+var winner2 = new User({ _id: 'winner2' });
 var loser = new User({ _id: 'loser' });
 
 var winnerBaseAward = new Award({
@@ -15,6 +16,13 @@ var winnerBaseAward = new Award({
     _amount: 1000,
     _source: new Source({ _id: '1234', _type: Source.TYPE.Custom }),
     _user: winner
+});
+
+var winner2BaseAward = new Award({
+    _granter: granter,
+    _amount: 1000,
+    _source: new Source({ _id: '12345', _type: Source.TYPE.Custom }),
+    _user: winner2
 });
 
 var loserBaseAward = new Award({
@@ -26,7 +34,8 @@ var loserBaseAward = new Award({
 
 
 var betPool = new BetPool({
-    _owner: granter
+    _owner: granter,
+    _options: [true, false]
 });
 
 assert.throws(() => {
@@ -44,7 +53,6 @@ assert.throws(() => {
         _betPool: betPool,
         _outcome: false,
         _wager: 500,
-        _payout: 500,
         _user: loser
     });
 });
@@ -55,15 +63,20 @@ var winningBet = new Bet({
     _betPool: betPool,
     _outcome: true,
     _wager: 500,
-    _payout: 1000,
     _user: winner
 });
+
+var winningBet2 = new Bet({
+    _betPool: betPool,
+    _outcome: true,
+    _wager: 100,
+    _user: winner2
+})
 
 var losingBet = new Bet({
     _betPool: betPool,
     _outcome: false,
     _wager: 500,
-    _payout: 1000,
     _user: loser
 });
 

@@ -14,5 +14,6 @@ module.exports.TYPE = {
     Custom: 1,
     Command: 2,
     Bet: 3,
-    Match: 4
+    Match: 4,
+    Reaction: 5
 }

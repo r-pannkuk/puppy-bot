@@ -1,21 +1,18 @@
-var object = {
-    id: 1
+var settings = {
+    users: {},
+    get: function(id) {
+        return this.users[id];
+    }
 }
 
-var reference1 = {
-    reference: object
+settings.users[1] = {
+    _id: 10000
+};
+
+var test = function(settings) {
+    settings.get(1).currentBalance = 50000
 }
 
-var reference2 = {
-    reference: object
-}
+test(settings);
 
-console.log(object);
-console.log(reference1);
-console.log(reference2);
-
-reference2.reference.id = 2;
-
-console.log(object);
-console.log(reference1);
-console.log(reference2);
+console.log(settings);

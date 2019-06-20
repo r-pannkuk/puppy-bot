@@ -13,6 +13,7 @@ module.exports = class SetChannelDelete extends commando.Command {
             examples: [ '!set-channel-delete #channel' ],
             argsPromptLimit: 0,
             guildOnly: true,
+            userPermissions: [Discord.Permissions.FLAGS.ADMINISTRATOR],
             args: [
                 {
                     key: 'channel',

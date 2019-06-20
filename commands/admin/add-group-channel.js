@@ -16,6 +16,7 @@ module.exports = class AddGroupChannel extends commando.Command {
             ],
             argsPromptLimit: 0,
             guildOnly: true,
+            userPermissions: [Discord.Permissions.FLAGS.ADMINISTRATOR],
             args: [
                 {
                     key: 'channel',

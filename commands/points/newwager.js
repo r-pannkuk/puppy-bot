@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 const Source = require('../../core/points/Source.js');
+const emojis = require('../../core/points/Emojis.js');
+const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
 
 
 module.exports = class PenaltyCommand extends commando.Command {
@@ -33,7 +35,8 @@ module.exports = class PenaltyCommand extends commando.Command {
     }
 
     async run(message, { wager, options }) {
-        var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR;
+        var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
+            message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.author).roles.has(r)).length > 0;
         if (!bool) {
             message.channel.send('You must have permissions to use this command.');
         }
@@ -43,34 +46,6 @@ module.exports = class PenaltyCommand extends commando.Command {
             _id: message._id
         });
 
-        var betPool = message.guild.pointSystem.newBetPool(message.author, wager, source, options);
-
-        var embed = new Discord.RichEmbed()
-            .setColor('RED')
-            .setAuthor(`New Wager`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Skull_and_crossbones.svg/2000px-Skull_and_crossbones.svg.png')
-            .setThumbnail('https://www.galabid.com/wp-content/uploads/2017/11/rip-gravestone-md.png');
-            var description = `**Status**: ${betPool.status}\n` +
-                `**Bet**: ${betPool.betSize}\n\n`;
-
-        var emojis = {
-            1: "\u0031\u20E3",
-            2: "\u0032\u20E3",
-            3: "\u0033\u20E3",
-            4: "\u0034\u20E3",
-            5: "\u0035\u20E3",
-            6: "\u0036\u20E3",
-            7: "\u0037\u20E3",
-            8: "\u0038\u20E3",
-            9: "\u0039\u20E3",
-            10: "\ud83d\udd1f",
-            11: "\uD83C\uDDE6",
-            12: "\uD83C\uDDE7",
-            13: "\uD83C\uDDE8",
-            14: "\uD83C\uDDE9",
-            15: "\uD83C\uDDEA",
-            16: "\uD83C\uDDEB"
-        }
-
         var discordifyOption = (val) => {
             const matches = val.match(/^<@!?(\d+)>$/);
             if (matches === null) return val;
@@ -79,23 +54,18 @@ module.exports = class PenaltyCommand extends commando.Command {
             return message.guild.members.get(id).displayName;
         }
 
-        for (var i in options) {
-            description += `${emojis[parseInt(i) + 1]}: **${discordifyOption(options[i])}**\n`;
-        }
+        var translatedOptions = options.map(discordifyOption);
 
-        description += '\n';
-        description += `**React with your choice to enter the bet pool.**`;
+        var betPool = message.guild.pointSystem.newBetPool(message.author, wager, source, translatedOptions);
 
-        embed.setDescription(description)
-            .setFooter(`Bet pool last updated at ${new Date(betPool._lastEdited).toString()} by ${message.guild.members.get(betPool.lastUser.id).displayName}.`);
+        var embed = RichEmbedBuilder.new(betPool);
 
         message.channel.send(embed).then(async (msg) => {
 
             message.guild.pointSystem.subscribeBetPool(betPool, msg);
-
-            for (var i in options) {
-                await msg.react(`${emojis[parseInt(i) + 1]}`);
-            }
+            
+            await msg.react('✅');
+            await msg.react('🚫');
         });
     }
 }

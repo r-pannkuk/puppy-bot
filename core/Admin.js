@@ -12,6 +12,20 @@ module.exports = class Admin {
         }
 
         this.guildSettings = guildSettings;
+
+        var settings = guildSettings.get('admin');
+
+        if(settings.deleteChannelID === undefined) {
+            settings.deleteChannelID = null;
+        }
+        if(settings.trapChannelID === undefined) {
+            settings.trapChannelID = null;
+        }
+        if(settings.roleChannelID === undefined) {
+            settings.roleChannelID = null;
+        }
+
+        guildSettings.set('admin', settings);
     }
 
     get settings() { return this.guildSettings.get('admin'); }
