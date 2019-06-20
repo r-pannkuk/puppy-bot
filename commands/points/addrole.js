@@ -6,12 +6,12 @@ const moment = require('moment');
 module.exports = class AddPointsRole extends commando.Command {
     constructor(client) {
         super(client, {
-            name: 'add-role',
+            name: 'add-points-role',
             group: 'points',
-            memberName: 'add-role',
-            aliases: ['addrole', 'addpointsrole', 'add-points-role', 'addadminrole', 'add-admin-role'],
+            memberName: 'add-points-role',
+            aliases: ['add-role', 'addrole', 'addpointsrole', 'add-points-role', 'addadminrole', 'add-admin-role'],
             description: 'Stores a role id that can be used to create wagers in the future.',
-            examples: ['!add-role @StupidDog'],
+            examples: ['!add-points-role @StupidDog'],
             argsPromptLimit: 0,
             guildOnly: true,
             userPermissions: [Discord.Permissions.FLAGS.ADMINISTRATOR],
@@ -29,7 +29,7 @@ module.exports = class AddPointsRole extends commando.Command {
     async run(msg, { role }) {
         msg.guild.pointSystem.addAdminRole(role.id);
 
-        msg.channel.send(`Deletion channel set to ${channel}.`);
+        msg.channel.send(`Role ${role} added to list of wager organizers.`);
     }
 
 
