@@ -5,6 +5,7 @@ const BetPool = require('../../core/points/BetPool.js');
 const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
 
 module.exports = async function (client, messageReaction, user) {
+    console.log("I'm in here all right");
     var message = messageReaction.message;
     var channel = message.channel;
     var emoji = messageReaction.emoji;
@@ -20,6 +21,7 @@ module.exports = async function (client, messageReaction, user) {
     if (emoji.name !== '✅' && emoji.name !== '🚫') {
         return;
     }
+    console.log("Passed the dumb checks");
 
     var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
         message.guild.pointSystem.adminRoles.find(r => message.guild.member(user).roles.has(r));
@@ -28,11 +30,16 @@ module.exports = async function (client, messageReaction, user) {
     bool = true;
 
     if (bool) {
+        
+    console.log("In the bool statement");
         var betPool = message.guild.pointSystem.findBetPool(message.id);
 
         if (!betPool || betPool._status === BetPool.STATE.Refunded || betPool._status === BetPool.STATE.Awarded) {
             return;
         }
+
+        
+    console.log("Not an issue with bet pool or state");
 
         messageReaction.remove(user);
 
