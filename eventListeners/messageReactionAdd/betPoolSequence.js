@@ -22,7 +22,7 @@ module.exports = async function (client, messageReaction, user) {
     }
 
     var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
-        message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.author).roles.has(r)).length > 0;
+        message.guild.pointSystem.adminRoles.find(r => message.guild.member(user).roles.has(r));
 
     if (bool) {
         var betPool = message.guild.pointSystem.findBetPool(message.id);

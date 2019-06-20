@@ -33,19 +33,19 @@ module.exports = async function (client, messageReaction, user) {
 
     if (betPool) {
         var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
-            message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.author).roles.has(r)).length > 0;
+            message.guild.pointSystem.adminRoles.find(r => message.guild.member(user).roles.has(r));
 
         if (betPool._status !== BetPool.STATE.Closed) {
             return;
         }
 
-        if(!bool) {
+        if (!bool) {
             user.send(`Betting is closed. Only authorized roles can select a winner.`);
             return;
         }
 
         var winningIndex = Object.keys(emojis).find(key => emojis[key] === emoji.name) - 1;
-        
+
         betPool = message.guild.pointSystem.completeBetPool(betPool, user, betPool._options[winningIndex]);
 
         message.edit(RichEmbedBuilder.new(betPool));
@@ -53,11 +53,11 @@ module.exports = async function (client, messageReaction, user) {
         message.channel.send(`*WINNER*: Bet pool **${betPool._id}** has paid out on **${betPool._winner}**. Winners will be notified.`);
 
         await new Promise(resolve => setTimeout(resolve, 5000));
-        
+
         betPool = message.guild.pointSystem.awardBetPool(betPool);
 
         message.edit(RichEmbedBuilder.new(betPool));
-        
+
         var winners = betPool.getAwardedBets();
 
         winners.forEach(bet => {

@@ -36,7 +36,8 @@ module.exports = class PenaltyCommand extends commando.Command {
 
     async run(message, { wager, options }) {
         var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
-            message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.author).roles.has(r)).length > 0;
+            message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.author).roles.has(r));
+            
         if (!bool) {
             message.channel.send('You must have permissions to use this command.');
         }
