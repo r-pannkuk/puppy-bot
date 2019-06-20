@@ -31,8 +31,9 @@ module.exports = function(client, messageReaction, user) {
 
     if(betPool) {
         if(betPool._status !== BetPool.STATE.Open) {
-            messageReaction.remove(user);
-            user.send(`Betting pool is not open.  Please try again later.`);
+            // TO-DO: FIgure out a way to deal with message adds and other phases.
+            // messageReaction.remove(user);
+            // user.send(`Betting pool is not open.  Please try again later.`);
             return;
         }
 
