@@ -35,9 +35,6 @@ module.exports = async function (client, messageReaction, user) {
         var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
             message.guild.pointSystem.adminRoles.find(r => message.guild.member(user).roles.has(r));
 
-            // TO-DO: REMOVE THIS LATER
-            bool = true;
-
         if (betPool._status !== BetPool.STATE.Closed) {
             return;
         }

@@ -39,9 +39,6 @@ module.exports = class AwardCommand extends commando.Command {
         var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
             message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.author).roles.has(r));
 
-        // TO-DO: REMOVE THIS LATER
-        bool = true;
-
         if (!bool) {
             message.channel.send('You must have permissions to use this command.');
         }
