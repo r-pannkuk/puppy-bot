@@ -3,7 +3,7 @@ const Source = require('../../core/points/Source.js');
 const emojis = require('../../core/points/Emojis.js');
 const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
 
-module.exports = function(client, messageReaction, user) {
+module.exports = async function(client, messageReaction, user) {
     var message = messageReaction.message;
     var channel = message.channel;
     var emoji = messageReaction.emoji;
@@ -54,6 +54,7 @@ module.exports = function(client, messageReaction, user) {
         var userPoints = message.guild.pointSystem.getUser(user);
 
         message.edit(RichEmbedBuilder.new(betPool));
+
         user.send(RichEmbedBuilder.userBet(bet, betPool, message, userPoints));
     }
 };

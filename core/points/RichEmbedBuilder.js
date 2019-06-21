@@ -54,19 +54,32 @@ function betString(bet) {
     }
 }
 
-module.exports.userBet = function (bet, betPool, betPoolMessage, user) {
+function discordLink(guild, channel, message) {
+    var link = `https://discordapp.com/channels/${guild.id}`;
+    if(channel) {
+        link += `/${channel.id}`;
+    }
+    if(message) {
+        link += `/${message.id}`;
+    }
+
+    return link;
+}
+
+module.exports.userBet = function (bet, betPool, msg, user) {
     var index = Object.values(betPool._options).findIndex(o => o === bet._outcome) + 1;
     var embed = new Discord.RichEmbed()
         .setColor(betPool.message().color)
-        .setAuthor(`Bet Update: ${betPool.message().author}`)
+        .setAuthor(`Bet Update`)
         .setDescription(
+            `**Bet Pool**: [${betPool.name}](${discordLink(msg.guild, msg.channel, msg)})\n` +
             `**Status**: ${betString(bet)}\n` +
             `**Outcome**: ${bet._outcome}\n` +
             `**Emoji**: ${emojis[index]}\n` +
             `**Bet**: ${bet._wager}\n`
         )
         .setFooter(`Current Balance: ${user._currentBalance}`)
-        .setURL(betPoolMessage.url);
+        .setURL(discordLink(msg.guild, msg.channel, msg));
 
     return embed;
 }
