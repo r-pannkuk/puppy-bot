@@ -142,7 +142,7 @@ module.exports = class Points {
         return penalty;
     }
 
-    newBetPool(discordUser, betSize, source, options) {
+    newBetPool(discordUser, betSize, source, options, title = null) {
         var settings = this.settings;
 
         var user = this._serializeUser(discordUser.id);
@@ -151,7 +151,8 @@ module.exports = class Points {
             _owner: user,
             _source: source,
             _options: options,
-            _betSize: betSize
+            _betSize: betSize,
+            _name: title
         });
 
         settings.users[user.id] = user;
@@ -212,11 +213,13 @@ module.exports = class Points {
         var awards = betPool.awardAll();
         this._updateBetPool(betPool);
 
-        awards.forEach((b) => this._changeUserPoints(b));
+        if(awards.length > 0) {
+            awards.forEach((b) => this._changeUserPoints(b));
+            var settings = this.settings;
+            awards.forEach(a => settings[a._id] = a);
+            this.settings = settings;
+        }
 
-        var settings = this.settings;
-        awards.forEach(a => settings[a._id] = a);
-        this.settings = settings;
         return betPool;
     }
 
@@ -225,11 +228,12 @@ module.exports = class Points {
         var refunds = betPool.refundAll();
         this._updateBetPool(betPool);
 
-        refunds.forEach((b) => this._changeUserPoints(b));
-
-        var settings = this.settings;
-        refunds.forEach(r => settings.awards[r._id] = r);
-        this.settings = settings;
+        if(refunds.length > 0) {
+            refunds.forEach((b) => this._changeUserPoints(b));
+            var settings = this.settings;
+            refunds.forEach(r => settings.awards[r._id] = r);
+            this.settings = settings;
+        }
 
         return betPool;
     }

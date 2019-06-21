@@ -5,18 +5,24 @@ const emojis = require('../../core/points/Emojis.js');
 const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
 
 
-module.exports = class NewWagerCommand extends commando.Command {
+module.exports = class NewWagerNamedCommand extends commando.Command {
     constructor(client) {
         super(client, {
-            name: 'newwager',
+            name: 'newwager-named',
             group: 'points',
-            memberName: 'newwager',
-            alias: 'new-wager',
+            memberName: 'newwager-named',
+            alias: 'new-wager-named',
             description: 'Creates a new wager pool for players to bet on.',
-            examples: ['!newwager 500 @Dog#3471 @Hazelyn#6286'],
+            examples: ['!newwager "My Title" 500 @Dog#3471 @Hazelyn#6286'],
             argsPromptLimit: 0,
             guildOnly: true,
             args: [
+                {
+                    key: 'title',
+                    prompt: "Enter a title for this wager pool.",
+                    type: 'string',
+                    default: ''
+                },
                 {
                     key: 'wager',
                     prompt: "Enter an optional reason for why this user is being penalized.",
@@ -34,7 +40,7 @@ module.exports = class NewWagerCommand extends commando.Command {
         });
     }
 
-    async run(message, { wager, options }) {
+    async run(message, { title, wager, options }) {
         var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
             message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.author).roles.has(r));
 
@@ -57,7 +63,7 @@ module.exports = class NewWagerCommand extends commando.Command {
 
         var translatedOptions = options.map(discordifyOption);
 
-        var betPool = message.guild.pointSystem.newBetPool(message.author, wager, source, translatedOptions);
+        var betPool = message.guild.pointSystem.newBetPool(message.author, wager, source, translatedOptions, title);
 
         var embed = RichEmbedBuilder.new(betPool);
 

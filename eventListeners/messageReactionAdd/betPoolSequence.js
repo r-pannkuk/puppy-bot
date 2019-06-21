@@ -5,7 +5,6 @@ const BetPool = require('../../core/points/BetPool.js');
 const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
 
 module.exports = async function (client, messageReaction, user) {
-    console.log("I'm in here all right");
     var message = messageReaction.message;
     var channel = message.channel;
     var emoji = messageReaction.emoji;
@@ -21,28 +20,23 @@ module.exports = async function (client, messageReaction, user) {
     if (emoji.name !== '✅' && emoji.name !== '🚫') {
         return;
     }
-    console.log("Passed the dumb checks");
 
     var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
         message.guild.pointSystem.adminRoles.find(r => message.guild.member(user).roles.has(r));
 
     if (bool) {
-        
-    console.log("In the bool statement");
+
         var betPool = message.guild.pointSystem.findBetPool(message.id);
 
         if (!betPool || betPool._status === BetPool.STATE.Refunded || betPool._status === BetPool.STATE.Awarded) {
             return;
         }
 
-        
-    console.log("Not an issue with bet pool or state");
-
         messageReaction.remove(user);
 
         if (emoji.name === '✅') {
-            switch (betPool.status) {
-                case 'Pending':
+            switch (betPool._status) {
+                case BetPool.STATE.Pending:
                     betPool = message.guild.pointSystem.openBetPool(betPool, message.author);
                     user.send('Bet pool has opened.  Bets may now be placed.');
 
@@ -52,7 +46,7 @@ module.exports = async function (client, messageReaction, user) {
                         await message.react(`${emojis[parseInt(i) + 1]}`);
                     }
                     break;
-                case 'Open':
+                case BetPool.STATE.Open:
                     if (betPool.currentPool === 0) {
                         user.send('No one has bet yet!');
                     }
@@ -97,7 +91,7 @@ module.exports = async function (client, messageReaction, user) {
                 var wager = bet._wager;
                 var owner = bet._user;
 
-                client.users.get(owner).send(`Bet pool **${betPool._id}** has been cancelled. Refunding your bet of **${wager}**.`)
+                client.users.get(owner).send(`Bet pool **${betPool.name}** has been cancelled. Refunding your bet of **${wager}**.`)
             });
 
             var reactions = message.reactions.entries();

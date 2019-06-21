@@ -39,7 +39,7 @@ module.exports = function(client, messageReaction, user) {
 
         var existingBet = betPool.getActiveBet(user.id);
         if(existingBet) {
-            user.send(`You\'ve already bet on this pool under ${existingBet._outcome}.`);
+            user.send(`You\'ve already bet on **${betPool.name}** under **${existingBet._outcome}**.`);
             return;
         }
 
@@ -50,9 +50,11 @@ module.exports = function(client, messageReaction, user) {
 
         var bet = points.newBet(user, betPool, source, betPool._options[index]);
         betPool = points.betPools[betPool._id];
+
+        var userPoints = message.guild.pointSystem.getUser(user);
+
         message.edit(RichEmbedBuilder.new(betPool));
-        
-        user.send(`Placed a new wager on **${bet._outcome}** for ${bet._wager}.`);
+        user.send(RichEmbedBuilder.userBet(bet, betPool, message, userPoints));
     }
 };
 

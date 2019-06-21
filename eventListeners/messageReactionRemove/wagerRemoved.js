@@ -42,9 +42,13 @@ module.exports = function(client, messageReaction, user) {
             return;
         }
         
+        bet = betPool._bets[bet._id];
+
+        var userPoints = message.guild.pointSystem.getUser(user);
+        
         message.edit(RichEmbedBuilder.new(betPool));
         
-        user.send(`Removed your wager on **${bet._outcome}**, refunding you ${bet._wager} points.`);
+        user.send(RichEmbedBuilder.userBet(bet, betPool, message, userPoints));
     }
 };
 

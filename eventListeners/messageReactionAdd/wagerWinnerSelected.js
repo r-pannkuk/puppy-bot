@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 
 const BetPool = require('../../core/points/BetPool.js');
+const Bet = require('../../core/points/Bet.js');
 const Source = require('../../core/points/Source.js');
 const emojis = require('../../core/points/Emojis.js');
 const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
@@ -50,7 +51,7 @@ module.exports = async function (client, messageReaction, user) {
 
         message.edit(RichEmbedBuilder.new(betPool));
 
-        message.channel.send(`*WINNER*: Bet pool **${betPool._id}** has paid out on **${betPool._winner}**. Winners will be notified.`);
+        message.channel.send(`*WINNER*: Bet pool **${betPool.name}** has paid out on **${betPool._winner}**. Winners will be notified.`);
 
         await new Promise(resolve => setTimeout(resolve, 5000));
 
@@ -58,13 +59,27 @@ module.exports = async function (client, messageReaction, user) {
 
         message.edit(RichEmbedBuilder.new(betPool));
 
-        var winners = betPool.getAwardedBets();
+        var bets = Object.values(betPool._bets);
+        var betOutcomes = {};
+        betOutcomes[Bet.STATUS.Lost] = [];
+        betOutcomes[Bet.STATUS.Awarded] = [];
 
-        winners.forEach(bet => {
+        bets.forEach(bet => {
             var user = client.users.get(bet._user);
 
-            user.send(`You've won **${bet._payout}** for betting on **${bet._outcome}** in bet pool **${betPool._id}**!`)
+            if(bet._status === Bet.STATUS.Awarded) {
+                user.send(`You've won **${bet._payout}** for betting on **${bet._outcome}** in bet pool **${betPool._name}**!`);
+            }
+
+            betOutcomes[bet._status].push({
+                user: user.username,
+                outcome: bet._outcome,
+                wager: bet._wager,
+                payout: bet._payout
+            });
         });
+
+        message.channel.send(RichEmbedBuilder.results(betPool, betOutcomes));
     }
 };
 

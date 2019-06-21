@@ -5,6 +5,7 @@ const emojis = require('./Emojis.js');
 class BetPool {
     constructor({
         _id = null,
+        _name = null,
         _source = null,
         _owner = null,
         _lastEditedBy = null,
@@ -16,13 +17,15 @@ class BetPool {
         _status = BetPool.STATE.Pending,
         _message = {
             _id: null,
+            color: [255, 255, 255],
             author: `New Wager`,
             authorIcon: null,
             thumbnail: null,
-            closing: `\n\n**React with your choice to enter the bet pool.**`
+            closing: `\n\n**Admin**: Open bets with ✅ or refund with 🚫.`
         }
     }) {
         this._id = _id || uuid();
+        this._name = _name || this._id;
         this._source = _source;
         this._owner = _owner;
         this._winner = _winner;
@@ -34,7 +37,7 @@ class BetPool {
         this._status = _status;
         this._message = _message;
 
-        this._message.author = this._id;
+        this._message.author = this._name;
     }
 
     static get STATE() {
@@ -49,6 +52,7 @@ class BetPool {
     }
 
     get source() { return this._source; }
+    get name() { return this._name || this._id; }
     get owner() { return this._owner; }
     get lastUser() { return this._lastEditedBy || this._owner; }
     get options() { return this._options; }
@@ -105,14 +109,24 @@ class BetPool {
             `**Bet**: ${this.betSize}\n` +
             `**Current Pool**: ${this.currentPool}\n`;
 
-        if(this._winner) {
+        if (this._winner) {
             message.description += `**WINNER**: ${this._winner}\n`;
         }
 
         message.description += '\n';
 
         for (var i in this._options) {
-            message.description += `${emojis[parseInt(i) + 1]}: **${this._options[i]}**\n`;
+            var count = Object.values(this._bets)
+                .filter(b => b._status !== Bet.STATUS.Refunded
+                    && b._outcome === this._options[i])
+                .length;
+            var numBetsString = (count) ? `   [${count}]` : ``;
+
+            if (!this._winner || this._options[i] === this._winner) {
+                message.description += `${emojis[parseInt(i) + 1]}: **${this._options[i]}**${numBetsString}\n`;
+            } else {
+                message.description += `${emojis[parseInt(i) + 1]}: ${this._options[i]}${numBetsString}\n`;
+            }
         }
 
         message.description += this._message.closing;
@@ -133,6 +147,9 @@ class BetPool {
 
         // this._message.author = 'Open Wager';
         this._message.thumbnail = 'https://res.mdpi.com/data/open-peer-review.png';
+        this._message.closing = `\n\n**Users**: Place bets by reacting to \u0031\u20E3, \u0032\u20E3, ...` +
+            `\n**Admin**: Close bets with ✅ or refund with 🚫.`;
+        this._message.color = 'GREEN';
     }
 
     close(modifier) {
@@ -141,6 +158,8 @@ class BetPool {
 
         // this._message.author = 'Closed Wager';
         this._message.thumbnail = 'https://i0.wp.com/moshekafrica.com/wp-content/uploads/2019/01/no-more-betting.png?resize=200%2C161&ssl=1';
+        this._message.closing = `\n\n**Admin**: Select a winner by reacting with \u0031\u20E3, \u0032\u20E3, ...`;
+        this._message.color = 'PURPLE';
     }
 
     complete(modifier, winner) {
@@ -164,6 +183,8 @@ class BetPool {
 
         // this._message.author = 'Wager Completed';
         this._message.thumbnail = 'https://www.onlygfx.com/wp-content/uploads/2018/04/completed-stamp-3.png';
+        this._message.closing = `\n\nWinning bets will be notified shortly.`;
+        this._message.color = 'GOLD'
     }
 
     awardAll(modifier) {
@@ -174,11 +195,14 @@ class BetPool {
 
         var totalPayout = bets.reduce((sum, b) => sum + b._wager, 0);
         var winningShares = bets.filter((b) => b._status === Bet.STATUS.Won).reduce((sum, bet) => sum + bet._wager, 0);
+        
+        this._message.closing = `\n\nBets have been paid awarded.`;
+        this._message.color = 'DARK_GREY';
 
-        if(winningShares === 0) {
+        if (winningShares === 0) {
             return [];
         }
-        
+
         return bets.map(b => {
             var bet = new Bet(b);
             var award = bet.award(
@@ -209,13 +233,16 @@ class BetPool {
         this._status = BetPool.STATE.Refunded;
         // this._message.author = 'CANCELLED';
         this._message.thumbnail = 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/ProhibitionSign2.svg/1200px-ProhibitionSign2.svg.png';
+        this._message.color = 'DARK_RED';
 
-        return Object.values(this.bets).map(b => {
-            var bet = new Bet(b);
-            var refund = bet.refund(this.lastUser);
-            this.bets[b._id] = bet;
-            return refund;
-        });
+        return Object.values(this.bets)
+            .filter(b => b._status === Bet.STATUS.Pending)
+            .map(b => {
+                var bet = new Bet(b);
+                var refund = bet.refund(this.lastUser);
+                this.bets[b._id] = bet;
+                return refund;
+            });
     }
 }
 
