@@ -18,7 +18,7 @@ module.exports.results = function (betPool, betOutcomes) {
     for (let [key, value] of Object.entries(betOutcomes)) {
         value = value.sort((o1, o2) => o2.payout - o1.payout);
         fields[key] = value.reduce((prev, outcome) => {
-            return prev += `**${outcome.user}** - Wagered **${outcome.wager}** on [**${outcome.outcome}**] and won [**${outcome.payout}**]`;
+            return prev += `**${outcome.user}** - Wagered **${outcome.wager}** on [**${outcome.outcome}**] and won [**${outcome.payout}**]\n`;
         }, ``)
     }
 
