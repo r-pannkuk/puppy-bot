@@ -3,6 +3,8 @@ const BetPool = require('./BetPool.js');
 const emojis = require('./Emojis.js');
 const Bet = require('./Bet.js');
 
+const LIMIT = 2000;
+
 module.exports.new = function (betPool) {
     return new Discord.RichEmbed()
         .setColor(betPool.message().color)
@@ -18,26 +20,24 @@ module.exports.results = function (betPool, betOutcomes) {
     for (let [key, value] of Object.entries(betOutcomes)) {
         value = value.sort((o1, o2) => o2.payout - o1.payout);
         fields[key] = value.reduce((prev, outcome) => {
-            return prev += `**${outcome.user}** - Wagered **${outcome.wager}** on [**${outcome.outcome}**] and won [**${outcome.payout}**]\n`;
+            return prev += `\t**${outcome.user}** - Wagered **${outcome.wager}** on [**${outcome.outcome}**] and won [**${outcome.payout}**]\n`;
         }, ``)
     }
 
-    var embed = new Discord.RichEmbed()
-        .setColor(betPool.message().color)
-        .setAuthor(`Results: ${betPool.message().author}`);
+    var msg = `__**Results**__: ${betPool.message().author}\n`;
 
     for (let [key, value] of Object.entries(fields)) {
         if (value) {
             var status = parseInt(key);
             if (status === Bet.STATUS.Won || status === Bet.STATUS.Awarded) {
-                embed.addField('Winners:', value);
+                msg += `  __Winners__:\n${value}`;
             } else if (status === Bet.STATUS.Lost) {
-                embed.addField('Losers:', value);
+                msg += `  __Losers__:\n${value}`;
             }
         }
     }
 
-    return embed;
+    return msg.split(LIMIT);
 }
 
 function betString(bet) {
@@ -82,4 +82,24 @@ module.exports.userBet = function (bet, betPool, msg, user) {
         .setURL(discordLink(msg.guild, msg.channel, msg));
 
     return embed;
+}
+
+module.exports.addReactions = async function(message, betPool,
+    reactCheckmark = true,
+    reactCancel = true,
+    reactOptions = true
+) {
+    if(reactCheckmark) {
+        await message.react('✅');
+    }
+
+    if(reactCancel) {
+        await message.react('🚫');
+    }
+
+    if(reactOptions) {
+        for(var i in betPool._options) {
+            await message.react(`${emojis[parseInt(i) + 1]}`);
+        }
+    }
 }

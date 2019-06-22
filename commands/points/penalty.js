@@ -42,6 +42,7 @@ module.exports = class PenaltyCommand extends commando.Command {
 
         if (!bool) {
             message.channel.send('You must have permissions to use this command.');
+            return;
         }
 
         var source = new Source({

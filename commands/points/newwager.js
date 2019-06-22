@@ -4,6 +4,8 @@ const Source = require('../../core/points/Source.js');
 const emojis = require('../../core/points/Emojis.js');
 const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
 
+const OPTIONS_LIMIT = 16;
+
 
 module.exports = class NewWagerCommand extends commando.Command {
     constructor(client) {
@@ -40,6 +42,12 @@ module.exports = class NewWagerCommand extends commando.Command {
 
         if (!bool) {
             message.channel.send('You must have permissions to use this command.');
+            return;
+        }
+
+        if(options.length > OPTIONS_LIMIT) {
+            message.channel.send(`Please limit the number of options to ${OPTIONS_LIMIT} or less.`);
+            return;
         }
 
         var source = new Source({
@@ -67,12 +75,7 @@ module.exports = class NewWagerCommand extends commando.Command {
 
             message.guild.pointSystem.subscribeBetPool(betPool, msg);
 
-            await msg.react('✅');
-            await msg.react('🚫');
-
-            for (var i in betPool._options) {
-                await msg.react(`${emojis[parseInt(i) + 1]}`);
-            }
+            await RichEmbedBuilder.addReactions(msg, betPool);
         });
     }
 }

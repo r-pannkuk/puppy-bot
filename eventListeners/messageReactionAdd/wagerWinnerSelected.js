@@ -28,8 +28,6 @@ module.exports = async function (client, messageReaction, user) {
     // Get the message ID and look it up in the list of bet messages
     // Assign this user a new bet from the wager.
 
-    var points = message.guild.pointSystem;
-
     var betPool = message.guild.pointSystem.findBetPool(message.id);
 
     if (betPool) {
@@ -49,6 +47,7 @@ module.exports = async function (client, messageReaction, user) {
 
         betPool = message.guild.pointSystem.completeBetPool(betPool, user, betPool._options[winningIndex]);
 
+        await message.clearReactions()
         message.edit(RichEmbedBuilder.new(betPool));
 
         message.channel.send(`*WINNER*: Bet pool **${betPool.name}** has paid out on **${betPool._winner}**. Winners will be notified.`);
@@ -67,7 +66,7 @@ module.exports = async function (client, messageReaction, user) {
         bets.forEach(bet => {
             var user = client.users.get(bet._user);
 
-            if(bet._status === Bet.STATUS.Awarded) {
+            if (bet._status === Bet.STATUS.Awarded) {
                 user.send(`You've won **${bet._payout}** for betting on **${bet._outcome}** in bet pool **${betPool._name}**!`);
             }
 
@@ -79,7 +78,8 @@ module.exports = async function (client, messageReaction, user) {
             });
         });
 
-        message.channel.send(RichEmbedBuilder.results(betPool, betOutcomes));
+        RichEmbedBuilder.results(betPool, betOutcomes).forEach(s => message.channel.send(s));
+
     }
 };
 

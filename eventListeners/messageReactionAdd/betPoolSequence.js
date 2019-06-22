@@ -56,22 +56,10 @@ module.exports = async function (client, messageReaction, user) {
 
                     message.edit(RichEmbedBuilder.new(betPool));
 
-                    messageReaction.remove();
+                    await message.clearReactions();
 
-                    var reactions = message.reactions.entries();
+                    await RichEmbedBuilder.addReactions(message, betPool);
 
-                    for (let reaction of reactions) {
-
-                        if (Object.values(emojis).indexOf(reaction[0]) === -1) {
-                            continue;
-                        }
-
-                        reaction[1].users.forEach(u => {
-                            if (u !== client.user) {
-                                reaction[1].remove(u);
-                            }
-                        });
-                    };
                     break;
                 default:
                     break;
@@ -94,18 +82,20 @@ module.exports = async function (client, messageReaction, user) {
                 client.users.get(owner).send(`Bet pool **${betPool.name}** has been cancelled. Refunding your bet of **${wager}**.`)
             });
 
-            var reactions = message.reactions.entries();
+            await message.clearReactions();
 
-            for (let reaction of reactions) {
-                if (Object.values(emojis).indexOf(reaction[0]) === -1 &&
-                    reaction[0] !== '🚫' && reaction[0] !== '✅') {
-                    continue;
-                }
+            // var reactions = message.reactions.entries();
 
-                reaction[1].users.forEach(u => {
-                    reaction[1].remove(u);
-                });
-            };
+            // for (let reaction of reactions) {
+            //     if (Object.values(emojis).indexOf(reaction[0]) === -1 &&
+            //         reaction[0] !== '🚫' && reaction[0] !== '✅') {
+            //         continue;
+            //     }
+
+            //     reaction[1].users.forEach(u => {
+            //         reaction[1].remove(u);
+            //     });
+            // };
         }
     } else {
         user.send(`You don't have permissions to change this wager.`);
