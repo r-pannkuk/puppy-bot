@@ -195,7 +195,7 @@ class BetPool {
 
         var totalPayout = bets.reduce((sum, b) => sum + b._wager, 0);
         var winningShares = bets.filter((b) => b._status === Bet.STATUS.Won).reduce((sum, bet) => sum + bet._wager, 0);
-        
+
         this._message.closing = `\n\nBets have been paid awarded.`;
         this._message.color = 'DARK_GREY';
 
@@ -217,9 +217,10 @@ class BetPool {
     refund(user) {
         var bet = this.getActiveBet(user._id);
 
-        bet = new Bet(bet);
-
         if (bet) {
+
+            bet = new Bet(bet);
+
             var refund = bet.refund(user._id);
             this._bets[bet._id] = bet;
             return refund;

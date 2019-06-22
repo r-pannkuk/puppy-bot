@@ -37,14 +37,14 @@ module.exports = async function (client, messageReaction, user) {
         if (emoji.name === '✅') {
             switch (betPool._status) {
                 case BetPool.STATE.Pending:
-                    betPool = message.guild.pointSystem.openBetPool(betPool, message.author);
-                    user.send('Bet pool has opened.  Bets may now be placed.');
+                    // betPool = message.guild.pointSystem.openBetPool(betPool, message.author);
+                    // user.send('Bet pool has opened.  Bets may now be placed.');
 
-                    message.edit(RichEmbedBuilder.new(betPool));
+                    // message.edit(RichEmbedBuilder.new(betPool));
 
-                    for (var i in betPool._options) {
-                        await message.react(`${emojis[parseInt(i) + 1]}`);
-                    }
+                    // for (var i in betPool._options) {
+                    //     await message.react(`${emojis[parseInt(i) + 1]}`);
+                    // }
                     break;
                 case BetPool.STATE.Open:
                     if (betPool.currentPool === 0) {

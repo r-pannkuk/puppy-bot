@@ -59,6 +59,8 @@ module.exports = class NewWagerCommand extends commando.Command {
 
         var betPool = message.guild.pointSystem.newBetPool(message.author, wager, source, translatedOptions);
 
+        betPool = message.guild.pointSystem.openBetPool(betPool, message.author);
+
         var embed = RichEmbedBuilder.new(betPool);
 
         message.channel.send(embed).then(async (msg) => {
@@ -67,6 +69,10 @@ module.exports = class NewWagerCommand extends commando.Command {
 
             await msg.react('✅');
             await msg.react('🚫');
+
+            for (var i in betPool._options) {
+                await msg.react(`${emojis[parseInt(i) + 1]}`);
+            }
         });
     }
 }
