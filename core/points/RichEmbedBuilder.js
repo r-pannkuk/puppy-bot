@@ -145,5 +145,3 @@ module.exports.userAccounts = async function ({
 
     return embed;
 }
-
-module.exports.test = async function() {}
