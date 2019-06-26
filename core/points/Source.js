@@ -1,4 +1,4 @@
-class Source {
+module.exports = class Source {
     constructor({
         _type = null,
         _id = null
@@ -6,14 +6,15 @@ class Source {
         this._type = _type;
         this._id = _id;
     }
-}
 
-module.exports = Source;
-
-module.exports.TYPE = {
-    Custom: 1,
-    Command: 2,
-    Bet: 3,
-    Match: 4,
-    Reaction: 5
+    static get TYPE() {
+        return {
+            Custom: 1,
+            Command: 2,
+            Bet: 3,
+            Match: 4,
+            Reaction: 5,
+            Tournament: 6
+        }
+    }
 }

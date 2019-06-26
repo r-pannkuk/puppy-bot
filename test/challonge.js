@@ -1,18 +1,52 @@
-const Challonge = require('../core/Challonge');
+const Challonge = require('../core/challonge/Challonge.js');
+const Tournament = require('../core/challonge/Tournament.js');
+const Match = require('../core/challonge/Match.js');
+const Participant = require('../core/challonge/Participant.js');
+
 require('dotenv').config();
 
-var client = new Challonge({}, { apiKey: process.env.CHALLONGE });
+async function execute() {
 
-console.log(client.createTournament({
-    name: 'Test',
-    tournament_type: 'single_elimination',
-    url: 'test_123',
-    subdomain: 'puppybot',
-    description: 'testing tournament creation functionality',
-    open_signup: false,
-    hold_third_place_match: false,
-    show_rounds: true,
-    // private: true,
-    signup_cap: 123
-}), (err, data) => console.log(err, data))
-console.log(client.getTournaments(), (err, data) => console.log(err, data));
+    var guildSettings = { obj: {} };
+    guildSettings.get = (id) => {
+        return guildSettings.obj[id];
+    };
+    guildSettings.set = (id, obj) => {
+        guildSettings.obj[id] = obj;
+    };
+
+    var client = new Challonge(guildSettings, { apiKey: process.env.CHALLONGE });
+
+    var tournament = new Tournament({
+        _challongeObj: {
+            name: 'Test',
+            tournamentType: 'single elimination',
+            url: Date.now(),
+            gameName: 'Touhou Hisoutensoku',
+            subdomain: 'puppybot',
+            description: 'testing tournament creation functionality',
+            openSignup: false,
+            holdThirdPlaceMatch: false,
+            showRounds: true,
+            private: true,
+            signupCap: 123
+        }
+    });
+
+    var tournament = await client._tournamentCreate(tournament).catch(err => console.log(err));
+    var listedTournaments = await client._tournamentGetAll().catch(err => console.log(err));
+    var ToT5 = await client._tournamentGet({
+        _id: 'ToT05top8'
+    });
+
+    var matches = await client._matchesGetAll({
+        _id: ToT5.tournament.url,
+        _challongeObj: ToT5.tournament
+    });
+    var participants = await client._participantsGetAll({
+        _id: ToT5.tournament.url,
+        _challongeObj: ToT5.tournament
+    });
+}
+
+execute();

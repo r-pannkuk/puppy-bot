@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const BetPool = require('./BetPool.js');
 const emojis = require('./Emojis.js');
 const Bet = require('./Bet.js');
+const Account = require('./Account.js');
 
 const LIMIT = 2000;
 
@@ -56,10 +57,10 @@ function betString(bet) {
 
 function discordLink(guild, channel, message) {
     var link = `https://discordapp.com/channels/${guild.id}`;
-    if(channel) {
+    if (channel) {
         link += `/${channel.id}`;
     }
-    if(message) {
+    if (message) {
         link += `/${message.id}`;
     }
 
@@ -84,22 +85,63 @@ module.exports.userBet = function (bet, betPool, msg, user) {
     return embed;
 }
 
-module.exports.addReactions = async function(message, betPool,
+module.exports.addReactions = async function (message, betPool,
     reactCheckmark = true,
     reactCancel = true,
     reactOptions = true
 ) {
-    if(reactCheckmark) {
+    if (reactCheckmark) {
         await message.react('✅');
     }
 
-    if(reactCancel) {
+    if (reactCancel) {
         await message.react('🚫');
     }
 
-    if(reactOptions) {
-        for(var i in betPool._options) {
+    if (reactOptions) {
+        for (var i in betPool._options) {
             await message.react(`${emojis[parseInt(i) + 1]}`);
         }
     }
+}
+
+function addAccountField(richEmbed, account) {
+    if (account._username) {
+        fieldDesc += `__Username__: **${account._username}**\n`;
+    }
+    if (account._email) {
+        fieldDesc += `__Email:__: **${account._email}**\n`;
+    }
+    switch (account._service) {
+        case Account.SERVICE.Challonge:
+            richEmbed.addField('Challonge', fieldDesc)
+            break;
+    }
+
+    return richEmbed;
+}
+
+module.exports.userAccount = async function ({
+    user, 
+    serviceType,
+    embed = new Discord.RichEmbed()
+}) {
+    var account = user._accounts.find(a => a._service === serviceType);
+    var embed = new Discord.RichEmbed()
+        .setColor('BLUE')
+        .setTitle();
+    embed = addAccountField(embed, account);
+
+    return embed;
+}
+
+module.exports.userAccounts = async function ({
+    user, 
+    embed = new Discord.RichEmbed()
+}) {
+    for (var i in user._accounts) {
+        embed = addAccountField(embed, user._accounts[i]);
+    }
+
+    return embed;
 }

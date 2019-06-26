@@ -3,6 +3,7 @@ const Penalty = require('./Penalty.js');
 const Award = require('./Award.js');
 const BetPool = require('./BetPool.js');
 const PointChange = require('./PointChange.js');
+const Account = require('./Account.js');
 
 module.exports = class Points {
     constructor(guildSettings) {
@@ -76,6 +77,65 @@ module.exports = class Points {
 
     getUser(discordUser) {
         return this._serializeUser(discordUser.id);
+    }
+
+    getUserByAccount(account) {
+        var user = Object.values(this.settings.users).find(u => {
+            var accounts = u._accounts;
+
+            if (accounts.some(a => {
+                if (a._service === account._service &&
+                    a._username.toLowerCase() === account._username.toLowerCase()
+                ) {
+                    return true;
+                }
+                return false;
+            })) {
+                return true;
+            }
+
+
+            return false;
+        });
+
+        return user;
+    }
+
+    getUserAccount(discordUser, serviceType) {
+        var user = this._serializeUser(discordUser.id);
+        var foundAccount = user._accounts.find(a => a._service === serviceType);
+        if(!foundAccount) return;
+
+        return new Account(foundAccount);
+    }
+
+    addUserAccount(discordUser, account) {
+        var settings = this.settings;
+        var user = this.removeUserAccount(discordUser, account._service);
+
+        user._accounts.push(account);
+
+        settings.users[user.id] = user;
+        this.settings = settings;
+
+        return user;
+    }
+
+    removeUserAccount(discordUser, serviceType) {
+        var settings = this.settings;
+        var user = this._serializeUser(discordUser.id);
+        var account = this.getUserAccount(discordUser, serviceType);
+
+        if (!account) return user;
+
+        user._accounts.splice(user._accounts.findIndex(a => {
+            return a._service === account._service
+        }), 1);
+
+        settings.users[user.id] = user;
+        this.settings = settings;
+
+        return user;
     }
 
     _changeUserPoints(pointChange) {
@@ -166,7 +226,7 @@ module.exports = class Points {
     findBetPool(message_id) {
         var betPool = Object.values(this.settings.betPools).find(bp => bp._message._id === message_id);
 
-        if(betPool) {
+        if (betPool) {
             return this._serializeBetPool(betPool._id);
         }
     }
@@ -213,7 +273,7 @@ module.exports = class Points {
         var awards = betPool.awardAll();
         this._updateBetPool(betPool);
 
-        if(awards.length > 0) {
+        if (awards.length > 0) {
             awards.forEach((b) => this._changeUserPoints(b));
             var settings = this.settings;
             awards.forEach(a => settings[a._id] = a);
@@ -228,7 +288,7 @@ module.exports = class Points {
         var refunds = betPool.refundAll();
         this._updateBetPool(betPool);
 
-        if(refunds.length > 0) {
+        if (refunds.length > 0) {
             refunds.forEach((b) => this._changeUserPoints(b));
             var settings = this.settings;
             refunds.forEach(r => settings.awards[r._id] = r);
@@ -276,9 +336,9 @@ module.exports = class Points {
         var user = this._serializeUser(discordUser.id);
         var betPool = this._serializeBetPool(betPool._id);
 
-        var refund =  betPool.refund(user);
+        var refund = betPool.refund(user);
 
-        if(!refund) {
+        if (!refund) {
             return null;
         }
 
