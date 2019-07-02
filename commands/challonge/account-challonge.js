@@ -7,7 +7,7 @@ module.exports = class AccountChallonge extends commando.Command {
     constructor(client) {
         super(client, {
             name: 'account-challonge',
-            group: 'points',
+            group: 'challonge',
             memberName: 'account-challonge',
             aliases: ['account-c', 'ac', 'accountchallonge', 'accountc'],
             description: 'Fetches a challonge account for a given Discord User.',
@@ -19,17 +19,6 @@ module.exports = class AccountChallonge extends commando.Command {
                     key: 'user',
                     prompt: 'Please enter the Discord User to associate with.',
                     type: 'user',
-                    validate: (val, msg, arg) => {
-                        var bool = msg.guild.member(msg.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
-                            msg.guild.pointSystem.adminRoles.find(r => msg.guild.member(message.author).roles.has(r));
-
-                        if (!bool && msg.author !== val) {
-                            msg.channel.send('Only users with permissions can associate another user with Challonge.');
-                            return false;
-                        }
-
-                        return true;
-                    },
                     default: ''
                 }
             ]

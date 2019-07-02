@@ -27,7 +27,7 @@ module.exports = async function(client, messageReaction, user) {
 
     var points = message.guild.pointSystem;
 
-    var betPool = message.guild.pointSystem.findBetPool(message.id);
+    var betPool = message.guild.pointSystem.findBetPoolByMessage(message.id);
 
     if(betPool) {
         if(betPool._status !== BetPool.STATE.Open) {

@@ -26,7 +26,7 @@ module.exports = async function (client, messageReaction, user) {
 
     if (bool) {
 
-        var betPool = message.guild.pointSystem.findBetPool(message.id);
+        var betPool = message.guild.pointSystem.findBetPoolByMessage(message.id);
 
         if (!betPool || betPool._status === BetPool.STATE.Refunded || betPool._status === BetPool.STATE.Awarded) {
             return;
@@ -37,18 +37,19 @@ module.exports = async function (client, messageReaction, user) {
         if (emoji.name === '✅') {
             switch (betPool._status) {
                 case BetPool.STATE.Pending:
-                    // betPool = message.guild.pointSystem.openBetPool(betPool, message.author);
-                    // user.send('Bet pool has opened.  Bets may now be placed.');
+                    betPool = message.guild.pointSystem.openBetPool(betPool, message.author);
+                    user.send('Bet pool has opened.  Bets may now be placed.');
 
-                    // message.edit(RichEmbedBuilder.new(betPool));
+                    message.edit(RichEmbedBuilder.new(betPool));
 
-                    // for (var i in betPool._options) {
-                    //     await message.react(`${emojis[parseInt(i) + 1]}`);
-                    // }
+                    for (var i in betPool._options) {
+                        await message.react(`${emojis[parseInt(i) + 1]}`);
+                    }
                     break;
                 case BetPool.STATE.Open:
                     if (betPool.currentPool === 0) {
                         user.send('No one has bet yet!');
+                        return;
                     }
 
                     betPool = message.guild.pointSystem.closeBetPool(betPool, message.author);
@@ -58,7 +59,10 @@ module.exports = async function (client, messageReaction, user) {
 
                     await message.clearReactions();
 
-                    await RichEmbedBuilder.addReactions(message, betPool);
+                    await RichEmbedBuilder.addReactions({
+                        message: message, 
+                        betPool: betPool
+                    });
 
                     break;
                 default:
@@ -83,19 +87,6 @@ module.exports = async function (client, messageReaction, user) {
             });
 
             await message.clearReactions();
-
-            // var reactions = message.reactions.entries();
-
-            // for (let reaction of reactions) {
-            //     if (Object.values(emojis).indexOf(reaction[0]) === -1 &&
-            //         reaction[0] !== '🚫' && reaction[0] !== '✅') {
-            //         continue;
-            //     }
-
-            //     reaction[1].users.forEach(u => {
-            //         reaction[1].remove(u);
-            //     });
-            // };
         }
     } else {
         user.send(`You don't have permissions to change this wager.`);

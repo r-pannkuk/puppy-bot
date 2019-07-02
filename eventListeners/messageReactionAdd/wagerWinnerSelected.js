@@ -28,7 +28,7 @@ module.exports = async function (client, messageReaction, user) {
     // Get the message ID and look it up in the list of bet messages
     // Assign this user a new bet from the wager.
 
-    var betPool = message.guild.pointSystem.findBetPool(message.id);
+    var betPool = message.guild.pointSystem.findBetPoolByMessage(message.id);
 
     if (betPool) {
         var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||

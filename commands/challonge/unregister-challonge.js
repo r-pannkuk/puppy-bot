@@ -7,7 +7,7 @@ module.exports = class UnregisterChallonge extends commando.Command {
     constructor(client) {
         super(client, {
             name: 'unregister-challonge',
-            group: 'points',
+            group: 'challonge',
             memberName: 'unregister-challonge',
             aliases: ['unregister-c', 'uc', 'unregisterchallonge', 'unregisterc'],
             description: 'Disassociates a given Discord User with their challonge account.',

@@ -79,6 +79,12 @@ module.exports = class Points {
         return this._serializeUser(discordUser.id);
     }
 
+    setUser(userObj) {
+        var settings = this.settings;
+        settings.users[userObj.id] = userObj;
+        this.settings = settings;
+    }
+
     getUserByAccount(account) {
         var user = Object.values(this.settings.users).find(u => {
             var accounts = u._accounts;
@@ -109,7 +115,12 @@ module.exports = class Points {
         return new Account(foundAccount);
     }
 
-    addUserAccount(discordUser, account) {
+    findAccountByMessage(message_id) {
+        var accounts = [].concat.apply(Object.values(this.settings.users).map(u => u._accounts));
+        return accounts.find(a => a._confirmationMessageId === message_id);
+    }
+
+    setUserAccount(discordUser, account) {
         var settings = this.settings;
         var user = this.removeUserAccount(discordUser, account._service);
 
@@ -223,12 +234,20 @@ module.exports = class Points {
         return betPool;
     }
 
-    findBetPool(message_id) {
+    findBetPoolByMessage(message_id) {
         var betPool = Object.values(this.settings.betPools).find(bp => bp._message._id === message_id);
 
         if (betPool) {
             return this._serializeBetPool(betPool._id);
         }
+    }
+
+    findAllBetPools(predicate) {
+        var filtered = Object.values(this.settings.betPools)
+        .map(bp => new BetPool(bp))
+        .filter(bp => predicate(bp));
+
+        return filtered;
     }
 
     _updateBetPool(betPool) {

@@ -31,7 +31,8 @@ client.registry.registerGroups([
     [ 'notes', 'User Notes' ],
     [ 'games', 'Commands for Games' ],
     [ 'tournament', 'Commands for tournament creation and viewing'],
-    [ 'points', 'A system for betting and awarding points for users.']
+    [ 'points', 'A system for betting and awarding points for users.'],
+    [ 'challonge', 'Links discord users with challonge accounts.']
 ]);
 client.registry.registerDefaults();
 client.registry.registerCommandsIn(__dirname + '/commands');

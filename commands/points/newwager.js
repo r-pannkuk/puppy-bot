@@ -75,7 +75,10 @@ module.exports = class NewWagerCommand extends commando.Command {
 
             message.guild.pointSystem.subscribeBetPool(betPool, msg);
 
-            await RichEmbedBuilder.addReactions(msg, betPool);
+            await RichEmbedBuilder.addReactions({
+                message: msg, 
+                betPool: betPool
+            });
         });
     }
 }

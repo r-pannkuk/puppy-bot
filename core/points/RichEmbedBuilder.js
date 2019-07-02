@@ -67,6 +67,8 @@ function discordLink(guild, channel, message) {
     return link;
 }
 
+module.exports.discordLink = discordLink;
+
 module.exports.userBet = function (bet, betPool, msg, user) {
     var index = Object.values(betPool._options).findIndex(o => o === bet._outcome) + 1;
     var embed = new Discord.RichEmbed()
@@ -85,11 +87,13 @@ module.exports.userBet = function (bet, betPool, msg, user) {
     return embed;
 }
 
-module.exports.addReactions = async function (message, betPool,
+module.exports.addReactions = async function ({
+    message, 
+    betPool,
     reactCheckmark = true,
     reactCancel = true,
     reactOptions = true
-) {
+}) {
     if (reactCheckmark) {
         await message.react('✅');
     }
@@ -106,11 +110,28 @@ module.exports.addReactions = async function (message, betPool,
 }
 
 function addAccountField(richEmbed, account) {
+    var fieldDesc = ``;
+
     if (account._username) {
         fieldDesc += `__Username__: **${account._username}**\n`;
     }
     if (account._email) {
         fieldDesc += `__Email:__: **${account._email}**\n`;
+    }
+    if (account._status) {
+        var status = ``;
+        switch (account._status) {
+            case Account.STATUS.Pending:
+                status = `Pending`
+                break;
+            case Account.STATUS.Approved:
+                status = `Approved`;
+                break;
+            case Account.STATUS.Confirmed:
+                status = `Confirmed`;
+                break;
+        }
+        fieldDesc += `__Status:__: **${status}**\n`;
     }
     switch (account._service) {
         case Account.SERVICE.Challonge:
@@ -121,22 +142,19 @@ function addAccountField(richEmbed, account) {
     return richEmbed;
 }
 
-module.exports.userAccount = async function ({
-    user, 
+module.exports.userAccount = function ({
+    user,
     serviceType,
     embed = new Discord.RichEmbed()
 }) {
     var account = user._accounts.find(a => a._service === serviceType);
-    var embed = new Discord.RichEmbed()
-        .setColor('BLUE')
-        .setTitle();
     embed = addAccountField(embed, account);
 
     return embed;
 }
 
-module.exports.userAccounts = async function ({
-    user, 
+module.exports.userAccounts = function ({
+    user,
     embed = new Discord.RichEmbed()
 }) {
     for (var i in user._accounts) {
@@ -145,5 +163,3 @@ module.exports.userAccounts = async function ({
 
     return embed;
 }
-
-module.exports.test = async function() {}

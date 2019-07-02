@@ -2,12 +2,13 @@ const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 const Source = require('../../core/points/Source.js');
 const Account = require('../../core/points/Account.js');
+const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
 
 module.exports = class RegisterChallonge extends commando.Command {
     constructor(client) {
         super(client, {
             name: 'register-challonge',
-            group: 'points',
+            group: 'challonge',
             memberName: 'register-challonge',
             aliases: ['register-c', 'rc', 'registerchallonge', 'registerc'],
             description: 'Associates a given Discord User with their challonge account.',
@@ -67,8 +68,25 @@ module.exports = class RegisterChallonge extends commando.Command {
             return;
         }
 
-        message.guild.pointSystem.addUserAccount(user, account);
+        userObj = message.guild.pointSystem.setUserAccount(user, account);
 
-        message.channel.send(`Added new Challonge account to ${user} under **${challongeId}**.`);
+        var embed = RichEmbedBuilder.userAccount({
+            user: userObj,
+            serviceType: Account.SERVICE.Challonge,
+            embed: new Discord.RichEmbed()
+                .setAuthor(user.username, user.avatarURL)
+                .setColor('BLUE')
+        });
+
+        var message = await message.channel.send(embed);
+
+        await RichEmbedBuilder.addReactions({
+            message: message,
+            reactOptions: false
+        });
+
+        account._confirmationMessageId = message.id;
+
+        message.guild.pointSystem.setUserAccount(user, account);
     }
 }
