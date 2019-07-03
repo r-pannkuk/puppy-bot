@@ -73,6 +73,8 @@ module.exports = class GetWagersCommand extends commando.Command {
                     continue;
                 }
 
+                console.log(`Bet Pool Message ID: ${betPool._message._id}`);
+
                 var foundMessage = await foundChannel.fetchMessage(betPool._message._id);
 
                 if (foundMessage) {
