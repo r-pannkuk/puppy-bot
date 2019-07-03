@@ -47,7 +47,7 @@ module.exports = class GetWagersCommand extends commando.Command {
                 bp.status.toLowerCase().indexOf(searchParameter) !== -1
         });
 
-        if(betPools.length === 0) {
+        if (betPools.length === 0) {
             message.channel.send(`No bet pools found.`);
             return;
         }
@@ -56,7 +56,9 @@ module.exports = class GetWagersCommand extends commando.Command {
         var pointSystem = message.guild.pointSystem;
         var foundGuild = message.guild;
 
-        betPools.forEach(async bp => {
+        for (var i in betPools) {
+            var bp = betPools[i];
+
             console.log('59');
             var betPool = pointSystem._serializeBetPool(bp._id);
 
@@ -64,11 +66,11 @@ module.exports = class GetWagersCommand extends commando.Command {
             var channels = message.guild.channels.array();
 
             console.log('66');
-            for(var i in channels) {
+            for (var i in channels) {
                 var foundChannel = channels[i];
 
                 console.log('70');
-                if(foundChannel.type !== 'text') {
+                if (foundChannel.type !== 'text') {
                     continue;
                 }
 
@@ -76,19 +78,21 @@ module.exports = class GetWagersCommand extends commando.Command {
                 var foundMessage = await foundChannel.fetchMessage(betPool._message._id);
 
                 console.log('78');
-                if(foundMessage) {
+                if (foundMessage) {
                     break;
                 }
             }
 
-            if(!foundMessage) {
+            console.log('78');
+            if (!foundMessage) {
                 await message.channel.send(`Could not find existing wager ${betPool.name}.`);
                 return;
             }
 
+            console.log('78');
             var foundChannel = foundMessage.channel;
             var link = RichEmbedBuilder.discordLink(foundGuild, foundChannel, foundMessage);
             await message.channel.send(`**${betPool.name}**: ${link}`);
-        })
+        }
     }
 }
