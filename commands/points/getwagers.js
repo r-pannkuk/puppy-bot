@@ -52,28 +52,34 @@ module.exports = class GetWagersCommand extends commando.Command {
             return;
         }
 
+        console.log('55');
         var pointSystem = message.guild.pointSystem;
         var foundGuild = message.guild;
 
         betPools.forEach(async bp => {
+            console.log('59');
             var betPool = pointSystem._serializeBetPool(bp._id);
 
+            console.log('63');
             var channels = message.guild.channels.array();
 
+            console.log('66');
             for(var i in channels) {
                 var foundChannel = channels[i];
 
+                console.log('70');
                 if(foundChannel.type !== 'text') {
                     continue;
                 }
 
+                console.log('75');
                 var foundMessage = await foundChannel.fetchMessage(betPool._message._id);
 
+                console.log('78');
                 if(foundMessage) {
                     break;
                 }
             }
-
 
             if(!foundMessage) {
                 await message.channel.send(`Could not find existing wager ${betPool.name}.`);
