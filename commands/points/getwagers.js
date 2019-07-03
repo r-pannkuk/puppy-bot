@@ -54,6 +54,7 @@ module.exports = class GetWagersCommand extends commando.Command {
 
         var pointSystem = message.guild.pointSystem;
         var foundGuild = message.guild;
+        var messageString = ``;
 
         for (var i in betPools) {
             var bp = betPools[i];
@@ -73,23 +74,25 @@ module.exports = class GetWagersCommand extends commando.Command {
                     continue;
                 }
 
-                console.log(`Bet Pool Message ID: ${betPool._message._id}`);
-
-                var foundMessage = await foundChannel.fetchMessage(betPool._message._id);
+                try {
+                    var foundMessage = await foundChannel.fetchMessage(betPool._message._id);
+                } catch(error) {
+                    message.channel.send(`Bet pool message for **${betPool.name}** was not found. Recreating:`);
+                    foundMessage = await message.channel.send(RichEmbedBuilder.new(betPool));
+                    message.guild.pointSystem.subscribeBetPool(betPool, foundMessage);
+                }
 
                 if (foundMessage) {
                     break;
                 }
             }
 
-            if (!foundMessage) {
-                await message.channel.send(`Could not find existing wager ${betPool.name}.`);
-                return;
-            }
-
             var foundChannel = foundMessage.channel;
             var link = RichEmbedBuilder.discordLink(foundGuild, foundChannel, foundMessage);
-            await message.channel.send(`**${betPool.name}**: ${link}`);
+            messageString += `**${betPool.name}**: ${link}\n`;
         }
+
+        var pieces = messageString.split(2000);
+        pieces.forEach(s => message.channel.send(s));
     }
 }
