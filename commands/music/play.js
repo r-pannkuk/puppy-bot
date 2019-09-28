@@ -30,13 +30,23 @@ module.exports = class PlayCommand extends commando.Command {
         var guild = message.guild;
         var messageChannel = message.channel;
 
-        console.log("Play");
 
         guild.musicPlayer.enqueue(source, function(err, videoInfo) {
             messageChannel.send(`Added track: **${videoInfo.title}**`);
 
             if(!guild.musicPlayer.isPlaying()) {
-                guild.musicPlayer.play(videoInfo, message.member.voiceChannel);
+                var voiceChannel = message.member.voiceChannel;
+
+                if(voiceChannel === undefined) {
+                    voiceChannel = message.guild.channels.find(c => c.type === 'voice');
+
+                    if(voiceChannel === undefined) {
+                        messageChannel.send(`Cannot find a voice channel to join.`);
+                        return;
+                    }
+                }
+
+                guild.musicPlayer.play(videoInfo, voiceChannel);
             }
         }, function(videoInfo) {
             messageChannel.send(`Now playing: **${videoInfo.title}**`);

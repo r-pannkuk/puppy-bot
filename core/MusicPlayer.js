@@ -62,6 +62,11 @@ module.exports = class MusicPlayer {
             this.setChannel(voiceChannel);
         }
 
+        if(this._voiceChannel === undefined) {
+            console.log("Channel not found!");
+            return;
+        }
+
         var musicPlayer = this;
 
         this._voiceChannel.join().then((connection) => {
