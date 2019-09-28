@@ -1,5 +1,5 @@
 const fs = require('fs');
-const ytdl = require('ytdl-core');
+const ytdl = require('ytdl-core-discord');
 const request = require('request');
 const getYT = require('get-youtube-id');
 const fetchYT = require('youtube-info');
@@ -58,6 +58,7 @@ module.exports = class MusicPlayer {
     }
 
     play(videoInfo, voiceChannel) {
+        
         if(voiceChannel !== undefined) {
             this.setChannel(voiceChannel);
         }
@@ -69,23 +70,24 @@ module.exports = class MusicPlayer {
 
         var musicPlayer = this;
 
-        this._voiceChannel.join().then((connection) => {
+        this._voiceChannel.join().then(async (connection) => {
             var stream;
+            var streamOptions = {
+                volume: 1,
+                passes: 2,
+                bitrate: 192000
+            };
 
             if(videoInfo.type === 'YouTube') {
-                stream = ytdl(videoInfo.url, {
-                    quality: 'highestaudio',
-                    filter: 'audioonly'
-                });
+                musicPlayer._dispatcher = await connection.playOpusStream(
+                    await ytdl(videoInfo.url, {
+                        quality: 'highestaudio',
+                        filter: 'audioonly'
+                    })
+                );
             } else if(videoInfo.type === 'Soundcloud') {
                 // SoundCloud download
             }
-
-            musicPlayer._dispatcher = connection.playStream(stream, {
-                volume: 1,
-                passes: 2,
-                bitrate: 128000
-            });
 
             videoInfo.callback(videoInfo);
 
@@ -93,7 +95,7 @@ module.exports = class MusicPlayer {
 
             musicPlayer._dispatcher.on('error', console.error);
 
-            musicPlayer._dispatcher.on('end', () => {
+            musicPlayer._dispatcher.on('end', (reason) => {
 
                 musicPlayer._queue.shift();
 
@@ -204,8 +206,8 @@ module.exports = class MusicPlayer {
 
                 return data.query.list.match(regex) !== null;
             }
-        } else if(host === 'youtu.be') {
-            return parsed.pathname.substring(1).match(regex) !== null;
+        } else if(data.host === 'youtu.be') {
+            return data.pathname.substring(1).match(regex) !== null;
         }
 
         return false;
