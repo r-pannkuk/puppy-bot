@@ -13,6 +13,10 @@ module.exports = async function (client, messageReaction, user) {
 
     var index = Object.values(emojis).findIndex(e => e === emoji.name);
 
+    if(message.guild === undefined || message.guild === null) {
+        return;
+    }
+
     if (channel.type !== 'text') {
         return;
     }

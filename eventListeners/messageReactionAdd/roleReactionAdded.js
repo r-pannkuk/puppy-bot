@@ -1,7 +1,15 @@
 module.exports = function(client, messageReaction, user) {
+    if(user === client.user) {
+        return;
+    }
+
     var message = messageReaction.message;
     var channel = message.channel;
     var emoji = messageReaction.emoji;
+
+    if(message.guild === undefined || message.guild === null) {
+        return;
+    }
 
     var member = channel.members.get(user.id);
 

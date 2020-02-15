@@ -22,17 +22,17 @@ client.setProvider(provider).catch(console.error);
 /* Command group registry. */
 client.registry.registerGroups([
     [ 'admin', 'Admin Functions' ],
-    [ 'rng', 'Random Number Generators' ],
-    [ 'pelt', 'PvP System for Abusing Scrubs' ],
-    [ 'traps', 'Trap Phrases which Explode' ],
+    [ 'challonge', 'Links discord users with challonge accounts.'],
+    [ 'games', 'Commands for Games' ],
     [ 'memes', 'Memes and Stupidity' ],
     [ 'music', 'Music Player' ],
-    [ 'reminders', 'Reminders and Notifications' ],
     [ 'notes', 'User Notes' ],
-    [ 'games', 'Commands for Games' ],
-    [ 'tournament', 'Commands for tournament creation and viewing'],
+    [ 'pelt', 'PvP System for Abusing Scrubs' ],
     [ 'points', 'A system for betting and awarding points for users.'],
-    [ 'challonge', 'Links discord users with challonge accounts.']
+    [ 'reminders', 'Reminders and Notifications' ],
+    [ 'rng', 'Random Number Generators' ],
+    [ 'tournament', 'Commands for tournament creation and viewing'],
+    [ 'traps', 'Trap Phrases which Explode' ]
 ]);
 client.registry.registerDefaults();
 client.registry.registerCommandsIn(__dirname + '/commands');

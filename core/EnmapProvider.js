@@ -39,6 +39,9 @@ module.exports = class EnmapProvider extends commando.SettingProvider {
 	}
 
 	clear(guild) {
+		if(guild === 'global') {
+			guild = {id:'global'};
+		}
 		return new Promise((resolve, reject) => {
 			this._enmap.delete(guild.id);
 
@@ -55,6 +58,10 @@ module.exports = class EnmapProvider extends commando.SettingProvider {
 	}
 
 	get(guild, key, defVal) {
+		if(guild === 'global') {
+			guild = {id:'global'};
+		}
+
 		var val = this._enmap.get(guild.id)[key];
 
 		if (val === undefined) {
@@ -92,6 +99,9 @@ module.exports = class EnmapProvider extends commando.SettingProvider {
 	}
 
 	remove(guild, key) {
+		if(guild === 'global') {
+			guild = {id:'global'};
+		}
 		return new Promise((resolve, reject) => {
 			var guildSettings = this._enmap.get(guild.id);
 
@@ -110,6 +120,9 @@ module.exports = class EnmapProvider extends commando.SettingProvider {
 	}
 
 	set(guild, key, val) {
+		if(guild === 'global') {
+			guild = {id:'global'};
+		}
 		return new Promise((resolve, reject) => {
 			var guildSettings = this._enmap.get(guild.id);
 
@@ -122,6 +135,9 @@ module.exports = class EnmapProvider extends commando.SettingProvider {
 	}
 
 	static getGuildID(guild) {
+		if(guild === 'global') {
+			guild = {id:'global'};
+		}
 		var id = this._enmap.get(guild.id);
 
 		if (id === undefined) {
@@ -137,6 +153,10 @@ module.exports = class EnmapProvider extends commando.SettingProvider {
      */
 	initGuild(client, guild, callback) {
 		this.client = client;
+		
+		if(guild === 'global') {
+			guild = {id:'global'};
+		}
 
 		if (!this._enmap.has(guild.id)) {
 			this._enmap.set(guild.id, {});
@@ -176,6 +196,9 @@ module.exports = class EnmapProvider extends commando.SettingProvider {
 	 * @private
 	 */
 	setupGuildCommand(guild, command, settings) {
+		if(guild === 'global') {
+			guild = {id:'global'};
+		}
 		if (typeof settings[`cmd-${command.name}`] === 'undefined') return;
 		if (guild) {
 			if (!guild._commandsEnabled) guild._commandsEnabled = {};
@@ -193,6 +216,9 @@ module.exports = class EnmapProvider extends commando.SettingProvider {
 	 * @private
 	 */
 	setupGuildGroup(guild, group, settings) {
+		if(guild === 'global') {
+			guild = {id:'global'};
+		}
 		if (typeof settings[`grp-${group.id}`] === 'undefined') return;
 		if (guild) {
 			if (!guild._groupsEnabled) guild._groupsEnabled = {};

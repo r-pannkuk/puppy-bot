@@ -9,6 +9,10 @@ module.exports = async function (client, messageReaction, user) {
     var channel = message.channel;
     var emoji = messageReaction.emoji;
 
+    if(message.guild === undefined || message.guild === null) {
+        return;
+    }
+
     if (channel.type !== 'text') {
         return;
     }

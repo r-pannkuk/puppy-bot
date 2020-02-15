@@ -3,6 +3,10 @@ module.exports = function(client, messageReaction, user) {
     var channel = message.channel;
     var emoji = messageReaction.emoji;
 
+    if(message.guild === undefined || message.guild === null) {
+        return;
+    }
+
     var member = channel.members.get(user.id);
 
     if(channel.id === message.guild.admin.roleChannelID) {
