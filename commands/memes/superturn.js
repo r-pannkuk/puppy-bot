@@ -15,7 +15,7 @@ module.exports = class SuperturnCommands extends commando.Command {
     }
 
     async run(message) {
-        var directory = './commands/memes/templates/superturn/';
+        var directory = './commands/memes/superturn/';
 
         var files = fs.readdirSync(directory);
 
