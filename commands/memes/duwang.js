@@ -27,14 +27,14 @@ module.exports = class DuwangCommands extends commando.Command {
         pyShell.run('duwang.py', {
             mode: 'text',
             pythonOptions: ['-u'],
-            pythonPath: 'python3',
+            pythonPath: 'python',
             scriptPath: './commands/memes/scripts/',
-            args: [ source ]
+            args: [source]
         }, function (err, results) {
             console.log(err);
             // Trim white space and carriage return from the call
-            if(results === undefined) {
-                results = [];
+            if (results === undefined) {
+                results = [ ];
             }
             results = results.map((value) => value.replace(/\s+/g, ''));
             message.channel.send({

@@ -15,7 +15,7 @@ MIN_THRESHOLD = 10
 
 def main():
     if(len(sys.argv) == 1 or sys.argv[1] == ''):
-        print("./commands/memes/templates/duwang_original.jpg")
+        print("./commands/memes/media/duwang/duwang_original.jpg")
         return
 
 
@@ -41,7 +41,7 @@ def main():
             os.remove(path)
 
     # open base image to be used as the basis for the new one
-    duwang = Image.open("./commands/memes/templates/duwang_text.png")
+    duwang = Image.open("./commands/memes/media/duwang/duwang_text.png")
     
     # create a new empty image with alpha, set to base image size
     new_img = Image.new('RGBA', (312,175))

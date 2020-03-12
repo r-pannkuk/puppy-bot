@@ -28,7 +28,7 @@ module.exports = class DuwangCommands extends commando.Command {
         pyShell.run('sylphie.py', {
             mode: 'text',
             pythonOptions: ['-u'],
-            pythonPath: 'python3',
+            pythonPath: 'python',
             scriptPath: './commands/memes/scripts/',
             args: [ action ]
         }, function (err, results) {

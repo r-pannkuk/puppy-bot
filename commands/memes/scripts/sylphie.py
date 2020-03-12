@@ -15,7 +15,7 @@ MIN_THRESHOLD = 10
 
 def main():
     if(len(sys.argv) == 1 or sys.argv[1] == ''):
-        print("./commands/memes/templates/sylphie_original.png")
+        print("./commands/memes/media/sylphie/sylphie_original.png")
         return
 
 
@@ -39,10 +39,9 @@ def main():
         # remove oldest files
         for cdate, path in sorted_files[MIN_THRESHOLD-1:]:
             os.remove(path)
-
     # open base image to be used as the basis for the new one
-    sylphie = Image.open("./commands/memes/templates/sylphie_text.png")
-    
+    sylphie = Image.open("./commands/memes/media/sylphie/sylphie_text.png")
+
     # create a new empty image with alpha, set to base image size
     new_img = Image.new('RGBA', (1920,1080))
     
