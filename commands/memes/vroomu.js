@@ -15,7 +15,7 @@ module.exports = class VroomuCommands extends commando.Command {
 
     async run(message) {
         message.channel.send({
-            files: ['./commands/memes/templates/vroomu.png']
+            files: ['./commands/memes/media/vroomu/vroomu.png']
         });
     }
 }
