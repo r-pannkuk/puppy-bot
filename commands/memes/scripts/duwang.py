@@ -1,9 +1,13 @@
+import PIL
+from PIL import _imaging
 from PIL import Image, ImageDraw, ImageFont
 import hashlib
 import time
 from urllib.parse import urlparse
 from urllib.request import urlretrieve
 from stat import S_ISREG, ST_CTIME, ST_MODE
+import requests
+from io import BytesIO
 import sys
 import os
 import time
@@ -56,10 +60,12 @@ def main():
         font_height = font.getsize('T')[1] + 4
         max_width = font.getsize('WWWWWWWWWW')[0]
 
-        user_img = Image.open(urlretrieve(location)[0])
+        response = requests.get(location)
+
+        user_img = Image.open(BytesIO(response.content)).convert("RGBA")
 
         # scale image to proper dimensions for a picture
-        user_img.thumbnail((78,44))
+        user_img.thumbnail((98,55))
 
         # Simply post the new image in the right spot, adjusting for width
         new_img.paste(user_img, (204 + (int)((78 - user_img.width) / 2),57), user_img)

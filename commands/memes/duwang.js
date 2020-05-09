@@ -24,6 +24,21 @@ module.exports = class DuwangCommands extends commando.Command {
     }
 
     async run(message, { source }) {
+        // Detect if image exists and override with image if so
+        if (message.attachments.size > 0) {
+            var attachments = message.attachments.entries();
+            for (const [key, value] of attachments) {
+                var url = value.url;
+                //True if this url is a png image.
+                if(url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
+                    source = url;
+                    break;
+                }
+            }
+        }
+
+        console.log(source);
+
         pyShell.run('duwang.py', {
             mode: 'text',
             pythonOptions: ['-u'],
@@ -34,7 +49,7 @@ module.exports = class DuwangCommands extends commando.Command {
             console.log(err);
             // Trim white space and carriage return from the call
             if (results === undefined) {
-                results = [ ];
+                results = [];
             }
             results = results.map((value) => value.replace(/\s+/g, ''));
             message.channel.send({
