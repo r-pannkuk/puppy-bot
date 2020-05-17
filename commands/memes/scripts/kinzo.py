@@ -63,8 +63,14 @@ def main():
         # remove oldest files
         for cdate, path in sorted_files[MIN_THRESHOLD-1:]:
             os.remove(path)
+
+    base_filename = "./commands/memes/media/kinzo/Kinzo_Template.png"
+
+    if len(sys.argv[1]) > 16:
+        base_filename = "./commands/memes/media/kinzo/Kinzo_Template_Long.png"
+
     # open base image to be used as the basis for the new one
-    kinzo = Image.open("./commands/memes/media/kinzo/Kinzo_Template.png")
+    kinzo = Image.open(base_filename)
 
     # create a new empty image with alpha, set to base image size
     new_img = Image.new('RGBA', (800,450))
