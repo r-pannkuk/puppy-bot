@@ -26,11 +26,6 @@ module.exports = class KinzoCommand extends commando.Command {
                             var channel = await guild.channels.get(parts[5]);
                             var message = await channel.fetchMessage(parts[6]);
 
-                            console.log(`Guild was found?  ${guild !== null}`)
-                            console.log(`Channel was found?  ${channel !== null}`)
-                            console.log(`Message was found?  ${message !== null}`)
-                            console.log(`User was found?  ${message.author !== null}`)
-
                             var user = await guild.member(message.author).displayName;
                             var content = message.content;
                         } else {
@@ -94,7 +89,7 @@ module.exports = class KinzoCommand extends commando.Command {
             pythonOptions: ['-u'],
             pythonPath: 'python3',
             scriptPath: './commands/memes/scripts/',
-            args: [user.displayName || user.username, content]
+            args: [user, content]
         }, function (err, results) {
             console.log(err);
             // Trim white space and carriage return from the call
