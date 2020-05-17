@@ -26,7 +26,7 @@ module.exports = class KinzoCommand extends commando.Command {
                             var channel = await guild.channels.get(parts[5]);
                             var message = await channel.fetchMessage(parts[6]);
 
-                            var user = guild.member(message.author).displayName;
+                            var user = await guild.member(message.author).displayName;
                             var content = message.content;
                         } else {
                             var parts = val.split(/ +/g);
