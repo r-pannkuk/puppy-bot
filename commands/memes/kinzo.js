@@ -31,6 +31,10 @@ module.exports = class KinzoCommand extends commando.Command {
     }
 
     async run(message, { user, whine }) {
+        if (message.guild) {
+            user = message.guild.member(user);
+        }
+        console.log(user.displayName || user.username);
         pyShell.run('kinzo.py', {
             mode: 'text',
             pythonOptions: ['-u'],
