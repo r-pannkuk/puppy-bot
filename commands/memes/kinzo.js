@@ -36,7 +36,7 @@ module.exports = class KinzoCommand extends commando.Command {
             pythonOptions: ['-u'],
             pythonPath: 'python3',
             scriptPath: './commands/memes/scripts/',
-            args: [ user.username, whine ]
+            args: [ user.displayName || user.username, whine ]
         }, function (err, results) {
             console.log(err);
             // Trim white space and carriage return from the call
