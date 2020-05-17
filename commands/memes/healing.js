@@ -2,7 +2,7 @@ const commando = require('discord.js-commando');
 const pyShell = require('python-shell');
 
 
-module.exports = class DuwangCommands extends commando.Command {
+module.exports = class HealingCommand extends commando.Command {
     constructor(client) {
         super(client, {
             name: 'healing',

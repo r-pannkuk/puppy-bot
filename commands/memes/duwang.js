@@ -37,8 +37,6 @@ module.exports = class DuwangCommands extends commando.Command {
             }
         }
 
-        console.log(source);
-
         pyShell.run('duwang.py', {
             mode: 'text',
             pythonOptions: ['-u'],
