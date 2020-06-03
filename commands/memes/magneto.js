@@ -33,7 +33,7 @@ module.exports = class MagnetoCommand extends commando.Command {
                 if(url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
                     source = url;
 
-                    pyShell.run('duwang.py', {
+                    pyShell.run('magneto.py', {
                         mode: 'text',
                         pythonOptions: ['-u'],
                         pythonPath: 'python3',
