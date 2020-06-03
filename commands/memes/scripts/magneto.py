@@ -50,14 +50,14 @@ def main():
     foreground = Image.open("./commands/memes/media/magneto/Magneto_Foreground.png")
     
     # create a new empty image with alpha, set to base image size
-    new_img = Image.new('RGBA', (1407,1077))
+    new_img = Image.new('RGBA', (469,359))
     
     # Paste the base image onto the new one before edits take place
     new_img.paste(magneto, (0,0), magneto)
     new_img.paste(hand, (0,0), hand)
 
-    pos1 = (397, 432)
-    pos2 = (990, 694)
+    pos1 = (132, 144)
+    pos2 = (330, 231)
 
     thumbnail_size = (pos2[0]-pos1[0], pos2[1]-pos1[1])
 
@@ -80,8 +80,6 @@ def main():
 
     # Paste the overlay of the hand on top of the image
     new_img.paste(foreground, (0,0), foreground)
-
-    new_img = new_img.resize(((int)(1407/3), (int)(1077/3)))
 
     # save
     new_img.save(save_name)

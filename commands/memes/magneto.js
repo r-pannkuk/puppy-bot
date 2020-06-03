@@ -30,32 +30,35 @@ module.exports = class MagnetoCommand extends commando.Command {
             for (const [key, value] of attachments) {
                 var url = value.url;
                 //True if this url is a png image.
-                if(url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
+                if (url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
                     source = url;
-
-                    pyShell.run('magneto.py', {
-                        mode: 'text',
-                        pythonOptions: ['-u'],
-                        pythonPath: 'python3',
-                        scriptPath: './commands/memes/scripts/',
-                        args: [source]
-                    }, function (err, results) {
-                        console.log(err);
-                        // Trim white space and carriage return from the call
-                        if (results === undefined) {
-                            results = [];
-                        }
-                        results = results.map((value) => value.replace(/\s+/g, ''));
-                        message.channel.send({
-                            files: results
-                        });
-                    });
-
-                    return;
+                    break;
                 }
             }
         }
 
-        message.channel.send("Image was not found.  Please enter a valid image.")
+        if (source !== '') {
+            pyShell.run('magneto.py', {
+                mode: 'text',
+                pythonOptions: ['-u'],
+                pythonPath: 'python3',
+                scriptPath: './commands/memes/scripts/',
+                args: [source]
+            }, function (err, results) {
+                console.log(err);
+                // Trim white space and carriage return from the call
+                if (results === undefined) {
+                    results = [];
+                }
+                results = results.map((value) => value.replace(/\s+/g, ''));
+                message.channel.send({
+                    files: results
+                });
+            });
+        }
+        else {
+            message.channel.send("Image was not found.  Please enter a valid image.")
+
+        }
     }
 }
