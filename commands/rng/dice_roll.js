@@ -8,6 +8,7 @@ module.exports = class DiceRollCommand extends commando.Command {
             name: 'roll',
             group: 'rng',
             memberName: 'roll',
+            aliases: ['decision'],
             description: 'Rolls a combination of dice. Can throw up to 999 dice with 999 sides. Must throw at least one die and only dice with 2 or more sides.',
             examples: [ '!roll 3d6', '!roll 4d8', '!roll 3d6 4d8' ],
             argsPromptLimit: 0,

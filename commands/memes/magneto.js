@@ -37,7 +37,7 @@ module.exports = class MagnetoCommand extends commando.Command {
             }
         }
 
-        if (source !== '') {
+        if (source.match(/\.(jpeg|jpg|gif|png)$/) != null) {
             pyShell.run('magneto.py', {
                 mode: 'text',
                 pythonOptions: ['-u'],
