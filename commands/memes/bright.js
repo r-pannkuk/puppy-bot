@@ -29,7 +29,7 @@ module.exports = class BrightCommand extends commando.Command {
             pythonOptions: ['-u'],
             pythonPath: 'python3',
             scriptPath: './commands/memes/scripts/',
-            args: [target]
+            args: [target.avatarURL]
         }, function (err, results) {
             console.log(err);
             // Trim white space and carriage return from the call
