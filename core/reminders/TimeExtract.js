@@ -97,7 +97,7 @@ class TimeExtract {
      * processing times that dictate a specific time
      */
     _process_explicit() {
-        return new Date(this.time_string);
+        return new Date(new Date(this.time_string) - Date.now());
     }
 
     /**
