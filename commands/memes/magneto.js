@@ -24,8 +24,18 @@ module.exports = class MagnetoCommand extends commando.Command {
     }
 
     async run(message, { source }) {
-        // Detect if image exists and override with image if so
-        if (message.attachments.size > 0) {
+        var embeds = message.embeds.filter(i => {
+            return i.type === 'image'
+        });
+
+        // Checking embeds for a valid image
+        if (embeds.length > 0) {
+            source = embeds[0].url;
+
+        }
+
+        // If not found, checking attachments instead
+        else if (message.attachments.size > 0) {
             var attachments = message.attachments.entries();
             for (const [key, value] of attachments) {
                 var url = value.url;
@@ -37,28 +47,28 @@ module.exports = class MagnetoCommand extends commando.Command {
             }
         }
 
-        if (source.match(/\.(jpeg|jpg|gif|png)$/) != null) {
-            pyShell.run('magneto.py', {
-                mode: 'text',
-                pythonOptions: ['-u'],
-                pythonPath: 'python3',
-                scriptPath: './commands/memes/scripts/',
-                args: [source]
-            }, function (err, results) {
-                console.log(err);
-                // Trim white space and carriage return from the call
-                if (results === undefined) {
-                    results = [];
-                }
-                results = results.map((value) => value.replace(/\s+/g, ''));
-                message.channel.send({
-                    files: results
-                });
-            });
-        }
+        // Otherwise assuming no image is present.
         else {
             message.channel.send("Image was not found.  Please enter a valid image.")
-
+            return;
         }
+
+        pyShell.run('magneto.py', {
+            mode: 'text',
+            pythonOptions: ['-u'],
+            pythonPath: 'python3',
+            scriptPath: './commands/memes/scripts/',
+            args: [source]
+        }, function (err, results) {
+            console.log(err);
+            // Trim white space and carriage return from the call
+            if (results === undefined) {
+                results = [];
+            }
+            results = results.map((value) => value.replace(/\s+/g, ''));
+            message.channel.send({
+                files: results
+            });
+        });
     }
 }
