@@ -16,7 +16,14 @@ function discordLink(guild, channel, message) {
 
 module.exports.create = async function(client, reminder) {
     var target = (client.users && client.users.get(reminder.target)) || client.channels.get(reminder.target) || client.members.get(reminder.target);
-    var message = await target.send(module.exports.new(client, reminder));
+
+    var embed = module.exports.new(client, reminder)
+
+    if(target.type && target.guild && client.me.permissions.has('MENTION_EVERYONE')) {
+        var message = await target.send("@here", {embed});
+    } else {
+        var message = await target.send({embed});
+    }
     module.exports.addReactions({
         message: message
     });

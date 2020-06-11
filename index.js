@@ -11,8 +11,7 @@ const fs = require('fs');
 /* Bot client creation. */
 var client = new commando.Client({
     owner: process.env.OWNER,
-    unknownCommandResponse: false,
-    disableEveryone: true
+    unknownCommandResponse: false
 });
 
 /* Guild settings load. */
