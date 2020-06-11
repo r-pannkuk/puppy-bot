@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const ReminderManager = require('./ReminderManager.js');
 const Reminder = require('./Reminder.js');
 
-function discordLink(guild, channel, message) {
+module.exports.discordLink = function(guild, channel, message) {
     var link = `https://discordapp.com/channels/${guild.id}`;
     if (channel) {
         link += `/${channel.id}`;

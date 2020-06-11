@@ -157,7 +157,7 @@ module.exports = class ReminderManager {
         var r = temp[obj.id || obj];
 
         r.isEnabled = false;
-        r.isREpeat = false;
+        r.isRepeat = false;
         // Scheduler.cancelJob(r.scheduleName);
 
         temp[r.id] = r;

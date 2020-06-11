@@ -61,25 +61,24 @@ module.exports = class GetWagersCommand extends commando.Command {
 
             var betPool = pointSystem._serializeBetPool(bp._id);
 
+            if (!betPool._message._id) {
+                continue;
+            }
+
             var channels = message.guild.channels.array();
 
             for (var i in channels) {
+                var foundMessage = false;
                 var foundChannel = channels[i];
 
                 if (foundChannel.type !== 'text') {
                     continue;
                 }
 
-                if(!betPool._message._id) {
-                    continue;
-                }
-
                 try {
-                    var foundMessage = await foundChannel.fetchMessage(betPool._message._id);
-                } catch(error) {
-                    message.channel.send(`Bet pool message for **${betPool.name}** was not found. Recreating:`);
-                    foundMessage = await message.channel.send(RichEmbedBuilder.new(betPool));
-                    message.guild.pointSystem.subscribeBetPool(betPool, foundMessage);
+                    foundMessage = await foundChannel.fetchMessage(betPool._message._id);
+                } catch (error) {
+                    continue;
                 }
 
                 if (foundMessage) {
@@ -87,9 +86,20 @@ module.exports = class GetWagersCommand extends commando.Command {
                 }
             }
 
-            var foundChannel = foundMessage.channel;
-            var link = RichEmbedBuilder.discordLink(foundGuild, foundChannel, foundMessage);
-            messageString += `**${betPool.name}**: ${link}\n`;
+            if (foundMessage) {
+                var foundChannel = foundMessage.channel;
+                var link = RichEmbedBuilder.discordLink(foundGuild, foundChannel, foundMessage);
+                messageString += `**${betPool.name}**: ${link}\n`;
+            } else {
+                message.channel.send(`Bet pool message for **${betPool.name}** was not found. Recreating:`);
+                foundMessage = await message.channel.send(RichEmbedBuilder.new(betPool));
+                message.guild.pointSystem.subscribeBetPool(betPool, foundMessage);
+
+                await RichEmbedBuilder.addReactions({
+                    message: foundMessage, 
+                    betPool: betPool
+                });
+            }
         }
 
         var pieces = messageString.split(2000);

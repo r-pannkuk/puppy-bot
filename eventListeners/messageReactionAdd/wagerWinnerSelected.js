@@ -62,7 +62,7 @@ module.exports = async function (client, messageReaction, user) {
 
         message.edit(RichEmbedBuilder.new(betPool));
 
-        var bets = Object.values(betPool._bets);
+        var bets = Object.values(betPool._bets).filter(b => b && (b._status === Bet.STATUS.Lost || b._status === Bet.STATUS.Awarded));
         var betOutcomes = {};
         betOutcomes[Bet.STATUS.Lost] = [];
         betOutcomes[Bet.STATUS.Awarded] = [];
