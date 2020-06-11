@@ -40,11 +40,15 @@ module.exports = class MagnetoCommand extends commando.Command {
             for (const [key, value] of attachments) {
                 var url = value.url;
                 //True if this url is a png image.
-                if (url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
+                if (url.match(/(.+)\.(jpeg|jpg|gif|png)(([\?\/].*)?)$/) !== null) {
                     source = url;
                     break;
                 }
             }
+        }
+
+        else if (source.match(/(.+)\.(jpeg|jpg|gif|png)(([\?\/].*)?)$/) !== null) {
+            // Valid image
         }
 
         // Otherwise assuming no image is present.
