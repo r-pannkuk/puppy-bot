@@ -1,6 +1,6 @@
 class Reminder {
     constructor({
-        id=Reminder._id++,
+        id=Date.now(),
         createdAt = Date.now(),
         reminderTime = null, 
         originalReminderTime = null,
@@ -35,7 +35,5 @@ class Reminder {
         this.currentJob = currentJob;
     }
 }
-
-Reminder._id = 1;
 
 module.exports = Reminder;

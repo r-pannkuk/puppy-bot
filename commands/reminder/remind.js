@@ -28,7 +28,7 @@ module.exports = class RemindCommand extends commando.Command {
                         var s = t.extract();
                         return s;
                     },
-                    validate: (input, msg, arg) => {                        
+                    validate: (input, msg, arg) => {
                         return TimeExtract.validate_time_string(input);
                     }
                 },
@@ -36,23 +36,58 @@ module.exports = class RemindCommand extends commando.Command {
                     key: 'target',
                     prompt: 'Please enter who the reminder should be for.',
                     parse: (input, msg) => {
-                        var input = input.slice(input.indexOf('<')+2, -1);
-                        if(input[0] === '!') {
-                            input = input.slice(1);
+                        // Checking for @here (message current users in channel)
+                        if (input === '@here') {
+                            return msg.channel;
+
+                        // Checking for channels
+                        } else if (input.indexOf('<#') === 0) {
+                            var input = input.slice(input.indexOf('<') + 2, -1);
+
+                            return msg.guild && msg.guild.channels.get(input);
+
+                        // Checking for users
+                        } else if (input.indexOf('<@') === 0) {
+                            var input = input.slice(input.indexOf('<') + 2, -1);
+                            if (input[0] === '!') {
+                                input = input.slice(1);
+                            }
+
+                            // Checks for guild then for DM
+                            return (msg.guild && (msg.guild.members.get(input) || msg.guild.channels.get(input)))
+                                || (msg.channel.recipient.id === input);
+
                         }
-                        // Checks for guild then for DM
-                        return (msg.guild && (msg.guild.members.get(input) || msg.guild.channels.get(input)))
-                        || (msg.channel.recipient);
+
+                        return null;
 
                     },
                     validate: (input, msg, arg) => {
-                        var input = input.slice(input.indexOf('<')+2, -1);
-                        if(input[0] === '!') {
-                            input = input.slice(1);
+
+                        // Checking for @here (message current users in channel)
+                        if (input === '@here') {
+                            return true;
+
+                        // Checking for channels
+                        } else if (input.indexOf('<#') === 0) {
+                            var input = input.slice(input.indexOf('<') + 2, -1);
+
+                            return msg.guild && msg.guild.channels.get(input);
+
+                        // Checking for users
+                        } else if (input.indexOf('<@') === 0) {
+                            var input = input.slice(input.indexOf('<') + 2, -1);
+                            if (input[0] === '!') {
+                                input = input.slice(1);
+                            }
+
+                            // Checks for guild then for DM
+                            return (msg.guild && (msg.guild.members.get(input) || msg.guild.channels.get(input)))
+                                || (msg.channel.recipient.id === input);
+
                         }
-                        // Checks for guild then for DM
-                        return (msg.guild && (msg.guild.members.get(input) || msg.guild.channels.get(input)))
-                        || (msg.channel.recipient.id === input);
+
+                        return false;
                     }
                 },
                 {
@@ -60,7 +95,7 @@ module.exports = class RemindCommand extends commando.Command {
                     prompt: 'Please enter the message for reminder.',
                     type: 'string'
                 }
-                
+
             ]
         });
     }
