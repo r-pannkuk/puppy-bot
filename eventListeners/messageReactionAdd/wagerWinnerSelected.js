@@ -75,7 +75,7 @@ module.exports = async function (client, messageReaction, user) {
             }
 
             betOutcomes[bet._status].push({
-                user: user.username,
+                user: message.guild.member(user).displayName,
                 outcome: bet._outcome,
                 wager: bet._wager,
                 payout: bet._payout
