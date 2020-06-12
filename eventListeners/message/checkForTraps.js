@@ -10,7 +10,9 @@ module.exports = function (client, message) {
     var content = message.content.toLowerCase();
     var traps = message.guild.battleSystem.traps;
 
-    var validTraps = Object.values(traps).filter(t => content.indexOf(t.phrase) > -1 && t.messageId !== message.id);
+    var validTraps = Object.values(traps).filter(t => {
+        return content.indexOf(t.phrase.toLowerCase()) > -1 && t.messageId !== message.id
+    });
     var validKeys = validTraps.reduce((p, t) => { p.push(t.phrase); return p; }, []);
 
     for (i in validKeys) {

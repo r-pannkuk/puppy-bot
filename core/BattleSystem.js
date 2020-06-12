@@ -55,7 +55,7 @@ class User {
 class Trap {
     constructor({
         phrase = null,
-        user = null,
+        userid = null,
         createdAt = Date.now(),
         callback = null,
         messageId = null,
@@ -102,7 +102,7 @@ class Trap {
     }) {
         this.id = uuid();
         this.phrase = phrase;
-        this.user = user;
+        this.userid = userid;
         this.createdAt = createdAt;
         this.callback = callback;
         this.messageId = messageId;
@@ -202,7 +202,7 @@ module.exports = class BattleSystem {
 
         var newTrap = new Trap({
             phrase: phrase,
-            user: userObj,
+            userid: user.id,
             createdAt: Date.now(),
             callback: callback,
             messageId: message.id
@@ -228,8 +228,8 @@ module.exports = class BattleSystem {
 
     removeTrap(trapWord) {
         var temp = this.settings;
-        var trap = Object.values(temp.traps).find(t => t.phrase === trapWord);
-        var user = this.retrieve(trap.user._id);
+        var trap = new Trap(Object.values(temp.traps).find(t => t.phrase === trapWord));
+        var user = this.retrieve(trap.userid);
 
         user.traps.splice(user.traps.indexOf(trap.id), 1);
 
@@ -246,7 +246,7 @@ module.exports = class BattleSystem {
         
         var temp = this.settings;
         var owner = this.retrieve(message.author.id);
-        var victim = this.retrieve(trap.user.id)
+        var victim = this.retrieve(trap.userid)
 
         victim.damage(owner, trap.getDamage());
 
@@ -259,7 +259,7 @@ module.exports = class BattleSystem {
 
     defaultTrapCallback(trap, message) {
         var victim = message.author;
-        var owner = message.client.users.get(trap.user.id);
+        var owner = message.client.users.get(trap.userid);
 
         var embed = new Discord.RichEmbed()
             .setColor('RED');

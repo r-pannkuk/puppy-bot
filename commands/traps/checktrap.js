@@ -27,7 +27,7 @@ module.exports = class CheckTrapCommand extends commando.Command {
 
                 for(var i in user.traps) {
                     var trap = message.guild.battleSystem.getTrap(user.traps[i]);
-                    var owner = this.client.users.get(trap.user._id);
+                    var owner = this.client.users.get(trap.userid);
                     var embed = new Discord.RichEmbed()
                     .setColor('RED');
                     
