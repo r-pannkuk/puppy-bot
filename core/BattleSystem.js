@@ -54,6 +54,7 @@ class User {
 
 class Trap {
     constructor({
+        id = uuid(),
         phrase = null,
         userid = null,
         createdAt = Date.now(),
@@ -100,7 +101,7 @@ class Trap {
             return damage;
         }
     }) {
-        this.id = uuid();
+        this.id = id;
         this.phrase = phrase;
         this.userid = userid;
         this.createdAt = createdAt;
@@ -251,7 +252,7 @@ module.exports = class BattleSystem {
         victim.damage(owner, trap.getDamage());
 
         if (trap !== undefined) {
-            trap.callback(trap, message);
+            this.defaultTrapCallback(trap, message);
         }
 
         this.settings = temp;

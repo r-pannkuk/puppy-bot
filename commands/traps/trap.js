@@ -26,8 +26,7 @@ module.exports = class TrapCommand extends commando.Command {
         var success = message.guild.battleSystem.addTrap(
             message,
             phrase,
-            message.author,
-            message.guild.battleSystem.defaultTrapCallback.bind(message.guild.battleSystem));
+            message.author);
 
         var duration = 10000;
 
