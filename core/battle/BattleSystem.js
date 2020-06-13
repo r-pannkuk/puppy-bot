@@ -147,7 +147,9 @@ module.exports = class BattleSystem {
         victim.damage(owner, trap.getDamage());
 
         if (trap !== undefined) {
-            var embed = RichEmbedBuilder.trapTriggered(trap, message);
+            var victimStats = this.retrieve(victim.id);
+
+            var embed = RichEmbedBuilder.trapTriggered(trap, message, victimStats);
 
             message.channel.send(embed);
 

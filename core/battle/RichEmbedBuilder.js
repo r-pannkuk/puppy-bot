@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 
-module.exports.trapTriggered = function (trap, message) {
+module.exports.trapTriggered = function (trap, message, victimStats) {
     var victim = message.author;
     var owner = message.client.users.get(trap.userid);
 
@@ -13,8 +13,6 @@ module.exports.trapTriggered = function (trap, message) {
     else {
         embed.setAuthor(`${owner.username}'s Trap Sprung!`, owner.avatarUrl);
     }
-
-    var victimStats = this.retrieve(victim.id);
 
     if (victimStats.health === 0) {
         embed.setThumbnail('https://www.galabid.com/wp-content/uploads/2017/11/rip-gravestone-md.png');
