@@ -1,0 +1,88 @@
+{
+    "name": "battle",
+    "levels" : [
+        {
+            "level": 1,
+            "xp": 0,
+            "maxTraps": 1
+        },
+        {
+            "level": 2,
+            "xp": 30,
+            "maxTraps": 1
+        },
+        {
+            "level": 3,
+            "xp": 100,
+            "maxTraps": 1
+        },
+        {
+            "level": 4,
+            "xp": 200,
+            "maxTraps": 1
+        },
+        {
+            "level": 5,
+            "xp": 350,
+            "maxTraps": 2
+        },
+        {
+            "level": 6,
+            "xp": 600,
+            "maxTraps": 2
+        },
+        {
+            "level": 7,
+            "xp": 1000,
+            "maxTraps": 2
+        },
+        {
+            "level": 8,
+            "xp": 1500,
+            "maxTraps": 2
+        },
+        {
+            "level": 9,
+            "xp": 2250,
+            "maxTraps": 3
+        },
+        {
+            "level": 10,
+            "xp": 3500,
+            "maxTraps": 3
+        },
+        {
+            "level": 11,
+            "xp": 5500,
+            "maxTraps": 3
+        },
+        {
+            "level": 12,
+            "xp": 8000,
+            "maxTraps": 4
+        },
+        {
+            "level": 13,
+            "xp": 11500,
+            "maxTraps": 4
+        },
+        {
+            "level": 14,
+            "xp": 16000,
+            "maxTraps": 4
+        },
+        {
+            "level": 15,
+            "xp": 25000,
+            "maxTraps": 5
+        }
+    ],
+    "items" : [
+        {
+            "id": 1,
+            "name": "Paper Knife",
+            "atk": 1,
+            "description": "Made from the strongest paper.  Mildly annoying."
+        }
+    ]
+}

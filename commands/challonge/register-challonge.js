@@ -25,17 +25,6 @@ module.exports = class RegisterChallonge extends commando.Command {
                     key: 'user',
                     prompt: 'Please enter the Discord User to associate with.',
                     type: 'user',
-                    validate: (val, msg, arg) => {
-                        var bool = msg.guild.member(msg.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
-                            msg.guild.pointSystem.adminRoles.find(r => msg.guild.member(message.author).roles.has(r));
-
-                        if (!bool && msg.author !== val) {
-                            msg.channel.send('Only users with permissions can associate another user with Challonge.');
-                            return false;
-                        }
-
-                        return true;
-                    },
                     default: ''
                 }
             ]
@@ -78,7 +67,13 @@ module.exports = class RegisterChallonge extends commando.Command {
                 .setColor('BLUE')
         });
 
-        var message = await message.channel.send(embed);
+        var accountChannel = message.guild.channels.get(message.guild.admin.accountChannelID);
+        
+        if(!accountChannel) {
+            accountChannel = message.channel;
+        }
+        
+        var message = await accountChannel.send(embed);
 
         await RichEmbedBuilder.addReactions({
             message: message,

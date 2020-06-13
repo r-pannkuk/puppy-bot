@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
-const emojis = require('../../core/points/Emojis.js');
-const Bet = require('../../core/points/Bet.js');
-const BetPool = require('../../core/points/BetPool.js');
+const emojis = require('../../core/bet/Emojis.js');
+const Bet = require('../../core/bet/Bet.js');
+const BetPool = require('../../core/bet/BetPool.js');
 const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
 
 module.exports = async function (client, messageReaction, user) {

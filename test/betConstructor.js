@@ -1,5 +1,5 @@
-const Bet = require('../core/points/Bet.js');
-const BetPool = require('../core/points/BetPool.js');
+const Bet = require('../core/bet/Bet.js');
+const BetPool = require('../core/bet/BetPool.js');
 
 var betPool = new BetPool({
     _id: 9,

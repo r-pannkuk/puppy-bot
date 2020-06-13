@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
-const BetPool = require('./BetPool.js');
-const emojis = require('./Emojis.js');
-const Bet = require('./Bet.js');
+const BetPool = require('../bet/BetPool.js');
+const emojis = require('../bet/Emojis.js');
+const Bet = require('../bet/Bet.js');
 const Account = require('./Account.js');
 
 const LIMIT = 2000;
@@ -163,3 +163,20 @@ module.exports.userAccounts = function ({
 
     return embed;
 }
+
+module.exports.listPendingAccounts = function (pendingAccounts) {
+    var embed = new Discord.RichEmbed();
+
+    var keys = Object.keys(pendingAccounts);
+
+    var description = ""
+
+    for (var i in keys) {
+        description += `[${keys[i]}](${pendingAccounts[keys[i]]})`;
+    }
+
+    embed.setTitle("Pending Accounts:");
+    embed.setDescription(description);
+
+    return embed;
+};

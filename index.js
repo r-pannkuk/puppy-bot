@@ -21,6 +21,7 @@ client.setProvider(provider).catch(console.error);
 /* Command group registry. */
 client.registry.registerGroups([
     [ 'admin', 'Admin Functions' ],
+    [ 'bet', 'Wagers and placing bets.' ],
     [ 'challonge', 'Links discord users with challonge accounts.'],
     [ 'games', 'Commands for Games' ],
     [ 'memes', 'Memes and Stupidity' ],

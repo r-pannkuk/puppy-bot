@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 const Source = require('../../core/points/Source.js');
-const emojis = require('../../core/points/Emojis.js');
+const emojis = require('../../core/bet/Emojis.js');
 const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
 const NewWagerCommand = require('./newwager.js');
 
@@ -9,7 +9,7 @@ module.exports = class NewWagerNamedCommand extends commando.Command {
     constructor(client) {
         super(client, {
             name: 'newwager-named',
-            group: 'points',
+            group: 'bet',
             memberName: 'newwager-named',
             aliases: ['new-wager-named', 'nwn'],
             description: 'Creates a new named wager pool for players to bet on.',

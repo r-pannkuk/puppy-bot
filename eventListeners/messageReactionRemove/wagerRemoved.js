@@ -1,6 +1,6 @@
-const BetPool = require('../../core/points/BetPool.js');
+const BetPool = require('../../core/bet/BetPool.js');
 const Source = require('../../core/points/Source.js');
-const emojis = require('../../core/points/Emojis.js');
+const emojis = require('../../core/bet/Emojis.js');
 const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
 
 module.exports = function(client, messageReaction, user) {

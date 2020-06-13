@@ -1,6 +1,7 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
+const RichEmbedBuilder = require('../../core/battle/RichEmbedBuilder.js')
 
 module.exports = class StatusCommand extends commando.Command {
     constructor(client) {
@@ -32,45 +33,7 @@ module.exports = class StatusCommand extends commando.Command {
 
         const stats = message.guild.battleSystem.retrieve(user.id);
 
-        var embed = new Discord.RichEmbed()
-        .setColor('DARK_RED')
-        .setAuthor(user.username, user.displayAvatarURL);
-
-        var descriptionString = `**XP**: ${stats.xp}
-        **HP**: ${stats.hp}
-        **Traps Active**: ${(stats.trapActive !== undefined && stats.trapActive) ? 1 : 0}\n`;
-
-        if('description' in stats) {
-            descriptionString +=  `**Description**: *${stats.description}*\n`
-        }
-
-        if(stats.inventory && stats.inventory.length > 0) {
-            descriptionString += `**__Inventory__**:\n`;
-
-            for(var index in stats.inventory) {
-                const item = stats.inventory[index];
-    
-                if(item) {
-                    if('effect' in item) {
-                        embed.addField(
-                            item.name, 
-                            `__ATK__: ${item.atk}
-                            __Description__: *${item.description}*
-                            __Bonus Effect__: *${item.effectDescription}*\n`
-                        );
-                    }
-                    else {
-                        embed.addField(
-                            item.name,
-                            `__ATK__: ${item.atk}
-                            __Description__: *${item.description}*\n`
-                        );
-                    }
-                }
-            }
-        }
-
-        embed.setDescription(descriptionString);
+        var embed = RichEmbedBuilder.status(user, stats);
 
         message.embed(embed);
     }

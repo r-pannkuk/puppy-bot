@@ -1,8 +1,8 @@
-const PointChange = require('./PointChange.js');
-const Award = require('./Award.js');
-const Source = require('./Source.js');
+const PointChange = require('../points/PointChange.js');
+const Award = require('../points/Award.js');
+const Source = require('../points/Source.js');
 const assert = require('assert');
-const User = require('./User.js');
+const User = require('../points/User.js');
 
 module.exports = class Bet extends PointChange {
     constructor({

@@ -1,4 +1,4 @@
-const MusicPlayer = require('../core/MusicPlayer');
+const MusicPlayer = require('../core/music/MusicPlayer');
 
 var callback = function(err, data) {
     console.log(data !== null);

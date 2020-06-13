@@ -24,6 +24,9 @@ module.exports = class Admin {
         if(settings.roleChannelID === undefined) {
             settings.roleChannelID = null;
         }
+        if(settings.accountChannelID === undefined) {
+            settings.accountChannelID = null;
+        }
 
         guildSettings.set('admin', settings);
     }
@@ -34,10 +37,12 @@ module.exports = class Admin {
     get deleteChannelID() { return this.settings.deleteChannelID; }
     get trapChannelID() { return this.settings.trapChannelID; }
     get roleChannelID() { return this.settings.roleChannelID; }
+    get accountChannelID() { return this.settings.accountChannelID; }
 
     set deleteChannelID(channelID) { var newSettings = this.settings; newSettings.deleteChannelID = channelID; this.settings = newSettings; }
     set trapChannelID(channelID) { var newSettings = this.settings; newSettings.trapChannelID = channelID; this.settings = newSettings; }
     set roleChannelID(channelID) { var newSettings = this.settings; newSettings.roleChannelID = channelID; this.settings = newSettings; }
+    set accountChannelID(channelID) { var newSettings = this.settings; newSettings.accountChannelID = channelID; this.settings = newSettings; }
 
     addNewChannel(guild, channelName, categoryName, overwrites, callback) {
         guild.createChannel(channelName, 'text', overwrites)

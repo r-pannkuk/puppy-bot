@@ -7,31 +7,26 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Node (Single-File)",
-            "program": "${file}"
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/index.js",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
         },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Node",
-            "program": "${workspaceFolder}/index.js"
-        },
+        
+
         {
             "name": "Python",
             "type": "python",
             "request": "launch",
-            "stopOnEntry": true,
-            "pythonPath": "${config:python.pythonPath}",
+            "stopOnEntry": false,
+            "pythonPath": "${config:python.interpreterPath}",
             "program": "${file}",
             "cwd": "${workspaceFolder}",
             "env": {},
             "envFile": "${workspaceFolder}/.env",
-            "debugOptions": [
-                "RedirectOutput"
-            ],
             "args": [
-                // "http://bit.ly/2DaER2o",
-                "11111111"
+                "https://cdn.discordapp.com/avatars/331669086813814784/7a57d173810e22bcac7931e0daea71e7.png?size=2048"
             ]
         }
     ]

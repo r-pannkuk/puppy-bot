@@ -1,7 +1,7 @@
 const User = require('./User.js');
 const Penalty = require('./Penalty.js');
 const Award = require('./Award.js');
-const BetPool = require('./BetPool.js');
+const BetPool = require('../bet/BetPool.js');
 const PointChange = require('./PointChange.js');
 const Account = require('./Account.js');
 
@@ -115,8 +115,16 @@ module.exports = class Points {
         return new Account(foundAccount);
     }
 
+    getAllUserAccounts() {
+        var users = {};
+
+        Object.values(this.users).forEach(u => users[u._id] = u._accounts.map(a => new Account(a)));
+
+        return users;
+    }
+
     findAccountByMessage(message_id) {
-        var accounts = [].concat.apply(Object.values(this.settings.users).map(u => u._accounts));
+        var accounts = [].concat.apply([], Object.values(this.settings.users).map(u => u._accounts));
         return accounts.find(a => a._confirmationMessageId === message_id);
     }
 
@@ -289,7 +297,7 @@ module.exports = class Points {
 
     awardBetPool(betPool) {
         var betPool = this._serializeBetPool(betPool._id);
-        var awards = betPool.awardAll();
+        var awards = betPool.awardAll().filter(a => a);
         this._updateBetPool(betPool);
 
         if (awards.length > 0) {

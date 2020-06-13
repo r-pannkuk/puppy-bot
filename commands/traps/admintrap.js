@@ -68,7 +68,6 @@ module.exports = class AdminTrapCommand extends commando.Command {
             key, 
             ownerId, 
             Date.parse(date), 
-            message.guild.battleSystem.defaultTrapCallback.bind(message.guild.battleSystem), 
             msg);
 
         status.trapActive = true;

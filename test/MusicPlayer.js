@@ -1,4 +1,4 @@
-const MusicPlayer = require('../core/MusicPlayer.js');
+const MusicPlayer = require('../core/music/MusicPlayer.js');
 const assert = require('assert');
 
 var musicPlayer = new MusicPlayer({
