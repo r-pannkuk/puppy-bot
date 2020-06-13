@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const uuid = require('uuid/v1');
 
 const config = require('./config.json')
 const Trap = require('./Trap.js');

@@ -1,3 +1,4 @@
+const uuid = require('uuid/v1');
 
 module.exports = class Trap {
     constructor({
