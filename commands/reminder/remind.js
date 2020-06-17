@@ -44,7 +44,7 @@ module.exports = class RemindCommand extends commando.Command {
                         } else if (input.indexOf('<#') === 0) {
                             var input = input.slice(input.indexOf('<') + 2, -1);
 
-                            return msg.guild && msg.guild.channels.get(input);
+                            return msg.guild.channels.get(input);
 
                         // Checking for users
                         } else if (input.indexOf('<@') === 0) {
@@ -54,9 +54,7 @@ module.exports = class RemindCommand extends commando.Command {
                             }
 
                             // Checks for guild then for DM
-                            return (msg.guild && (msg.guild.members.get(input) || msg.guild.channels.get(input)))
-                                || (msg.channel.recipient.id === input);
-
+                            return (msg.client.users.get(input) || msg.guild.members.get(input));
                         }
 
                         return null;
@@ -114,7 +112,7 @@ module.exports = class RemindCommand extends commando.Command {
         reminderManager.scheduleReminder(message.guild || this.client, r);
 
         var sent = await message.channel.send(`Created a new reminder for ${target} at ${datetime}: "${reminderMessage}"`);
-        reminderManager.subscribeReminderMessage(r, sent.id);
+        reminderManager.subscribeReminderMessage(r, sent);
         RichEmbed.addReactions({
             message: sent,
             reactCancel: true,

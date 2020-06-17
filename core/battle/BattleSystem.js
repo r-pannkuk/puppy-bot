@@ -1,5 +1,3 @@
-const Discord = require('discord.js');
-
 const config = require('./config.json')
 const Trap = require('./Trap.js');
 const User = require('./User.js');

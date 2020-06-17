@@ -2,18 +2,6 @@ const Discord = require('discord.js');
 const ReminderManager = require('./ReminderManager.js');
 const Reminder = require('./Reminder.js');
 
-module.exports.discordLink = function(guild, channel, message) {
-    var link = `https://discordapp.com/channels/${guild.id}`;
-    if (channel) {
-        link += `/${channel.id}`;
-    }
-    if (message) {
-        link += `/${message.id}`;
-    }
-
-    return link;
-}
-
 module.exports.create = async function(client, reminder) {
     var target = (client.users && client.users.get(reminder.target)) || client.channels.get(reminder.target) || client.members.get(reminder.target);
 

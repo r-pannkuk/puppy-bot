@@ -22,8 +22,8 @@ class TimeExtract {
     }
 
     static validate_time_string(str) {
-        var stripped = "".replace(' ', '');
-        return true;
+        var stripped = str.match(/([0-9]+y)|([0-9]+mo)|([0-9]+w)|([0-9]+d)|([0-9]+h)|([0-9]+m)|([0-9]+s)/g);
+        return stripped !== null && stripped.length > 0;
     }
 
     static time_string_to_object() {

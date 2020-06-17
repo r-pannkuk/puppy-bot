@@ -111,11 +111,13 @@ module.exports = class ReminderManager {
         return r;
     }
 
-    subscribeReminderMessage(obj, messageId) {
+    subscribeReminderMessage(obj, discordMessage) {
         var temp = this.reminders;
         var r = temp[obj.id || obj];
 
-        r.discordMessageId = messageId;
+        r.discordGuildId = (discordMessage.guild) ? discordMessage.guild.id : '@me';
+        r.discordChannelId = discordMessage.channel.id;
+        r.discordMessageId = discordMessage.id;
 
         temp[r.id] = r;
         this.reminders = temp;

@@ -13,7 +13,7 @@ module.exports = class GetWagersCommand extends commando.Command {
             name: 'getwagers',
             group: 'bet',
             memberName: 'getwagers',
-            aliases: ['get-wagers', 'wagerlist', 'gw'],
+            aliases: ['checkwagers', 'get-wagers', 'wagerlist', 'gw'],
             description: 'Creates a new wager pool for players to bet on.',
             examples: ['!newwager 500 @Dog#3471 @Hazelyn#6286'],
             argsPromptLimit: 0,

@@ -13,6 +13,8 @@ class Reminder {
         source = null,
         isEnabled = false,
         isFired = false,
+        discordGuildId = null,
+        discordChannelId = null,
         discordMessageId = null,
         scheduleName = null,
         currentJob = null
@@ -30,6 +32,8 @@ class Reminder {
         this.source = source;
         this.isEnabled = isEnabled;
         this.isFired = isFired;
+        this.discordGuildId = discordGuildId;
+        this.discordChannelId = discordChannelId;
         this.discordMessageId = discordMessageId;
         this.scheduleName = scheduleName;
         this.currentJob = currentJob;

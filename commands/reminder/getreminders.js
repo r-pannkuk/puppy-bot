@@ -11,6 +11,9 @@ module.exports = class GetRemindersCommand extends commando.Command {
     constructor(client) {
         super(client, {
             name: 'getreminders',
+            aliases: [
+                'checkreminders'
+            ],
             group: 'reminders',
             memberName: 'getreminders',
             description: 'Lists all reminders that you own.',
@@ -27,8 +30,6 @@ module.exports = class GetRemindersCommand extends commando.Command {
         var ownedReminders = Object.values(reminderManager.reminders)
             .filter(r => r.author === message.author.id && new Date(r.reminderTime) >= Date.now() && r.isEnabled)
             .sort((a, b) => new Date(a.reminderTime) - new Date(b.reminderTime));
-
-        var channels = message.guild.channels.array();
 
         if (ownedReminders.length > 0) {
             for (var i in ownedReminders) {
@@ -57,30 +58,9 @@ module.exports = class GetRemindersCommand extends commando.Command {
 
                 datestring = datestring.join(', ');
 
-                var foundChannel;
-                var foundMessage;
-
-                for (var i in channels) {
-                    var c = channels[i];
-
-                    if (c.type !== 'text') {
-                        continue;
-                    }
-
-                    try {
-                        foundChannel = c;
-                        foundMessage = await c.fetchMessage(reminder.discordMessageId);
-                        break;
-                    } catch (error) {
-                        continue;
-                    }
-                };
-
-                if(!foundMessage) {
-                    var sent = await message.author.send(`**(${datestring})**: *Unknown.*`);
-                } else {
-                    var sent = await message.author.send(`**(${datestring})**: ${RichEmbed.discordLink(message.guild, foundChannel, foundMessage)}`);
-                }
+                var sent = await message.author.send(
+                    `**(${datestring})**: https://discordapp.com/channels/${reminder.discordGuildId}/${reminder.discordChannelId}/${reminder.discordMessageId}`
+                );
             }
         } else {
             message.author.send(`You don't currently have any reminders set.`);
