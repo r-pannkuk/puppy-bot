@@ -14,16 +14,19 @@ class TimeExtract {
             this.time_string = string;
         }
 
-        if (string.indexOf('/') >= 0 || string.indexOf(':') >= 0) {
-            this.process_type = TimeExtract.Types.EXPLICIT;
-        } else {
+        var delimeterMatch = string.match(/([0-9]+y)|([0-9]+mo)|([0-9]+w)|([0-9]+d)|([0-9]+h)|([0-9]+m)|([0-9]+s)/g);
+
+        if (delimeterMatch && delimeterMatch.length > 0) {
             this.process_type = TimeExtract.Types.DISPLACEMENT;
+        } else if (parseInt(string) || string.indexOf('/') >= 0 || string.indexOf(':') >= 0) {
+            this.process_type = TimeExtract.Types.EXPLICIT;
         }
     }
 
     static validate_time_string(str) {
         var stripped = str.match(/([0-9]+y)|([0-9]+mo)|([0-9]+w)|([0-9]+d)|([0-9]+h)|([0-9]+m)|([0-9]+s)/g);
-        return stripped !== null && stripped.length > 0;
+        var date = (parseInt(str)) ? new Date(parseInt(str)) : new Date(str);
+        return (stripped !== null && stripped.length > 0) || (date instanceof Date && !isNaN(date.getTime()));
     }
 
     static time_string_to_object() {
@@ -65,7 +68,7 @@ class TimeExtract {
      */
     extract() {
         var currentOffset = this._process_spaceless();
-        
+
         var d = new Date();
 
         if (this.inverted) {
@@ -97,7 +100,8 @@ class TimeExtract {
      * processing times that dictate a specific time
      */
     _process_explicit() {
-        return new Date(new Date(this.time_string) - Date.now());
+        var date = ((parseInt(this.time_string)) ? new Date(parseInt(this.time_string)) : new Date(this.time_string));
+        return new Date(date.getTime() - Date.now());
     }
 
     /**
