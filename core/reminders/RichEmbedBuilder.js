@@ -7,7 +7,9 @@ module.exports.create = async function(client, reminder) {
 
     var embed = module.exports.new(client, reminder)
 
-    if(target.type && target.guild && client.me.permissions.has('MENTION_EVERYONE')) {
+    var permissions = (client.me && client.me.permissions) || (target.guild && target.guild.members.get(client.user.id).permissions);
+
+    if(target.type && target.guild && permissions.has('MENTION_EVERYONE')) {
         var message = await target.send("@here", {embed});
     } else {
         var message = await target.send({embed});

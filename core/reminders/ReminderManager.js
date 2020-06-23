@@ -91,7 +91,7 @@ module.exports = class ReminderManager {
         this.reminders = temp;
 
         var newMessage = await RichEmbedHelper.create(client, currentReminder);
-        this.subscribeReminderMessage(currentReminder, newMessage.id);
+        this.subscribeReminderMessage(currentReminder, newMessage);
     }
 
     /**
