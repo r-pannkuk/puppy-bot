@@ -1,6 +1,37 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
+const diceRegex = /[1-9]+[0-9]*[\\s]*d[\\s]*[1-9][0-9]*([\\s]*[+,\-,*,/][\\s]*([1-9]+[0-9]*[\\s]*d[\\s]*[1-9][0-9]*|[1-9]+[0-9]*))*/g;
+
+const opFunctions = {
+    '+': (a, b) => a + b,
+    '-': (a, b) => a - b,
+    '*': (a, b) => a * b,
+    '/': (a, b) => a / b
+};
+
+
+function rollDie(sides) {
+    return Math.ceil(Math.random() * sides);
+}
+
+function rollDice(dice, sides) {
+    var results = [];
+
+    for (let i = 0; i < dice; ++i) {
+        results.push(rollDie(sides));
+    }
+
+    return results;
+}
+
+function stringifyCalculatedToken(calculatedToken) {
+    if (calculatedToken.type === 'die') {
+        return `[${calculatedToken.value}]`;
+    } else {
+        return `${calculatedToken.value}`;
+    }
+}
 
 module.exports = class DiceRollCommand extends commando.Command {
     constructor(client) {
@@ -10,112 +41,110 @@ module.exports = class DiceRollCommand extends commando.Command {
             memberName: 'roll',
             aliases: ['decision'],
             description: 'Rolls a combination of dice. Can throw up to 999 dice with 999 sides. Must throw at least one die and only dice with 2 or more sides.',
-            examples: [ '!roll 3d6', '!roll 4d8', '!roll 3d6 4d8' ],
+            examples: ['!roll 3d6', '!roll 4d8', '!roll 3d6 4d8'],
             argsPromptLimit: 0,
             args: [
                 {
                     key: 'input',
                     prompt: "Please enter an amount of dice and an amount of sides. Multiple groups work, e.g. 4d8 2d4",
                     type: 'string',
-                    validate: input => {
-                        var groups = input.split(' ');
+                    parse: (val, msg) => {
+                        const operatorRegex = /[+,\-,*,/]/g;
 
-                        if(groups.length > 25)
-                            return 'Too many dice groupings.  Please use less dice.';
+                        var values = val.split(operatorRegex).map(s => s.trim());
+                        var operators = [...val.matchAll(operatorRegex)].flat();
+                        var functions = operators.map(o => opFunctions[o]);
 
-                        for(var group in groups) {
-                            if(
-                                /^d([1-9][0-9][0-9]|[1-9][0-9]|[2-9])$/g.test(groups[group]) == false &&
-                                /^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])d([1-9][0-9][0-9]|[1-9][0-9]|[2-9])$/g.test(groups[group]) == false &&
-                                /^(\+|\-|\*|\/)([1-9][0-9][0-9]|[1-9][0-9]|[0-9])$/g.test(groups[group]) == false) {
-                                return 'Input had an error. Please try again.';
-                            }
-                        }
-
-                        return true;
+                        return {
+                            original: val,
+                            values: values,
+                            operators: operators,
+                            functions: functions
+                        };
+                    },
+                    validate: (val, msg) => {
+                        var test = diceRegex.test(val);
+                        return test;
                     }
                 }
             ]
         });
     }
 
-    async run(message, args) {
-        var groups = args.input.split(' ');
-        var diceGroups = [];
-        var operatorGroups = [];
+    async run(message, { input }) {
+        var originalString = input.original;
+        var values = input.values;
+        var operators = input.operators;
+        var functions = input.functions;
 
         var diceResults = [];
 
-        for(var group in groups) {
-            // Edge case for d4
-            if(/^d([1-9][0-9][0-9]|[1-9][0-9]|[2-9])$/g.test(groups[group]) == true) {
-                diceGroups.push('1' + groups[group]);
+        // TODO: PEMDAS, fuck
+
+        var invalid = false;
+
+        var calculated = values.map(v => {
+            if (v.indexOf('d') > -1) {
+                var groups = v.split('d');
+                var dice = groups[0];
+                var sides = groups[1];
+
+                if(dice > 100 || sides > 100) {
+                    invalid = true;
+                    return;
+                }
+
+                var results = rollDice(dice, sides);
+                var total = results.reduce((sum, x) => sum + x, 0);
+
+                diceResults.push({
+                    token: v,
+                    results: results,
+                    total: total
+                });
+
+                return {
+                    type: 'die',
+                    value: total
+                };
             }
-            else if(/^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])d([1-9][0-9][0-9]|[1-9][0-9]|[2-9])$/g.test(groups[group]) == true) {
-                diceGroups.push(groups[group]);
-            }
-            else if(/^(\+|\-|\*|\/)([1-9][0-9][0-9]|[1-9][0-9]|[0-9])$/g.test(groups[group]) == true) {
-                operatorGroups.push(groups[group]);
-            }
+
+            return {
+                type: 'int',
+                value: parseInt(v)
+            };
+        });
+
+        if(invalid) {
+            message.channel.send(`Please limit dice rolls to 100 sides or 100 dice.`);
+            return;
         }
 
-        for(var group in diceGroups) {
-            var split = diceGroups[group].split('d');
-            var diceCount = split[0];
-            var sidesCount = split[1];
+        var result = calculated[0].value;
+        var combinedString = stringifyCalculatedToken(calculated[0]);
 
-            var dice = [];
-
-            for(var i = 0; i < diceCount; ++i) {
-                dice.push(Math.floor(Math.random() * sidesCount) + 1);
-            }
-
-            diceResults.push({
-                group: diceGroups[group],
-                diceCount: diceCount,
-                sidesCount: sidesCount,
-                dice: dice
-            })
+        for (let i = 0; i < calculated.length - 1; ++i) {
+            result = functions[i](result, calculated[i + 1].value);
+            combinedString += ` ${operators[i]} ${stringifyCalculatedToken(calculated[i + 1])}`;
         }
+
+        combinedString += ` = **${result}**`;
 
         var embed = new Discord.RichEmbed()
-        .setColor(14400597)
-        .setAuthor(`Dice roll: ${args.input}`, 'https://vignette.wikia.nocookie.net/game-of-dice/images/c/cb/White_Dice.png/revision/latest?cb=20160113233423')
+            .setColor(14400597)
+            .setAuthor(`Dice roll: ${originalString}`, 'https://vignette.wikia.nocookie.net/game-of-dice/images/c/cb/White_Dice.png/revision/latest?cb=20160113233423')
 
-        var sum = 0;
+        // embed.addField(undefined, combinedString)
 
-        for(var group in diceResults) {
-            sum = diceResults[group].dice.reduce((total, n) => total + n, sum);
-
-            if(diceResults[group].dice.toString().length <= 1024)
-                embed.addField(diceResults[group].group, diceResults[group].dice.toString());
-        }
-
-        var original_sum = sum;
-
-        for(var group in operatorGroups) {
-            var operator = operatorGroups[group][0];
-            var value = parseInt(operatorGroups[group].substr(1));
-
-            if(operator === '+') {
-                sum += value;
-            }
-            else if(operator === '-') {
-                sum -= value;
-            }
-            else if(operator === '*') {
-                sum *= value;
-            }
-            else if(operator === '/') {
-                sum /= value;
+        for (var group in diceResults) {
+            if (diceResults[group].toString().length <= 1024) {
+                embed.addField(`${diceResults[group].token} = ${diceResults[group].total}`, diceResults[group].results.toString());
+            } else {
+                embed.addField(`${diceResults[group].token} = ${diceResults[group].total}`, diceResults[group].results.toString().slice(0, 1000) + ' ...');
             }
         }
 
-        if(operatorGroups.length > 0) {
-            embed.setDescription(`${message.author} rolled ${original_sum} {${operatorGroups.join(',')}} = **${sum}**.`);
-        } else {
-            embed.setDescription(`${message.author} rolled **${sum}**.`);
-        }
+        embed.setDescription(`${message.author} rolled ${combinedString}`);
 
         return message.embed(embed);
     }
