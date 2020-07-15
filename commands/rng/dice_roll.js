@@ -1,8 +1,6 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
-const diceRegex = /[1-9]+[0-9]*[\\s]*d[\\s]*[1-9][0-9]*([\\s]*[+,\-,*,/][\\s]*([1-9]+[0-9]*[\\s]*d[\\s]*[1-9][0-9]*|[1-9]+[0-9]*))*/g;
-
 const opFunctions = {
     '+': (a, b) => a + b,
     '-': (a, b) => a - b,
@@ -63,6 +61,7 @@ module.exports = class DiceRollCommand extends commando.Command {
                         };
                     },
                     validate: (val, msg) => {
+                        const diceRegex = /[1-9]+[0-9]*[\\s]*d[\\s]*[1-9][0-9]*([\\s]*[+,\-,*,/][\\s]*([1-9]+[0-9]*[\\s]*d[\\s]*[1-9][0-9]*|[1-9]+[0-9]*))*/g;
                         var test = diceRegex.test(val);
                         return test;
                     }
