@@ -8,11 +8,19 @@ const opFunctions = {
     '/': (a, b) => a / b
 };
 
-
+/**
+ * Rolls a die of a specific number of sides.
+ * @param {Number} sides 
+ */
 function rollDie(sides) {
     return Math.ceil(Math.random() * sides);
 }
 
+/**
+ * Rolls multiple dice of a specific number of sides.
+ * @param {Number} dice - How many dice there are to use.
+ * @param {Number} sides - How many sides are on each of the dice.
+ */
 function rollDice(dice, sides) {
     var results = [];
 
@@ -23,6 +31,10 @@ function rollDice(dice, sides) {
     return results;
 }
 
+/**
+ * Takes a token (such as '+2') and converts them to the write text format for writing.
+ * @param {String} calculatedToken 
+ */
 function stringifyCalculatedToken(calculatedToken) {
     if (calculatedToken.type === 'die') {
         return `[${calculatedToken.value}]`;
@@ -41,32 +53,30 @@ module.exports = class DiceRollCommand extends commando.Command {
             description: 'Rolls a combination of dice. Can throw up to 999 dice with 999 sides. Must throw at least one die and only dice with 2 or more sides.',
             examples: ['!roll 3d6', '!roll 4d8', '!roll 3d6 4d8'],
             argsPromptLimit: 0,
-            args: [
-                {
-                    key: 'input',
-                    prompt: "Please enter an amount of dice and an amount of sides. Multiple groups work, e.g. 4d8 2d4",
-                    type: 'string',
-                    parse: (val, msg) => {
-                        const operatorRegex = /[+,\-,*,/]/g;
+            args: [{
+                key: 'input',
+                prompt: "Please enter an amount of dice and an amount of sides. Multiple groups work, e.g. 4d8 2d4",
+                type: 'string',
+                parse: (val, msg) => {
+                    const operatorRegex = /[+,\-,*,/]/g;
 
-                        var values = val.split(operatorRegex).map(s => s.trim());
-                        var operators = [...val.matchAll(operatorRegex)].flat();
-                        var functions = operators.map(o => opFunctions[o]);
+                    var values = val.split(operatorRegex).map(s => s.trim());
+                    var operators = [...val.matchAll(operatorRegex)].flat();
+                    var functions = operators.map(o => opFunctions[o]);
 
-                        return {
-                            original: val,
-                            values: values,
-                            operators: operators,
-                            functions: functions
-                        };
-                    },
-                    validate: (val, msg) => {
-                        const diceRegex = /[1-9]+[0-9]*[\\s]*d[\\s]*[1-9][0-9]*([\\s]*[+,\-,*,/][\\s]*([1-9]+[0-9]*[\\s]*d[\\s]*[1-9][0-9]*|[1-9]+[0-9]*))*/g;
-                        var test = diceRegex.test(val);
-                        return test;
-                    }
+                    return {
+                        original: val,
+                        values: values,
+                        operators: operators,
+                        functions: functions
+                    };
+                },
+                validate: (val, msg) => {
+                    const diceRegex = /[1-9]+[0-9]*[\\s]*d[\\s]*[1-9][0-9]*([\\s]*[+,\-,*,/][\\s]*([1-9]+[0-9]*[\\s]*d[\\s]*[1-9][0-9]*|[1-9]+[0-9]*))*/g;
+                    var test = diceRegex.test(val);
+                    return test;
                 }
-            ]
+            }]
         });
     }
 
@@ -88,7 +98,7 @@ module.exports = class DiceRollCommand extends commando.Command {
                 var dice = groups[0];
                 var sides = groups[1];
 
-                if(dice > 100 || sides > 100) {
+                if (dice > 100 || sides > 100) {
                     invalid = true;
                     return;
                 }
@@ -114,7 +124,7 @@ module.exports = class DiceRollCommand extends commando.Command {
             };
         });
 
-        if(invalid) {
+        if (invalid) {
             message.channel.send(`Please limit dice rolls to 100 sides or 100 dice.`);
             return;
         }

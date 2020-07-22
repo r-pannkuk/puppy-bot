@@ -1,8 +1,9 @@
 const Discord = require('discord.js');
 
-module.exports = class Admin {
+/** Represents the Admin object for channel administration. */
+class Admin {
     constructor(guildSettings) {
-        if(guildSettings.get('admin') === undefined) {
+        if (guildSettings.get('admin') === undefined) {
             console.log("Admin settings not found, creating.");
             guildSettings.set('admin', {
                 deleteChannelID: null,
@@ -15,17 +16,20 @@ module.exports = class Admin {
 
         var settings = guildSettings.get('admin');
 
-        if(settings.deleteChannelID === undefined) {
+        if (settings.deleteChannelID === undefined) {
             settings.deleteChannelID = null;
         }
-        if(settings.trapChannelID === undefined) {
+        if (settings.trapChannelID === undefined) {
             settings.trapChannelID = null;
         }
-        if(settings.roleChannelID === undefined) {
+        if (settings.roleChannelID === undefined) {
             settings.roleChannelID = null;
         }
-        if(settings.accountChannelID === undefined) {
+        if (settings.accountChannelID === undefined) {
             settings.accountChannelID = null;
+        }
+        if (settings.gulagChannelID === undefined) {
+            settings.gulagChannelID = null;
         }
 
         guildSettings.set('admin', settings);
@@ -38,11 +42,33 @@ module.exports = class Admin {
     get trapChannelID() { return this.settings.trapChannelID; }
     get roleChannelID() { return this.settings.roleChannelID; }
     get accountChannelID() { return this.settings.accountChannelID; }
+    get gulagChannelID() { return this.settings.gulagChannelID; }
 
-    set deleteChannelID(channelID) { var newSettings = this.settings; newSettings.deleteChannelID = channelID; this.settings = newSettings; }
-    set trapChannelID(channelID) { var newSettings = this.settings; newSettings.trapChannelID = channelID; this.settings = newSettings; }
-    set roleChannelID(channelID) { var newSettings = this.settings; newSettings.roleChannelID = channelID; this.settings = newSettings; }
-    set accountChannelID(channelID) { var newSettings = this.settings; newSettings.accountChannelID = channelID; this.settings = newSettings; }
+    set deleteChannelID(channelID) {
+        var newSettings = this.settings;
+        newSettings.deleteChannelID = channelID;
+        this.settings = newSettings;
+    }
+    set trapChannelID(channelID) {
+        var newSettings = this.settings;
+        newSettings.trapChannelID = channelID;
+        this.settings = newSettings;
+    }
+    set roleChannelID(channelID) {
+        var newSettings = this.settings;
+        newSettings.roleChannelID = channelID;
+        this.settings = newSettings;
+    }
+    set accountChannelID(channelID) {
+        var newSettings = this.settings;
+        newSettings.accountChannelID = channelID;
+        this.settings = newSettings;
+    }
+    set gulagChannelID(channelID) {
+        var newSettings = this.settings;
+        newSettings.gulagChannelID = channelID;
+        this.settings = newSettings;
+    }
 
     addNewChannel(guild, channelName, categoryName, overwrites, callback) {
         guild.createChannel(channelName, 'text', overwrites)
@@ -55,8 +81,8 @@ module.exports = class Admin {
                     channel.setParent(parent)
                         .then(callback);
                 }
-    
-                if(channelCategory === null) {
+
+                if (channelCategory === null) {
                     guild.createChannel(categoryName, 'category')
                         .then(setChannelParentCallback);
                 } else {
@@ -84,3 +110,5 @@ module.exports = class Admin {
             .then(callback);
     }
 }
+
+module.exports = Admin;

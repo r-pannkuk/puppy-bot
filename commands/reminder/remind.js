@@ -3,7 +3,7 @@ const pyShell = require('python-shell');
 const fs = require('fs');
 
 const Reminder = require('../../core/reminders/Reminder.js');
-const TimeExtract = require('../../core/reminders/TimeExtract.js');
+const TimeExtract = require('../../core/TimeExtract.js');
 const RichEmbed = require('../../core/reminders/RichEmbedBuilder.js');
 
 
@@ -19,8 +19,7 @@ module.exports = class RemindCommand extends commando.Command {
                 '!remind 01-01-2000 00:00:00 @Dog Hey idiot, happy new millenium.'
             ],
             argsPromptLimit: 0,
-            args: [
-                {
+            args: [{
                     key: 'datetime',
                     prompt: 'Please enter a valid time for the reminder to be set.',
                     parse: (input, msg) => {
@@ -40,13 +39,13 @@ module.exports = class RemindCommand extends commando.Command {
                         if (input === '@here') {
                             return msg.channel;
 
-                        // Checking for channels
+                            // Checking for channels
                         } else if (input.indexOf('<#') === 0) {
                             var input = input.slice(input.indexOf('<') + 2, -1);
 
                             return msg.guild.channels.get(input);
 
-                        // Checking for users
+                            // Checking for users
                         } else if (input.indexOf('<@') === 0) {
                             var input = input.slice(input.indexOf('<') + 2, -1);
                             if (input[0] === '!') {
@@ -66,13 +65,13 @@ module.exports = class RemindCommand extends commando.Command {
                         if (input === '@here') {
                             return true;
 
-                        // Checking for channels
+                            // Checking for channels
                         } else if (input.indexOf('<#') === 0) {
                             var input = input.slice(input.indexOf('<') + 2, -1);
 
                             return msg.guild && msg.guild.channels.get(input);
 
-                        // Checking for users
+                            // Checking for users
                         } else if (input.indexOf('<@') === 0) {
                             var input = input.slice(input.indexOf('<') + 2, -1);
                             if (input[0] === '!') {
@@ -80,8 +79,8 @@ module.exports = class RemindCommand extends commando.Command {
                             }
 
                             // Checks for guild then for DM
-                            return (msg.guild && (msg.guild.members.get(input) || msg.guild.channels.get(input)))
-                                || (msg.channel.recipient.id === input);
+                            return (msg.guild && (msg.guild.members.get(input) || msg.guild.channels.get(input))) ||
+                                (msg.channel.recipient.id === input);
 
                         }
 

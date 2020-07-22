@@ -1,6 +1,18 @@
+const date = require('date-and-time');
+
+/**
+ * Ensures proper formatting for a date string.
+ * @param {string} string Formats a date string to be proper for Date conversions.
+ * @returns {string} The input formatted properly.
+ */
+function convertProperDateString(string) {
+    return string.replace(/([[1-9]*[0-9])((st)|(nd)|(rd)|(th))/g, "$1");
+}
+
 class TimeExtract {
     constructor(string, timezone = null) {
         this.timezone = timezone;
+        string = convertProperDateString(string);
 
         if (string.length > 0) {
             this.inverted = string[0] == '-';
@@ -24,9 +36,26 @@ class TimeExtract {
     }
 
     static validate_time_string(str) {
-        var stripped = str.match(/([0-9]+y)|([0-9]+mo)|([0-9]+w)|([0-9]+d)|([0-9]+h)|([0-9]+m)|([0-9]+s)/g);
-        var date = (parseInt(str)) ? new Date(parseInt(str)) : new Date(str);
-        return (stripped !== null && stripped.length > 0) || (date instanceof Date && !isNaN(date.getTime()));
+        if (str === undefined || str === '') {
+            return false;
+        }
+
+        str = convertProperDateString(str);
+
+        // Checking if there's nothing but duration tokens in the string.
+        var stripped = str.trim().replace(/([0-9]+y)|([0-9]+mo)|([0-9]+w)|([0-9]+d)|([0-9]+h)|([0-9]+m)|([0-9]+s)/g, '');
+
+        var int = parseInt(str);
+
+        // Converting to milliseconds
+        if (int && int < 999999999999) {
+            int *= 1000;
+        }
+
+        // Checking if the string makes a valid date object.
+        var date = (int && new Date(int)) || new Date(str);
+
+        return (stripped.length === 0) || (date instanceof Date && !isNaN(date.getTime()));
     }
 
     static time_string_to_object() {
@@ -53,8 +82,7 @@ class TimeExtract {
             } else {
                 try {
                     value = parseInt(token);
-                }
-                catch (ValueError) {
+                } catch (ValueError) {
                     throw InvalidTime();
                 }
             }

@@ -3,7 +3,7 @@ const Scheduler = require('node-schedule');
 
 const Reminder = require('./Reminder.js');
 const RichEmbedHelper = require('./RichEmbedBuilder.js');
-const TimeExtract = require('./TimeExtract.js');
+const TimeExtract = require('../TimeExtract.js');
 
 const CreateReminderResponse = {
     OK: 0,

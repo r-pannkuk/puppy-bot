@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
-const TimeExtract = require('./../../core/reminders/TimeExtract.js');
+const TimeExtract = require('../../core/TimeExtract.js');
 
-module.exports = function (client, messageReaction, user) {
+module.exports = function(client, messageReaction, user) {
     if (user === client.user) {
         return;
     }
@@ -14,7 +14,7 @@ module.exports = function (client, messageReaction, user) {
 
     var reminder = client.reminders.getReminderByMessageId(message.id);
 
-    var reminderIntervalPrompt = async (reminder, allowRealDate = true, collectCallback, rejectCallback) => {
+    var reminderIntervalPrompt = async(reminder, allowRealDate = true, collectCallback, rejectCallback) => {
         if (allowRealDate) {
             await channel.send("Please enter an interval or date time for reminding.");
         } else {
@@ -23,8 +23,7 @@ module.exports = function (client, messageReaction, user) {
 
         var collector = new Discord.MessageCollector(
             channel,
-            m => m.author.id === reminder.target || m.author.id === reminder.author,
-            {
+            m => m.author.id === reminder.target || m.author.id === reminder.author, {
                 time: 15000
             });
 
@@ -44,7 +43,7 @@ module.exports = function (client, messageReaction, user) {
             reminder.repeatInterval = null;
             var isHandled = false;
 
-            var collectCallback = async (m, c) => {
+            var collectCallback = async(m, c) => {
                 isHandled = true;
                 c.stop();
 
@@ -77,7 +76,7 @@ module.exports = function (client, messageReaction, user) {
             }
 
             var endCallback = () => {
-                if(isHandled) {
+                if (isHandled) {
                     return;
                 }
 
@@ -90,4 +89,3 @@ module.exports = function (client, messageReaction, user) {
         }
     }
 };
-

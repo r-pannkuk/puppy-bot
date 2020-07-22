@@ -3,7 +3,7 @@ const pyShell = require('python-shell');
 const fs = require('fs');
 
 const Reminder = require('../../core/reminders/Reminder.js');
-const TimeExtract = require('../../core/reminders/TimeExtract.js');
+const TimeExtract = require('../../core/TimeExtract.js');
 const RichEmbed = require('../../core/reminders/RichEmbedBuilder.js');
 
 
