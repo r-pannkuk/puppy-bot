@@ -11,6 +11,10 @@ function convertProperDateString(string) {
 
 class TimeExtract {
     constructor(string, timezone = null) {
+        if (string instanceof Date) {
+            string = string.toString();
+        }
+
         this.timezone = timezone;
         string = convertProperDateString(string);
 
@@ -30,7 +34,7 @@ class TimeExtract {
 
         if (delimeterMatch && delimeterMatch.length > 0) {
             this.process_type = TimeExtract.Types.DISPLACEMENT;
-        } else if (parseInt(string) || string.indexOf('/') >= 0 || string.indexOf(':') >= 0) {
+        } else if (!isNaN(string) || string.indexOf('/') >= 0 || string.indexOf(':') >= 0) {
             this.process_type = TimeExtract.Types.EXPLICIT;
         }
     }
@@ -55,7 +59,7 @@ class TimeExtract {
         // Checking if the string makes a valid date object.
         var date = (int && new Date(int)) || new Date(str);
 
-        return (stripped.length === 0) || (date instanceof Date && !isNaN(date.getTime()));
+        return (stripped.length === 0) || (date instanceof Date && !isNaN(date.getTime()) && date.getTime() > Date.now());
     }
 
     static time_string_to_object() {
@@ -114,6 +118,32 @@ class TimeExtract {
         return currentOffset.getTime();
     }
 
+    interval_string() {
+        var date = this.extract();
+
+        var deltaSeconds = (date.getTime() - Date.now()) / 1000;
+
+        var days = Math.floor(deltaSeconds / 86400);
+        deltaSeconds -= days * 86400;
+
+        var hours = Math.floor(deltaSeconds / 3600) % 24;
+        deltaSeconds -= hours * 3600;
+
+        var minutes = Math.floor(deltaSeconds / 60) % 60;
+        deltaSeconds -= minutes * 60;
+
+        deltaSeconds = Math.floor(deltaSeconds);
+
+        var datestring = [];
+
+        if (days) { datestring.push(`${days} days`) }
+        if (hours) { datestring.push(`${hours} hours`) }
+        if (minutes) { datestring.push(`${minutes} minutes`) }
+        if (deltaSeconds) { datestring.push(`${deltaSeconds} seconds`) }
+
+        return datestring.join(', ');
+    }
+
     _process_spaceless() {
         if (this.process_type === TimeExtract.Types.EXPLICIT) {
             var d = this._process_explicit();
@@ -128,7 +158,7 @@ class TimeExtract {
      * processing times that dictate a specific time
      */
     _process_explicit() {
-        var date = ((parseInt(this.time_string)) ? new Date(parseInt(this.time_string)) : new Date(this.time_string));
+        var date = ((!isNaN(this.time_string)) ? new Date(parseInt(this.time_string)) : new Date(this.time_string));
         return new Date(date.getTime() - Date.now());
     }
 

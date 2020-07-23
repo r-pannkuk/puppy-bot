@@ -5,6 +5,7 @@ const fs = require('fs');
 const Reminder = require('../../core/reminders/Reminder.js');
 const TimeExtract = require('../../core/TimeExtract.js');
 const RichEmbed = require('../../core/reminders/RichEmbedBuilder.js');
+const ReminderManager = require('../../core/reminders/ReminderManager.js');
 
 
 module.exports = class RemindCommand extends commando.Command {
@@ -98,6 +99,7 @@ module.exports = class RemindCommand extends commando.Command {
     }
 
     async run(message, { datetime, target, reminderMessage }) {
+        /** @type {ReminderManager} */
         var reminderManager = this.client.reminders;
 
         var r = reminderManager.createReminder(new Reminder({

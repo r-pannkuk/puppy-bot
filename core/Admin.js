@@ -28,8 +28,11 @@ class Admin {
         if (settings.accountChannelID === undefined) {
             settings.accountChannelID = null;
         }
-        if (settings.gulagChannelID === undefined) {
-            settings.gulagChannelID = null;
+        if (settings.moderationChannelID === undefined) {
+            settings.moderationChannelID = null;
+        }
+        if (settings.moderationRoleID === undefined) {
+            settings.moderationRoleID = null;
         }
 
         guildSettings.set('admin', settings);
@@ -42,7 +45,8 @@ class Admin {
     get trapChannelID() { return this.settings.trapChannelID; }
     get roleChannelID() { return this.settings.roleChannelID; }
     get accountChannelID() { return this.settings.accountChannelID; }
-    get gulagChannelID() { return this.settings.gulagChannelID; }
+    get moderationChannelID() { return this.settings.moderationChannelID; }
+    get moderationRoleID() { return this.settings.moderationRoleID; }
 
     set deleteChannelID(channelID) {
         var newSettings = this.settings;
@@ -64,9 +68,14 @@ class Admin {
         newSettings.accountChannelID = channelID;
         this.settings = newSettings;
     }
-    set gulagChannelID(channelID) {
+    set moderationChannelID(channelID) {
         var newSettings = this.settings;
-        newSettings.gulagChannelID = channelID;
+        newSettings.moderationChannelID = channelID;
+        this.settings = newSettings;
+    }
+    set moderationRoleID(roleID) {
+        var newSettings = this.settings;
+        newSettings.moderationRoleID = roleID;
         this.settings = newSettings;
     }
 

@@ -7,6 +7,7 @@ const ReminderRichEmbed = require('../../core/reminders/RichEmbedBuilder.js');
 const GameManager = require('../../core/GameManager.js');
 const Challonge = require('../../core/challonge/Challonge.js');
 const PointSystem = require('../../core/points/Points.js');
+const ModerationSystem = require('../../core/moderation/ModerationSystem.js');
 
 module.exports = function(client, guild) {
 
@@ -29,6 +30,9 @@ module.exports = function(client, guild) {
         guild.challonge = new Challonge(guild.settings, {
             apiKey: process.env.CHALLONGE
         });
+
+        /* Moderation system for managing user activity. */
+        guild.moderation = new ModerationSystem(guild.settings);
 
         /* Notepad for user notes. */
         // guild.notepad = new Notepad(guild.settings);
