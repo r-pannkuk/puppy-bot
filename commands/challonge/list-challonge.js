@@ -19,11 +19,8 @@ module.exports = class ListChallonge extends commando.Command {
     }
 
     async run(message) {
-        var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
-            message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.user).roles.has(r));
-
-        if (!bool) {
-            message.reply("You need to have role permissions to use that command.");
+        if (!msg.guild.members.get(msg.author.id).hasPermission('MANAGE_CHANNELS')) {
+            msg.channel.send(`You don't have permission to use that command.`);
             return;
         }
 
@@ -56,7 +53,7 @@ module.exports = class ListChallonge extends commando.Command {
             }
         }
 
-        if(Object.keys(pendingAccounts).length === 0) {
+        if (Object.keys(pendingAccounts).length === 0) {
             message.channel.send(`No pending user accounts were found.`);
             return;
         }

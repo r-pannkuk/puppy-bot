@@ -9,12 +9,11 @@ module.exports = class AdminTrapCommand extends commando.Command {
             group: 'traps',
             memberName: 'admintrap',
             description: 'Admin tool for adding traps with a custom timestamp.',
-            examples: [ '!admintrap <phrase> <userId> <timestamp>' ],
+            examples: ['!admintrap <phrase> <userId> <timestamp>'],
             argsPromptLimit: 0,
             ownerOnly: true,
-            userPermissions: [ Discord.Permissions.FLAGS.ADMINISTRATOR ],
-            args: [
-                {
+            
+            args: [{
                     key: 'phrase',
                     prompt: "Enter the phrase you want to trap on.  The longer the trap goes unsprung, the more damage it will do.",
                     type: 'string',
@@ -42,38 +41,40 @@ module.exports = class AdminTrapCommand extends commando.Command {
         });
     }
 
-    
+
     async run(msg, { phrase, ownerId, date }) {
-        if(!this.client.isOwner(msg.author)) {
+        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+            msg.channel.send(`You don't have permission to use that command.`);
             return;
         }
+
 
         var traps = message.guild.battleSystem._enmap.get('traps');
 
         var key = phrase.toLowerCase();
 
-        if(Object.keys(traps).indexOf(key) > -1) {
+        if (Object.keys(traps).indexOf(key) > -1) {
             msg.channel.send('Trap was already found.');
             return false;
         }
 
         var status = message.guild.battleSystem.retrieve(ownerId);
 
-        if('trapActive' in status && status.trapActive) {
+        if ('trapActive' in status && status.trapActive) {
             msg.channel.send('User already has a trap set.');
             return false;
         }
 
         traps[key] = message.guild.battleSystem.generateTrap(
-            key, 
-            ownerId, 
-            Date.parse(date), 
+            key,
+            ownerId,
+            Date.parse(date),
             msg);
 
         status.trapActive = true;
 
         message.guild.battleSystem.set(ownerId, status);
-        
+
         message.guild.battleSystem._enmap.set('traps', traps);
 
         msg.channel.send("Trap set succesfully.");

@@ -13,8 +13,7 @@ module.exports = class AwardCommand extends commando.Command {
             examples: ['!award @Dog#3471 100', '!award @Dog#3471 100 Being a huge nerd'],
             argsPromptLimit: 0,
             guildOnly: true,
-            args: [
-                {
+            args: [{
                     key: 'user',
                     prompt: "Please provide the user to award.",
                     type: 'user'
@@ -36,11 +35,8 @@ module.exports = class AwardCommand extends commando.Command {
     }
 
     async run(message, { user, amount, reason }) {
-        var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
-            message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.author).roles.has(r));
-
-        if (!bool) {
-            message.channel.send('You must have permissions to use this command.');
+        if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(message.author.id))) {
+            msg.channel.send(`You don't have permission to use that command.`);
             return;
         }
 

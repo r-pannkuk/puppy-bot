@@ -1,3 +1,5 @@
+const Discord = require('discord.js');
+
 const User = require('./User.js');
 const Penalty = require('./Penalty.js');
 const Award = require('./Award.js');
@@ -77,6 +79,24 @@ module.exports = class Points {
 
     getUser(discordUser) {
         return this._serializeUser(discordUser.id);
+    }
+
+    /**
+     * Returns member's authorization to use points.
+     * @param {Discord.GuildMember} member - Guild member
+     */
+    getUserAuthorization(member) {
+        var hasAuthorization = false;
+
+        for (var i in this.adminRoles) {
+            hasAuthorization = member.roles.has(this.adminRoles[i]) || hasAuthorization;
+
+            if (hasAuthorization) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     setUser(userObj) {

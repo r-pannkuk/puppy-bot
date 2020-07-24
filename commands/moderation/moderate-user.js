@@ -15,7 +15,7 @@ class ModerateCommand extends commando.Command {
             aliases: ['gulag', 'moderate-user'],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: [Discord.Permissions.FLAGS.KICK_MEMBERS],
+            
             args: [{
                     key: 'user',
                     prompt: "Select the user for moderation.",
@@ -53,6 +53,11 @@ class ModerateCommand extends commando.Command {
      * @param {string} args.date - Date string for moderating.
      */
     async run(msg, { user, duration }) {
+        if (!msg.guild.members.get(msg.author.id).hasPermission('KICK_MEMBERS')) {
+            msg.channel.send(`You don't have permission to use that command.`);
+            return;
+        }
+
         if (duration === '') {
             duration = 'Dec 31 23:59:59 2099 UTC';
         }

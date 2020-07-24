@@ -9,16 +9,15 @@ module.exports = class AddGroupChannel extends commando.Command {
             group: 'admin',
             memberName: 'add-group-channel',
             description: 'Creates a new group and role for discussion.',
-            examples: [ 
+            examples: [
                 '!add-group-channel #channel',
                 '!add-group-channel #CATEGORY/channel',
-                '!add-group-channel #channel @role_name'    
+                '!add-group-channel #channel @role_name'
             ],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: [Discord.Permissions.FLAGS.ADMINISTRATOR],
-            args: [
-                {
+            
+            args: [{
                     key: 'channel',
                     prompt: "Store a channel for use.",
                     type: 'string'
@@ -33,16 +32,21 @@ module.exports = class AddGroupChannel extends commando.Command {
         });
     }
 
-    
+
     async run(msg, { channel, role }) {
-        if(msg.client.channels.exists('name', channel)) {
+        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+            msg.channel.send(`You don't have permission to use that command.`);
+            return;
+        }
+
+        if (msg.client.channels.exists('name', channel)) {
             msg.channel.send(`Channel ${channel} already exists. Please use another.`);
             return;
         }
 
         var channelInputs = channel.split('#').join('').split('@').join('').split('<').join('').split('>').join('').split('&').join('').split('/');
 
-        if(channelInputs.length === undefined || channelInputs.length > 2) {
+        if (channelInputs.length === undefined || channelInputs.length > 2) {
             msg.channel.send('Invalid channel name.  Please use an appropriate name for the group channel.');
             return;
         }
@@ -50,21 +54,20 @@ module.exports = class AddGroupChannel extends commando.Command {
         var categoryName = (channelInputs.length === 2) ? channelInputs[0] : msg.channel.parent.name;
         var channelName = (channelInputs.length === 2) ? channelInputs[1] : channelInputs[0];
 
-        if(role === '') {
+        if (role === '') {
             role = `[${channelName}]`;
         }
 
         var roleName = role.split('@').join('').split('<').join('').split('>').join('').split('&').join('');
 
         var guildRole = msg.guild.roles.find('name', roleName);
-        
-        if(guildRole === null) {
+
+        if (guildRole === null) {
             guildRole = msg.guild.roles.get(roleName);
         }
 
         var createChannelCallback = (role) => {
-            var overwrites = [
-                {
+            var overwrites = [{
                     id: msg.guild.defaultRole,
                     deny: [
                         'SEND_MESSAGES',
@@ -91,10 +94,10 @@ module.exports = class AddGroupChannel extends commando.Command {
                     ]
                 }
             ]
-    
+
             msg.guild.admin.addNewChannel(msg.guild, channelName, categoryName, overwrites, (channel) => {
                 msg.channel.send(`New channel ${channel} created under ${categoryName.toUpperCase()} for ${role}.`);
-    
+
                 msg.guild.channels.get(msg.guild.admin.roleChannelID).send(
                     `${role} - React with \:white_check_mark: to be added to the group and access ${channel}`
                 ).then(msg => {
@@ -102,13 +105,13 @@ module.exports = class AddGroupChannel extends commando.Command {
                 });
             });
         };
-        
-        if(guildRole === null || guildRole === undefined) {
+
+        if (guildRole === null || guildRole === undefined) {
             msg.guild.admin.createRole(msg.guild, roleName, createChannelCallback);
         } else {
             createChannelCallback(guildRole);
         }
     }
 
-    
+
 }

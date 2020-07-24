@@ -17,9 +17,11 @@ module.exports = class TrapListCommand extends commando.Command {
 
     
     async run(message) {
-        if(!this.client.isOwner(message.author)) {
+        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+            msg.channel.send(`You don't have permission to use that command.`);
             return;
         }
+
 
         var traps = Object.values(message.guild.battleSystem.trapList());
         if(traps.length > 0) {
@@ -28,10 +30,10 @@ module.exports = class TrapListCommand extends commando.Command {
                 string += `[${traps[i].phrase}],`;
             }
             string = string.substr(0, string.length - 1);
-            message.channel.send(string);
+            message.author.send(string);
         }
         else {
-            message.channel.send("No traps found.");
+            message.author.send("No traps found.");
         }
     }
 }

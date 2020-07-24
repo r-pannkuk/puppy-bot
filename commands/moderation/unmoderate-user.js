@@ -15,7 +15,7 @@ class UnmoderateCommand extends commando.Command {
             aliases: ['ungulag', 'unmoderate-user'],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: [Discord.Permissions.FLAGS.KICK_MEMBERS],
+            
             args: [{
                 key: 'user',
                 prompt: "Select the user to restore.",
@@ -26,6 +26,11 @@ class UnmoderateCommand extends commando.Command {
 
 
     async run(msg, { user }) {
+        if (!msg.guild.members.get(msg.author.id).hasPermission('KICK_MEMBERS')) {
+            msg.channel.send(`You don't have permission to use that command.`);
+            return;
+        }
+
         /** @type {ModerationSystem} The moderation object. */
         var mods = msg.guild.moderation;
         var member = msg.guild.members.get(user.id);

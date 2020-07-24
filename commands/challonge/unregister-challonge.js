@@ -14,34 +14,37 @@ module.exports = class UnregisterChallonge extends commando.Command {
             examples: ['!uc @Dog#1237', '!uc'],
             argsPromptLimit: 0,
             guildOnly: true,
-            args: [
-                {
-                    key: 'user',
-                    prompt: 'Please enter the Discord User to associate with.',
-                    type: 'user',
-                    validate: (val, msg, arg) => {
-                        var bool = msg.guild.member(msg.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
+            args: [{
+                key: 'user',
+                prompt: 'Please enter the Discord User to associate with.',
+                type: 'user',
+                validate: (val, msg, arg) => {
+                    var bool = msg.guild.member(msg.author).permissions.bitfield & 'ADMINISTRATOR' ||
                         msg.guild.pointSystem.adminRoles.find(r => msg.guild.member(msg.author).roles.has(r));
 
-                        if (!bool && msg.author !== val) {
-                            msg.channel.send('Only users with permissions can associate another user with Challonge.');
-                            return false;
-                        }
+                    if (!bool && msg.author !== val) {
+                        msg.channel.send('Only users with permissions can associate another user with Challonge.');
+                        return false;
+                    }
 
-                        return true;
+                    return true;
 
-                    },
-                    default: ''
-                }
-            ]
+                },
+                default: ''
+            }]
         });
     }
 
     async run(message, { user }) {
-        if(user === '') {
+        if (!msg.guild.members.get(msg.author.id).hasPermission('MANAGE_CHANNELS')) {
+            msg.channel.send(`You don't have permission to use that command.`);
+            return;
+        }
+
+        if (user === '') {
             user = message.author;
         }
-        
+
         var account = message.guild.pointSystem.getUserAccount(user, Account.SERVICE.Challonge);
 
         if (!account) {

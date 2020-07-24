@@ -9,26 +9,29 @@ module.exports = class SetChannelTrap extends commando.Command {
             group: 'admin',
             memberName: 'set-channel-trap',
             description: 'Admin tool for setting a channel for posting trap messages.',
-            examples: [ '!set-channel-trap <channel>' ],
+            examples: ['!set-channel-trap <channel>'],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: [Discord.Permissions.FLAGS.ADMINISTRATOR],
-            args: [
-                {
-                    key: 'channel',
-                    prompt: "Enter a channel name for posting trap messages.",
-                    type: 'channel',
-                    default: ''
-                }
-            ]
+            
+            args: [{
+                key: 'channel',
+                prompt: "Enter a channel name for posting trap messages.",
+                type: 'channel',
+                default: ''
+            }]
         });
     }
 
-    
+
     async run(msg, { channel }) {
-        if(channel !== '') {
+        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+            msg.channel.send(`You don't have permission to use that command.`);
+            return;
+        }
+
+        if (channel !== '') {
             msg.guild.admin.trapChannelID = channel.id;
-    
+
             msg.channel.send(`Trap channel set successfully.  Traps will now be posted in ${channel}`);
         } else {
             var channel = this.client.channels.get(msg.guild.admin.trapChannelID);

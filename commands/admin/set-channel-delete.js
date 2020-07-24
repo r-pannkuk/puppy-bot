@@ -10,26 +10,29 @@ module.exports = class SetChannelDelete extends commando.Command {
             group: 'admin',
             memberName: 'set-channel-delete',
             description: 'Stores a text channel for reporting deleted messages.',
-            examples: [ '!set-channel-delete #channel' ],
+            examples: ['!set-channel-delete #channel'],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: [Discord.Permissions.FLAGS.ADMINISTRATOR],
-            args: [
-                {
-                    key: 'channel',
-                    prompt: "Store a channel for use.",
-                    type: 'channel',
-                    default: ''
-                }
-            ]
+            
+            args: [{
+                key: 'channel',
+                prompt: "Store a channel for use.",
+                type: 'channel',
+                default: ''
+            }]
         });
     }
 
-    
+
     async run(msg, { channel }) {
-        if(channel !== '') {
+        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+            msg.channel.send(`You don't have permission to use that command.`);
+            return;
+        }
+
+        if (channel !== '') {
             msg.guild.admin.deleteChannelID = channel.id;
-    
+
             msg.channel.send(`Deletion channel set to ${channel}.`);
         } else {
             var channel = this.client.channels.get(msg.guild.admin.deleteChannelID);
@@ -37,5 +40,5 @@ module.exports = class SetChannelDelete extends commando.Command {
         }
     }
 
-    
+
 }

@@ -14,8 +14,7 @@ module.exports = class AwardChallongeCommand extends commando.Command {
             examples: ['!award soku-123 total 1000', '!award soku-123 matches 1000 500 250'],
             argsPromptLimit: 0,
             guildOnly: true,
-            args: [
-                {
+            args: [{
                     key: 'challonge',
                     prompt: "Please provide the user to award.",
                     type: 'string',
@@ -62,11 +61,8 @@ module.exports = class AwardChallongeCommand extends commando.Command {
     }
 
     async run(message, { challonge, point_allocation, amounts }) {
-        var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
-            message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.author).roles.has(r));
-
-        if (!bool) {
-            message.channel.send('You must have permissions to use this command.');
+        if (!msg.guild.members.get(msg.author.id).hasPermission('MANAGE_CHANNELS')) {
+            msg.channel.send(`You don't have permission to use that command.`);
             return;
         }
 
@@ -81,30 +77,30 @@ module.exports = class AwardChallongeCommand extends commando.Command {
         var matches = Object.values(await message.guild.challonge._matchesGetAll({ _id: challonge }));
 
         var participantPerformances = participants
-        .filter(p => p.participant.finalRank !== null)
-        .map(p => {
-            return {
-                id: p.participant.id,
-                challongeId: p.participant.challongeUsername,
-                displayName: p.participant.displayName,
-                rank: p.participant.finalRank,
-                wonMatches: matches.
+            .filter(p => p.participant.finalRank !== null)
+            .map(p => {
+                return {
+                    id: p.participant.id,
+                    challongeId: p.participant.challongeUsername,
+                    displayName: p.participant.displayName,
+                    rank: p.participant.finalRank,
+                    wonMatches: matches.
                     filter(m => m.match.winnerId === p.participant.id)
                     .length,
-                wonGames: matches
-                    .filter(m => m.match.player1Id === p.participant.id)
-                    .reduce((prev, m) => {
-                        var scores = m.match.scoresCsv.split('-').map(i => parseInt(i));
-                        return prev + scores[0];
-                    }, 0) +
-                    matches
+                    wonGames: matches
+                        .filter(m => m.match.player1Id === p.participant.id)
+                        .reduce((prev, m) => {
+                            var scores = m.match.scoresCsv.split('-').map(i => parseInt(i));
+                            return prev + scores[0];
+                        }, 0) +
+                        matches
                         .filter(m => m.match.player2Id === p.participant.id)
                         .reduce((prev, m) => {
                             var scores = m.match.scoresCsv.split('-').map(i => parseInt(i));
                             return prev + scores[1];
                         }, 0)
-            }
-        });
+                }
+            });
 
         /* Sorting and assigning shares to participants based on the type of
          * point allocation that was decided upon.  
@@ -159,7 +155,7 @@ module.exports = class AwardChallongeCommand extends commando.Command {
 
             totalShares -= userResult.shares;
 
-            if(userResult.award === 0) {
+            if (userResult.award === 0) {
                 continue;
             }
 

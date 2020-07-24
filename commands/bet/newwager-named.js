@@ -16,8 +16,7 @@ module.exports = class NewWagerNamedCommand extends commando.Command {
             examples: ['!newwager-named "My Title" 500 @Dog#3471 @Hazelyn#6286'],
             argsPromptLimit: 0,
             guildOnly: true,
-            args: [
-                {
+            args: [{
                     key: 'title',
                     prompt: "Enter a title for this wager pool.",
                     type: 'string',
@@ -41,11 +40,8 @@ module.exports = class NewWagerNamedCommand extends commando.Command {
     }
 
     async run(message, { title, wager, options }) {
-        var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
-            message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.author).roles.has(r));
-
-        if (!bool) {
-            message.channel.send('You must have permissions to use this command.');
+        if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(message.author.id))) {
+            message.channel.send(`You don't have permission to use that command.`)
             return;
         }
 

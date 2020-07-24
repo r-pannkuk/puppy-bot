@@ -13,7 +13,7 @@ module.exports = async function (client, messageReaction, user) {
 
     var index = Object.values(emojis).findIndex(e => e === emoji.name);
 
-    if(message.guild === undefined || message.guild === null) {
+    if (message.guild === undefined || message.guild === null) {
         return;
     }
 
@@ -35,15 +35,12 @@ module.exports = async function (client, messageReaction, user) {
     var betPool = message.guild.pointSystem.findBetPoolByMessage(message.id);
 
     if (betPool) {
-        var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
-            message.guild.pointSystem.adminRoles.find(r => message.guild.member(user).roles.has(r));
-
-        if (betPool._status !== BetPool.STATE.Closed) {
+        if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(user.id))) {
+            user.send(`Betting is closed. Only authorized roles can select a winner.`);
             return;
         }
 
-        if (!bool) {
-            user.send(`Betting is closed. Only authorized roles can select a winner.`);
+        if (betPool._status !== BetPool.STATE.Closed) {
             return;
         }
 
@@ -86,4 +83,3 @@ module.exports = async function (client, messageReaction, user) {
 
     }
 };
-

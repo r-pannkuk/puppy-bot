@@ -13,7 +13,7 @@ module.exports = class SetChannelModeration extends commando.Command {
             argsPromptLimit: 0,
             aliases: ['set-channel-gulag', 'set-channel-moderate'],
             guildOnly: true,
-            userPermissions: [Discord.Permissions.FLAGS.ADMINISTRATOR],
+            
             args: [{
                 key: 'channel',
                 prompt: "Enter a channel name which will be designated for user moderation.",
@@ -24,6 +24,11 @@ module.exports = class SetChannelModeration extends commando.Command {
     }
 
     async run(msg, { channel }) {
+        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+            msg.channel.send(`You don't have permission to use that command.`);
+            return;
+        }
+
         if (channel !== '') {
             msg.guild.admin.moderationChannelID = channel.id;
 

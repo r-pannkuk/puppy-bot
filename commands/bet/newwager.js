@@ -18,8 +18,7 @@ module.exports = class NewWagerCommand extends commando.Command {
             examples: ['!newwager 500 @Dog#3471 @Hazelyn#6286'],
             argsPromptLimit: 0,
             guildOnly: true,
-            args: [
-                {
+            args: [{
                     key: 'wager',
                     prompt: "Enter an optional reason for why this user is being penalized.",
                     type: 'integer',
@@ -43,7 +42,7 @@ module.exports = class NewWagerCommand extends commando.Command {
         options
     }) {
 
-        if(options.length > OPTIONS_LIMIT) {
+        if (options.length > OPTIONS_LIMIT) {
             message.channel.send(`Please limit the number of unique options to ${OPTIONS_LIMIT} or less.`);
             return;
         }
@@ -52,40 +51,37 @@ module.exports = class NewWagerCommand extends commando.Command {
             _type: Source.TYPE.Command,
             _id: message._id
         });
-    
+
         var discordifyOption = (val) => {
             const matches = val.match(/^<@!?(\d+)>$/);
             if (matches === null) return val;
-    
+
             const id = matches[1];
             return message.guild.members.get(id).displayName;
         }
-    
+
         var translatedOptions = options.map(discordifyOption);
-    
+
         var betPool = message.guild.pointSystem.newBetPool(message.author, wager, source, translatedOptions, title);
-    
+
         betPool = message.guild.pointSystem.openBetPool(betPool, message.author);
-    
+
         var embed = RichEmbedBuilder.new(betPool);
-    
-        message.channel.send(embed).then(async (msg) => {
-    
+
+        message.channel.send(embed).then(async(msg) => {
+
             message.guild.pointSystem.subscribeBetPool(betPool, msg);
-    
+
             await RichEmbedBuilder.addReactions({
-                message: msg, 
+                message: msg,
                 betPool: betPool
             });
         });
     }
 
     async run(message, { wager, options }) {
-        var bool = message.guild.member(message.author).permissions.bitfield & Discord.Permissions.FLAGS.ADMINISTRATOR ||
-            message.guild.pointSystem.adminRoles.find(r => message.guild.member(message.author).roles.has(r));
-
-        if (!bool) {
-            message.channel.send('You must have permissions to use this command.');
+        if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(message.author.id))) {
+            message.channel.send(`You don't have permission to use that command.`)
             return;
         }
 

@@ -33,7 +33,7 @@ module.exports = class GetModerationsCommand extends commando.Command {
             ],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: [Discord.Permissions.FLAGS.KICK_MEMBERS]
+            userPermissions: ['KICK_MEMBERS']
         });
     }
 
@@ -42,6 +42,11 @@ module.exports = class GetModerationsCommand extends commando.Command {
      * @param {Discord.Message} message 
      */
     async run(message) {
+        if (!msg.guild.members.get(msg.author.id).hasPermission('KICK_MEMBERS')) {
+            msg.channel.send(`You don't have permission to use that command.`);
+            return;
+        }
+
         /** @type {ModerationSystem} The moderation object. */
         var mods = message.guild.moderation;
 
