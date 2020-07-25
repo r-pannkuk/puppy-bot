@@ -1,4 +1,5 @@
 const commando = require('discord.js-commando');
+const Discord = require('discord.js');
 
 
 module.exports = class TrapCommand extends commando.Command {
@@ -22,6 +23,12 @@ module.exports = class TrapCommand extends commando.Command {
     }
 
 
+    /**
+     * 
+     * @param {Discord.Message} message 
+     * @param {object} args 
+     * @param {string} args.phrase Trap phrase
+     */
     async run(message, { phrase }) {
         var success = message.guild.battleSystem.addTrap(
             message,

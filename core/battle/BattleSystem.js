@@ -264,7 +264,7 @@ module.exports = class BattleSystem {
 
         var userObj = this._serializeUser(user);
 
-        if (userObj.traps.length >= 1) {
+        if (userObj.traps.length >= userObj._stats.maxTraps) {
             return false;
         }
 

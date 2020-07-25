@@ -129,7 +129,7 @@ module.exports.useItem = function ({ attacker, victim, item }) {
 module.exports.pelt = function ({ isNew, attacker, victim, item }) {
     var embed = this.useItem({ attacker, victim, item });
 
-    embed.setAuthor(`${attacker.nickame} Pelted!`, attacker.user.displayAvatarURL);
+    embed.setAuthor(`${attacker.nickname} Pelted!`, attacker.user.displayAvatarURL);
 
     if (isNew) {
         embed.setFooter(`*New Item! ${item.item.name} was added to ${attacker.nickname}'s inventory.*`, 'http://puppy-bot.com/puppy-bot-discord/media/battle/items/treasure-chest.png');
