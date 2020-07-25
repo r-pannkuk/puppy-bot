@@ -51,7 +51,7 @@ module.exports = class PeltCommand extends commando.Command {
                 m => m.user.presence.status === 'online' &&
                     m.user.bot === false &&
                     m.user.id !== message.author.id
-            );
+            ).array();
 
             if (users.size === 0) {
                 message.channel.send(`Nobody was around, so you pelted yourself!`);
