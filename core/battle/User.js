@@ -27,7 +27,7 @@ module.exports = class User {
             _energy: config.levels[0].maxEnergy
         },
         _lastEdited,
-        _lastPelt = Date.now(),
+        _lastPelt = 0,
         _traps = []
     }) {
         /** @type {string} */
