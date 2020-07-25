@@ -1,9 +1,20 @@
+const Discord = require('discord.js');
+
+/**
+ * 
+ * @param {Discord.Client} client 
+ * @param {Discord.Message} message 
+ */
 module.exports = function (client, message) {
     if (message.channel.type !== 'text') {
         return;
     }
 
     if (message.author === client.user) {
+        return;
+    }
+
+    if(message.author.bot) {
         return;
     }
 

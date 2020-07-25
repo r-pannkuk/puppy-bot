@@ -167,6 +167,11 @@ module.exports = class BattleSystem {
         if (victim.health <= 0) {
             experience = beforeHealth;
             victim.health = 0;
+
+            var victimGuildMember = this.guildSettings.guild.members.get(victim.id);
+            var attackerGuildMember = this.guildSettings.guild.members.get(attacker.id);
+
+            this.guildSettings.client.emit(`userDeath`, victimGuildMember, victim, attacker, attackerGuildMember, amount);
         }
 
         victim = this._serializeUser(victim);
@@ -192,7 +197,12 @@ module.exports = class BattleSystem {
      * @return {{attacker:User, victim:User, item:UserInventoryItem}}
      */
     useItem(attacker, victim, item) {
-        attacker = this._serializeUser(attacker);
+        attacker = this._serializeUser(attacker); 
+        victim = this._serializeUser(victim);
+
+        if(item instanceof UserInventoryItem) {
+            item = item.schema;
+        }
 
         attacker.energy -= item.energy;
 
@@ -258,7 +268,7 @@ module.exports = class BattleSystem {
 
         attacker.lastPelt = Date.now();
 
-        var useEvent = this.useItem(attacker, victim, invItem.item);
+        var useEvent = this.useItem(attacker, victim, invItem.schema);
 
         return {
             ...useEvent,

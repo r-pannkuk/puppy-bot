@@ -15,7 +15,12 @@ class UserInventory {
     }
 
     /** All item slots for this user. */
-    get items() { return this._items; }
+    get items() { return this._items.sort((a, b) => {
+        if (a.cooldown === b.cooldown) {
+            return b.schema.level - a.schema.level;
+        }
+        return a.cooldown - b.cooldown;
+    }); }
 
     /** The item last used by the user. */
     get lastUsedItem() { return this._items.sort((a, b) => a.lastUsed - b.lastUsed)[0]; }

@@ -67,13 +67,8 @@ module.exports.status = function (guildMember, userObj) {
 
     if (userObj.inventory && userObj.inventory.items.length > 0) {
         var inventoryString = userObj.inventory.items
-            .sort((a, b) => {
-                if (a.cooldown === b.cooldown) {
-                    return b.item.level - a.item.level;
-                }
-                return a.cooldown - b.cooldown;
-            }).reduce((prev, i) => {
-                var item = i.item;
+            .reduce((prev, i) => {
+                var item = i.schema;
                 var cooldown = i.cooldown;
                 var duration = TimeExtract.interval_string_milliseconds(cooldown);
 
@@ -140,18 +135,18 @@ module.exports.useItem = function ({ attacker, victim, item }) {
         .setAuthor(`${attacker.displayName} Attacked with an Item!`, attacker.user.displayAvatarURL)
 
     embed.setDescription(`**Target**: ${victim.user}
-    **Damage**: ${item.item.attack}
+    **Damage**: ${item.schema.attack}
     **Health**: ${Math.floor(victim._stats._health)} / ${victim._stats.maxHealth}`);
 
-    embed.addField(`${item.item.name}`,
-        `${item.item.description}`);
+    embed.addField(`${item.schema.name}`,
+        `${item.schema.description}`);
 
-    embed.addField(`**Level**`, `${item.item.level}`, false);
-    embed.addField(`**Attack**`, `${item.item.attack}`, true);
-    embed.addField(`**Energy**`, `${item.item.energy}`, true);
-    embed.addField(`**Cooldown**`, `${TimeExtract.interval_string_milliseconds(item.item.cooldown)}`, true);
+    embed.addField(`**Level**`, `${item.schema.level}`, false);
+    embed.addField(`**Attack**`, `${item.schema.attack}`, true);
+    embed.addField(`**Energy**`, `${item.schema.energy}`, true);
+    embed.addField(`**Cooldown**`, `${TimeExtract.interval_string_milliseconds(item.schema.cooldown)}`, true);
 
-    embed.setImage(`${item.item.image}`);
+    embed.setImage(`${item.schema.image}`);
     embed.image.height = 100;
     embed.image.width = 100;
 
@@ -172,7 +167,7 @@ module.exports.pelt = function ({ isNew, attacker, victim, item }) {
     embed.setAuthor(`${attacker.displayName} Pelted!`, attacker.user.displayAvatarURL);
 
     if (isNew) {
-        embed.setFooter(`*New Item! ${item.item.name} was added to ${attacker.displayName}'s inventory.*`, 'http://puppy-bot.com/puppy-bot-discord/media/battle/items/treasure-chest.png');
+        embed.setFooter(`*New Item! ${item.schema.name} was added to ${attacker.displayName}'s inventory.*`, 'http://puppy-bot.com/puppy-bot-discord/media/battle/items/treasure-chest.png');
     }
 
     return embed;

@@ -44,17 +44,17 @@ class UserInventoryItem {
     set quantity(int) { this._quantity = int; }
 
     /** Item currently in inventory. */
-    get item() { 
+    get schema() { 
         return this._config.find(i => i.id === this.id); 
     }
 
     /** Remaining cooldown for the item. */
     get cooldown() {
-        if (!this.item) {
+        if (!this.schema) {
             return null;
         }
 
-        var remainingCooldown = this.item.cooldown - (Date.now() - this._lastUsed);
+        var remainingCooldown = this.schema.cooldown - (Date.now() - this._lastUsed);
 
         if(remainingCooldown < 0) {
             remainingCooldown = 0;
