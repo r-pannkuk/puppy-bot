@@ -5,6 +5,7 @@ const UserInventoryItem = require('./UserInventoryItem.js');
 const TimeExtract = require('../TimeExtract.js');
 const Trap = require('./Trap.js');
 const UserStatistics = require('./UserStatistics.js');
+const Item = require('./Item.js');
 
 /**
  * 
@@ -90,6 +91,28 @@ module.exports.status = function (guildMember, userObj) {
 
     return embed;
 }
+
+
+/**
+ * 
+ * @param {Discord.GuildMember} guildMember 
+ * @param {User} stats 
+ * @param {import('./Item.js').ItemConfig[]} itemConfig
+ */
+module.exports.itemList = function (guildMember, stats, itemConfig) {
+    var embed = new Discord.RichEmbed()
+        .setColor('PURPLE')
+        .setAuthor(`${guildMember.displayName}'s Item Checklist`, guildMember.user.displayAvatarURL);
+
+    var itemList = itemConfig.filter(ic => ic.level <= stats.level).map(ic => {
+        var foundItem = stats.inventory.items.find(i => ic.id === i.id);
+        return `${(!foundItem) ? `~~` : `**`}[${ic.level}] ${ic.name}${(!foundItem) ? `~~` : `**`}`;
+    })
+
+    embed.setDescription(itemList.join('\n'));
+
+    return embed;
+};
 
 /**
  * 

@@ -11,6 +11,7 @@ module.exports = class SetDescriptionCommand extends commando.Command {
             memberName: 'set-desc',
             description: 'Sets a user\'s description.',
             examples: [ '!set-description \"A really mean dude with attitude\"', '!set-description \"A really mean dude with attitude\" @Dog' ],
+            aliases: ['set-description', 'setdesc', 'setdescription'],
             argsPromptLimit: 0,
             argsSingleQuotes: true,
             args: [
@@ -34,19 +35,19 @@ module.exports = class SetDescriptionCommand extends commando.Command {
     async run(message, { user, description }) {
         /* Checking if user was passed or if sent as default parameter. */
 
-        if(Object.keys(user).length === 0) {
-            user = message.author;
-        }
+        // if(Object.keys(user).length === 0) {
+        //     user = message.author;
+        // }
 
-        /** @type {BattleSystem} */
-        var battleSystem = message.guild.battleSystem;
+        // /** @type {BattleSystem} */
+        // var battleSystem = message.guild.battleSystem;
 
-        var stats = battleSystem.fetch(user.id);
+        // var stats = battleSystem.fetch(user.id);
 
-        stats.description = description;
+        // stats.description = description;
 
-        message.guild.battleSystem.set(user.id, stats);
+        // message.guild.battleSystem.(user.id, stats);
 
-        message.channel.send(`Updated description for ${user} to \"${description}\"`);
+        // message.channel.send(`Updated description for ${user} to \"${description}\"`);
     }
 }
