@@ -23,7 +23,12 @@ module.exports = class StatusCommand extends commando.Command {
         });
     }
 
-    
+    /**
+     * 
+     * @param {Discord.Message} message 
+     * @param {object} args
+     * @param {Discord.User} args.user
+     */
     async run(message, { user }) {
         /* Checking if user was passed or if sent as default parameter. */
 
@@ -31,9 +36,11 @@ module.exports = class StatusCommand extends commando.Command {
             user = message.author;
         }
 
-        const stats = message.guild.battleSystem.retrieve(user.id);
+        var member = message.guild.members.get(user.id);
 
-        var embed = RichEmbedBuilder.status(user, stats);
+        const stats = message.guild.battleSystem.fetch(user.id);
+
+        var embed = RichEmbedBuilder.status(member, stats);
 
         message.embed(embed);
     }

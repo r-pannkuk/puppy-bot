@@ -16,7 +16,7 @@ module.exports = class CheckTrapCommand extends commando.Command {
 
     
     async run(message) {
-        var user = message.guild.battleSystem.retrieve(message.author.id);
+        var user = message.guild.battleSystem.fetch(message.author.id);
 
         var promise = message.author.createDM();
 
@@ -26,7 +26,7 @@ module.exports = class CheckTrapCommand extends commando.Command {
             promise.then( channel => {
 
                 for(var i in user.traps) {
-                    var trap = message.guild.battleSystem.getTrap(user.traps[i]);
+                    var trap = message.guild.battleSystem.getTrapByID(user.traps[i]);
                     var owner = this.client.users.get(trap.userid);
                     var embed = new Discord.RichEmbed()
                     .setColor('RED');

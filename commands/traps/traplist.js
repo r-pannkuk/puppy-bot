@@ -17,13 +17,13 @@ module.exports = class TrapListCommand extends commando.Command {
 
     
     async run(message) {
-        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
-            msg.channel.send(`You don't have permission to use that command.`);
+        if (!message.guild.members.get(message.author.id).hasPermission('ADMINISTRATOR')) {
+            message.channel.send(`You don't have permission to use that command.`);
             return;
         }
 
 
-        var traps = Object.values(message.guild.battleSystem.trapList());
+        var traps = Object.values(message.guild.battleSystem.traps);
         if(traps.length > 0) {
             var string = "";
             for(var i in traps) {

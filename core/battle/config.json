@@ -1,88 +1,381 @@
 {
     "name": "battle",
-    "levels" : [
+    "peltInterval": 3600000,
+    "regen": {
+        "health": 0.0000166666666666667,
+        "energy": 0.0000833333333333335
+    },
+    "levels": [
         {
             "level": 1,
             "xp": 0,
-            "maxTraps": 1
+            "maxTraps": 1,
+            "maxHealth": 10,
+            "maxEnergy": 100
         },
         {
             "level": 2,
             "xp": 30,
-            "maxTraps": 1
+            "maxTraps": 1,
+            "maxHealth": 40,
+            "maxEnergy": 200
         },
         {
             "level": 3,
             "xp": 100,
-            "maxTraps": 1
+            "maxTraps": 1,
+            "maxHealth": 75,
+            "maxEnergy": 300
         },
         {
             "level": 4,
             "xp": 200,
-            "maxTraps": 1
+            "maxTraps": 1,
+            "maxHealth": 110,
+            "maxEnergy": 400
         },
         {
             "level": 5,
             "xp": 350,
-            "maxTraps": 2
+            "maxTraps": 2,
+            "maxHealth": 150,
+            "maxEnergy": 500
         },
         {
             "level": 6,
             "xp": 600,
-            "maxTraps": 2
+            "maxTraps": 2,
+            "maxHealth": 200,
+            "maxEnergy": 600
         },
         {
             "level": 7,
             "xp": 1000,
-            "maxTraps": 2
+            "maxTraps": 2,
+            "maxHealth": 250,
+            "maxEnergy": 700
         },
         {
             "level": 8,
             "xp": 1500,
-            "maxTraps": 2
+            "maxTraps": 3,
+            "maxHealth": 300,
+            "maxEnergy": 800
         },
         {
             "level": 9,
             "xp": 2250,
-            "maxTraps": 3
+            "maxTraps": 3,
+            "maxHealth": 350,
+            "maxEnergy": 900
         },
         {
             "level": 10,
             "xp": 3500,
-            "maxTraps": 3
+            "maxTraps": 3,
+            "maxHealth": 400,
+            "maxEnergy": 1000
         },
         {
             "level": 11,
             "xp": 5500,
-            "maxTraps": 3
+            "maxTraps": 3,
+            "maxHealth": 450,
+            "maxEnergy": 1100
         },
         {
             "level": 12,
             "xp": 8000,
-            "maxTraps": 4
+            "maxTraps": 4,
+            "maxHealth": 500,
+            "maxEnergy": 1200
         },
         {
             "level": 13,
             "xp": 11500,
-            "maxTraps": 4
+            "maxTraps": 4,
+            "maxHealth": 666,
+            "maxEnergy": 1300
         },
         {
             "level": 14,
             "xp": 16000,
-            "maxTraps": 4
+            "maxTraps": 4,
+            "maxHealth": 725,
+            "maxEnergy": 1400
         },
         {
             "level": 15,
             "xp": 25000,
-            "maxTraps": 5
+            "maxTraps": 5,
+            "maxHealth": 800,
+            "maxEnergy": 1500
         }
     ],
-    "items" : [
+    "items": [
         {
             "id": 1,
             "name": "Paper Knife",
-            "atk": 1,
-            "description": "Made from the strongest paper.  Mildly annoying."
+            "description": "Made from the strongest construction paper.  Mildly annoying and causes nasty paper cuts.",
+            "attack": 1,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/paper-knife.png",
+            "energy": 2,
+            "level": 1,
+            "chance": 100,
+            "cooldown": 300000
+        },
+        {
+            "id": 2,
+            "name": "Wooden Gun",
+            "description": "A powerful device which deals high mental damage to an opponent.",
+            "attack": 5,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/wooden-gun.png",
+            "energy": 10,
+            "level": 2,
+            "chance": 190,
+            "cooldown": 600000
+        },
+        {
+            "id": 3,
+            "name": "Kate] Bracket",
+            "description": "A magical bracket flung from a stapler that can easily put an eye out. ",
+            "attack": 3,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/kate%5d-bracket.png",
+            "energy": 6,
+            "level": 3,
+            "chance": 280,
+            "cooldown": 180000
+        },
+        {
+            "id": 16,
+            "name": "Rubber Band",
+            "description": "A simple rubber band.  Maybe if you were stronger you could use it to sever somebody's body in half.",
+            "attack": 5,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/rubber-band.png",
+            "energy": 15,
+            "level": 3,
+            "chance": 140,
+            "cooldown": 120000
+        },
+        {
+            "id": 17,
+            "name": "Ninja Info Cards",
+            "description": "What the heck are those?  It's hard to explain.  They may not look like much.",
+            "attack": 8,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/ninja-info-card.jpg",
+            "energy": 12,
+            "level": 4,
+            "chance": 123,
+            "cooldown": 600000
+        },
+        {
+            "id": 4,
+            "name": "Real Knife",
+            "description": "Like Paper Knives but actually does damage.  Good for users with time stop abilities.",
+            "attack": 10,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/real-knife.png",
+            "energy": 20,
+            "level": 4,
+            "chance": 370,
+            "cooldown": 540000
+        },
+        {
+            "id": 5,
+            "name": "Alpha Gun",
+            "description": "A gun carried by Chargeman Ken which can instantly kill Juralians with a beam-like attack.",
+            "attack": 12,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/alpha-gun.PNG",
+            "energy": 24,
+            "level": 5,
+            "chance": 460,
+            "cooldown": 600000
+        },
+        {
+            "id": 18,
+            "name": "League of Legends Player",
+            "description": "A raging league of legends player, blabbering something about map awareness.",
+            "attack": 40,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/league-of-legends-rager.png",
+            "energy": 50,
+            "level": 5,
+            "chance": 230,
+            "cooldown": 2400000
+        },
+        {
+            "id": 19,
+            "name": "Sharken Shooter",
+            "description": "Transforms and launches to the opponent, causing a direct hit.  Victory is yours.",
+            "attack": 12,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/sharken-shooter.jpg",
+            "energy": 20,
+            "level": 6,
+            "chance": 550,
+            "cooldown": 600000
+        },
+        {
+            "id": 6,
+            "name": "Zabuza Sword",
+            "description": "Cannot be beat. ",
+            "attack": 25,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/zabuza-sword.png",
+            "energy": 50,
+            "level": 6,
+            "chance": 550,
+            "cooldown": 1200000
+        },
+        {
+            "id": 7,
+            "name": "G-Apache",
+            "description": "An archaism capable of flight and mid-air maneuvers.  Piloted by Gilbert.",
+            "attack": 50,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/g-apache.PNG",
+            "energy": 100,
+            "level": 7,
+            "chance": 640,
+            "cooldown": 2700000
+        },
+        {
+            "id": 8,
+            "name": "Blue Truth",
+            "description": "A conjecture which can point out a flaw in another's argument.",
+            "attack": 125,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/blue-truth.png",
+            "energy": 250,
+            "level": 8,
+            "chance": 730,
+            "cooldown": 6000000
+        },
+        {
+            "id": 21,
+            "name": "Red Truth",
+            "description": "An indisputable fact that does not need evidence to support it.",
+            "attack": 400,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/red-truth.png",
+            "energy": 600,
+            "level": 8,
+            "chance": 91,
+            "cooldown": 21600000
+        },
+        {
+            "id": 9,
+            "name": "Black Key",
+            "description": "Sacrament of the Church used as a weapon against demons and vampires.",
+            "attack": 50,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/black-key.png",
+            "energy": 100,
+            "level": 9,
+            "chance": 820,
+            "cooldown": 2400000
+        },
+        {
+            "id": 23,
+            "name": "Homingu Reizaa",
+            "description": "Lasers capable of instantaneously destroying a fleet of Space Monsters. Aim for the top, Noriko.",
+            "attack": 100,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/homingu-reizaa.gif",
+            "energy": 80,
+            "level": 10,
+            "chance": 91,
+            "cooldown": 5400000
+        },
+        {
+            "id": 10,
+            "name": "Prog Knife",
+            "description": "A giant knife which vibrates at an extremely high frequency, increasing cutting sharpness down to the molecular level.",
+            "attack": 60,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/prog-knife.png",
+            "energy": 120,
+            "level": 10,
+            "chance": 910,
+            "cooldown": 2700000
+        },
+        {
+            "id": 11,
+            "name": "Orbal Gear",
+            "description": "A new kind of mech weapon that can compete with Ouroboros' advanced military technology.   Prone to glitches.",
+            "attack": 125,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/orbal-gear.png",
+            "energy": 250,
+            "level": 11,
+            "chance": 1000,
+            "cooldown": 5400000
+        },
+        {
+            "id": 25,
+            "name": "Stand Arrow",
+            "description": "A golden arrow with the ability to awaken one's inner stand abilities.  More often than not it just kills them.",
+            "attack": 800,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/stand-arrow.png",
+            "energy": 800,
+            "level": 11,
+            "chance": 50,
+            "cooldown": 43200000
+        },
+        {
+            "id": 27,
+            "name": "Divine Axe Rhitta",
+            "description": "A giant and incredibly off-balance axe that stores the heat one generates throughout the day as solar energy.  It can be released all at once in a tremendous amount of force and blinding light. ",
+            "attack": 1000,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/divine-axe-rhitta.png",
+            "energy": 600,
+            "level": 12,
+            "chance": 109,
+            "cooldown": 86400000
+        },
+        {
+            "id": 12,
+            "name": "Megaton Hammer",
+            "description": "A massive hammer that makes no sense.  Does a lot of damage but has a pretty long swing time.",
+            "attack": 200,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/megaton-hammer.png",
+            "energy": 400,
+            "level": 12,
+            "chance": 1090,
+            "cooldown": 7200000
+        },
+        {
+            "id": 13,
+            "name": "Demon Sword Heart Span",
+            "description": "Kiss-shot's demon sword that effectively kills oddities.  A replica of Youtou Kokorowatari.",
+            "attack": 90,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/demon-sword-heartspan.jpg",
+            "energy": 180,
+            "level": 13,
+            "chance": 1180,
+            "cooldown": 3000000
+        },
+        {
+            "id": 29,
+            "name": "Mirror Force Card",
+            "description": "1st Edition Mirror Force Card.  Overpowered bullshit.",
+            "attack": 300,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/mirror-force-card.jpg",
+            "energy": 300,
+            "level": 13,
+            "chance": 236,
+            "cooldown": 7200000
+        },
+        {
+            "id": 30,
+            "name": "Black Barrel Replica",
+            "description": "A copy made from the original Black Barrel, a gun created from the original Longinus, a weapon that can even kill gods. It's output power is proportionate to the lifespan of the target, and can render even otherwise immortal enemies to have a finite lifespan and die.",
+            "attack": 1000,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/black-barrel-replica.jpg",
+            "energy": 1200,
+            "level": 14,
+            "chance": 635,
+            "cooldown": 48000000
+        },
+        {
+            "id": 14,
+            "name": "Spear of Longinus",
+            "description": "An extraterrestrial artifact with the power to penetrate any A.T. field and imobilize godly beings.",
+            "attack": 200,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/spear-of-longinus.png",
+            "energy": 400,
+            "level": 14,
+            "chance": 1270,
+            "cooldown": 6600000
         }
     ]
 }

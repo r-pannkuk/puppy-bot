@@ -17,7 +17,7 @@ module.exports = class Points {
                 penalties: {},
                 bets: {},
                 betPools: {},
-                adminRoles: []
+                authorizedRoles: []
             });
         }
 
@@ -41,8 +41,8 @@ module.exports = class Points {
             settings.betPools = {};
         }
 
-        if (settings.adminRoles === undefined) {
-            settings.adminRoles = [];
+        if (settings.authorizedRoles === undefined) {
+            settings.authorizedRoles = [];
         }
 
         this.guildSettings.set('points', settings);
@@ -55,7 +55,7 @@ module.exports = class Points {
     get users() { return this.settings.users; }
     get penalties() { return this.settings.penalties; }
     get betPools() { return this.settings.betPools; }
-    get adminRoles() { return this.settings.adminRoles; }
+    get authorizedRoles() { return this.settings.authorizedRoles; }
 
 
     _serialize(system, generator, id) {
@@ -69,10 +69,10 @@ module.exports = class Points {
     _serializePenalty(penalty_id) { return this._serialize(this.settings.penalties, (obj) => new Penalty(obj), penalty_id); }
     _serializeBetPool(betPool_id) { return this._serialize(this.settings.betPools, (obj) => new BetPool(obj), betPool_id); }
 
-    addAdminRole(role_id) {
+    addAuthorizedRole(role_id) {
         var settings = this.settings;
 
-        settings.adminRoles.push(role_id);
+        settings.authorizedRoles.push(role_id);
 
         this.settings = settings;
     }
@@ -88,8 +88,8 @@ module.exports = class Points {
     getUserAuthorization(member) {
         var hasAuthorization = false;
 
-        for (var i in this.adminRoles) {
-            hasAuthorization = member.roles.has(this.adminRoles[i]) || hasAuthorization;
+        for (var i in this.authorizedRoles) {
+            hasAuthorization = member.roles.has(this.authorizedRoles[i]) || hasAuthorization;
 
             if (hasAuthorization) {
                 return true;

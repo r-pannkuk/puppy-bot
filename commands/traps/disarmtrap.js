@@ -24,7 +24,7 @@ module.exports = class DisarmTrapCommand extends commando.Command {
 
     
     async run(message, { phrase }) {
-        var traps = message.guild.battleSystem.trapList();
+        var traps = message.guild.battleSystem.traps;
         var sanitizedPhrase = phrase.toLowerCase();
 
         if(Object.values(traps).find(t => t.phrase.indexOf(sanitizedPhrase) > -1)) {

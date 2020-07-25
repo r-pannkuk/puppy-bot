@@ -1,15 +1,15 @@
-const Moderation = require('./Moderation.js');
 const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 const Scheduler = require('node-schedule');
 
-/**
- * @property {object} moderations Container for all moderations.
- */
+const Moderation = require('./Moderation.js');
+
 class ModerationSystem {
     /**
      * 
-     * @param {GuildSettingsHelper} guildSettings 
+     * @param {object} guildSettings 
+     * @param {Discord.Client} guildSettings.client
+     * @param {Discord.Guild} guildSettings.guild 
      */
     constructor(guildSettings) {
         if (guildSettings.get('moderation') === undefined) {
@@ -20,6 +20,7 @@ class ModerationSystem {
         this.guildSettings = guildSettings;
     }
 
+    /** @type {Object.<string, Moderation} A container of moderations. */
     get moderations() { return this.guildSettings.get('moderation'); }
     set moderations(obj) { this.guildSettings.set('moderation', obj); }
 
@@ -56,6 +57,9 @@ class ModerationSystem {
         action(moderation._id, moderation._endTime, this.unmoderateUser.bind(this, moderation));
     }
 
+    /**
+     * Schedules and fires all moderations that have passed.  Used on start up.
+     */
     scheduleAllModerations() {
         for (var i in this.moderations) {
             /** @type {Moderation} */
@@ -95,7 +99,7 @@ class ModerationSystem {
         /** @type {Discord.Guild} */
         var guild = this.guildSettings.guild;
         var member = guild.members.get(mod._userId);
-        member.send(`You have been moderated in ${guild.name}`);
+        member.send(`You have been moderated in **${guild.name}** until ${mod._endTime}.`);
 
         moderations[mod._id] = mod;
 
@@ -106,10 +110,10 @@ class ModerationSystem {
 
     /**
      * Unmoderatesa user, restoring them to their role status prior to the moderating.
-     * @param {(Discord.User|string|Moderation)} user User ID of the user to unmoderate.
+     * @param {(Discord.User|Discord.GuildMember|string|Moderation)} user User ID of the user to unmoderate.
      */
     unmoderateUser(user) {
-        if (user instanceof Discord.User) {
+        if (user instanceof Discord.User || user instanceof Discord.GuildMember) {
             user = user.id;
         } else if ('_id' in user) {
             user = user._userId;
@@ -148,7 +152,7 @@ class ModerationSystem {
     getUserModerations(user) {
         if (user instanceof Moderation) {
             user = user._userId;
-        } else if (user instanceof Discord.User) {
+        } else if (user instanceof Discord.User || user instanceof Discord.GuildMember) {
             user = user.id;
         }
         return Object.values(this.moderations).filter(m => m._userId === user && m._active === true)[0];

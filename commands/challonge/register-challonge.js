@@ -32,8 +32,8 @@ module.exports = class RegisterChallonge extends commando.Command {
     }
 
     async run(message, { challongeId, user }) {
-        if (!msg.guild.members.get(msg.author.id).hasPermission('MANAGE_CHANNELS')) {
-            msg.channel.send(`You don't have permission to use that command.`);
+        if (!message.guild.members.get(message.author.id).hasPermission('MANAGE_CHANNELS')) {
+            message.channel.send(`You don't have permission to use that command.`);
             return;
         }
 

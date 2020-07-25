@@ -2,6 +2,10 @@ const Discord = require('discord.js');
 const moment = require('moment-timezone');
 
 module.exports = function(client, message) {
+    if(!message.guild.admin.deleteChannelID) {
+        return;
+    }
+
     if(message.channel.type !== 'text') {
         return;
     }

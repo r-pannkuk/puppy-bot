@@ -38,7 +38,7 @@ module.exports = class GetRemindersCommand extends commando.Command {
                 var te = new TimeExtract(reminder.reminderTime);
 
                 var sent = await message.author.send(
-                    `**(${te.interval_string()})**: https://discordapp.com/channels/${reminder.discordGuildId}/${reminder.discordChannelId}/${reminder.discordMessageId}`
+                    `**(${te.interval_date()})**: https://discordapp.com/channels/${reminder.discordGuildId}/${reminder.discordChannelId}/${reminder.discordMessageId}`
                 );
             }
         } else {

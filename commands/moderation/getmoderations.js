@@ -69,7 +69,7 @@ module.exports = class GetModerationsCommand extends commando.Command {
 
             var duration = new TimeExtract(mod._endTime);
 
-            description += `${user} [by ${moderator}] - ${duration.interval_string()}\n`;
+            description += `${user} [by ${moderator}] - ${duration.interval_date()}\n`;
         }
 
         var embed = new Discord.RichEmbed();

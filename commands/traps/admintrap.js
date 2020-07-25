@@ -58,7 +58,7 @@ module.exports = class AdminTrapCommand extends commando.Command {
             return false;
         }
 
-        var status = message.guild.battleSystem.retrieve(ownerId);
+        var status = message.guild.battleSystem.fetch(ownerId);
 
         if ('trapActive' in status && status.trapActive) {
             msg.channel.send('User already has a trap set.');

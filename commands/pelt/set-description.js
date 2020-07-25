@@ -1,6 +1,7 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
+const BattleSystem = require('../../core/battle/BattleSystem.js');
 
 module.exports = class SetDescriptionCommand extends commando.Command {
     constructor(client) {
@@ -37,7 +38,10 @@ module.exports = class SetDescriptionCommand extends commando.Command {
             user = message.author;
         }
 
-        var stats = message.guild.battleSystem.retrieve(user.id);
+        /** @type {BattleSystem} */
+        var battleSystem = message.guild.battleSystem;
+
+        var stats = battleSystem.fetch(user.id);
 
         stats.description = description;
 

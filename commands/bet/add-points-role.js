@@ -35,7 +35,7 @@ module.exports = class AddPointsRole extends commando.Command {
         /** @type {PointSystem} */
         var pointSystem = msg.guild.pointSystem;
 
-        pointSystem.addAdminRole(role.id);
+        pointSystem.addAuthorizedRole(role.id);
 
         msg.channel.send(`Role ${role} added to list of wager organizers.`);
     }

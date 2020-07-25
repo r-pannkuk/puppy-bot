@@ -26,7 +26,7 @@ module.exports = class RemoveTrapCommand extends commando.Command {
     
     async run(message, { phrase }) {
         if(!phrase) {
-            var traps = Object.values(message.guild.battleSystem.trapList());
+            var traps = Object.values(message.guild.battleSystem.traps);
     
             var trap = traps.find(t => t.userid === message.author.id);
     
@@ -40,7 +40,7 @@ module.exports = class RemoveTrapCommand extends commando.Command {
             }
         }
         else {
-            var traps = message.guild.battleSystem.trapList();
+            var traps = message.guild.battleSystem.traps;
             var sanitizedPhrase = phrase.toLowerCase();
 
             if(Object.keys(traps).indexOf(sanitizedPhrase) > -1) {

@@ -20,7 +20,7 @@ module.exports = class UnregisterChallonge extends commando.Command {
                 type: 'user',
                 validate: (val, msg, arg) => {
                     var bool = msg.guild.member(msg.author).permissions.bitfield & 'ADMINISTRATOR' ||
-                        msg.guild.pointSystem.adminRoles.find(r => msg.guild.member(msg.author).roles.has(r));
+                        msg.guild.pointSystem.authorizedRoles.find(r => msg.guild.member(msg.author).roles.has(r));
 
                     if (!bool && msg.author !== val) {
                         msg.channel.send('Only users with permissions can associate another user with Challonge.');
@@ -36,8 +36,8 @@ module.exports = class UnregisterChallonge extends commando.Command {
     }
 
     async run(message, { user }) {
-        if (!msg.guild.members.get(msg.author.id).hasPermission('MANAGE_CHANNELS')) {
-            msg.channel.send(`You don't have permission to use that command.`);
+        if (!message.guild.members.get(message.author.id).hasPermission('MANAGE_CHANNELS')) {
+            message.channel.send(`You don't have permission to use that command.`);
             return;
         }
 

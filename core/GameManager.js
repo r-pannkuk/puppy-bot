@@ -18,7 +18,7 @@ module.exports = class GameManager {
      * @param {string} fieldKey The field to look up
      */
     get(gameKey, userKey, fieldKey) {
-        if(userKey instanceof Discord.User) {
+        if(userKey instanceof Discord.User || userKey instanceof Discord.GuildMember) {
             userKey = userKey.id;
         }
 
@@ -70,7 +70,7 @@ module.exports = class GameManager {
      * @param {string} fieldValue 
      */
     set(gameKey, userKey, fieldKey, fieldValue) {
-        if(userKey instanceof Discord.User) {
+        if(userKey instanceof Discord.User || userKey instanceof Discord.GuildMember) {
             userKey = userKey.id;
         }
 
@@ -102,7 +102,7 @@ module.exports = class GameManager {
      * @param {string} fieldKey 
      */
     delete(gameKey, userKey, fieldKey) {
-        if(userKey instanceof Discord.User) {
+        if(userKey instanceof Discord.User || userKey instanceof Discord.GuildMember) {
             userKey = userKey.id;
         }
 

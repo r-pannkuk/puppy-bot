@@ -13,6 +13,8 @@ class TimeExtract {
     constructor(string, timezone = null) {
         if (string instanceof Date) {
             string = string.toString();
+        } else if (typeof(string) === 'number') {
+            string = string.toString();
         }
 
         this.timezone = timezone;
@@ -118,10 +120,8 @@ class TimeExtract {
         return currentOffset.getTime();
     }
 
-    interval_string() {
-        var date = this.extract();
-
-        var deltaSeconds = (date.getTime() - Date.now()) / 1000;
+    static interval_string_milliseconds(milliseconds) {
+        var deltaSeconds = milliseconds / 1000;
 
         var days = Math.floor(deltaSeconds / 86400);
         deltaSeconds -= days * 86400;
@@ -142,6 +142,12 @@ class TimeExtract {
         if (deltaSeconds) { datestring.push(`${deltaSeconds} seconds`) }
 
         return datestring.join(', ');
+    }
+
+    interval_date() {
+        var date = this.extract();
+
+        return this.interval_string_milliseconds(date.getTime() - Date.now());
     }
 
     _process_spaceless() {
