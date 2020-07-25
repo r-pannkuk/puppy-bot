@@ -75,6 +75,9 @@ module.exports = class PeltCommand extends commando.Command {
             ...victim
         }
 
+        damageEvent.attacker.displayName = attacker.displayName;
+        damageEvent.victim.displayName = victim.displayName;
+
         var embed = RichEmbedBuilder.pelt(damageEvent);
 
         message.embed(embed);

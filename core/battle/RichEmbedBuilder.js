@@ -1,8 +1,17 @@
 const Discord = require('discord.js');
+
 const User = require('./User.js');
 const UserInventoryItem = require('./UserInventoryItem.js');
 const TimeExtract = require('../TimeExtract.js');
+const Trap = require('./Trap.js');
+const UserStatistics = require('./UserStatistics.js');
 
+/**
+ * 
+ * @param {Trap} trap 
+ * @param {Discord.Message} message 
+ * @param {User} victimStats 
+ */
 module.exports.trapTriggered = function (trap, message, victimStats) {
     var victim = message.author;
     var owner = message.client.users.get(trap.userid);
@@ -89,6 +98,37 @@ module.exports.status = function (guildMember, userObj) {
 
 /**
  * 
+ * @param {User} user 
+ * @param {UserStatistics} beforeStats 
+ */
+module.exports.levelUp = function (user, beforeStats) {
+    var embed = new Discord.RichEmbed()
+        .setColor('GOLD')
+        .setAuthor('You leveled up!');
+
+    var afterStats = user.stats;
+
+    embed.addField(beforeStats.level,
+        `**HP**: ${beforeStats.maxHealth}\n` +
+        `**Energy**: ${beforeStats.maxEnergy}\n` +
+        `**Max Traps**: ${beforeStats.maxTraps}\n` +
+        `**XP Left**: 0`,
+        true);
+
+    embed.addField(`\u200b`, "➡️\n\n➡️", true);
+
+    embed.addField(afterStats.level,
+        `**HP**: ${afterStats.maxHealth}\n` +
+        `**Energy**: ${afterStats.maxEnergy}\n` +
+        `**Max Traps**: ${afterStats.maxTraps}\n` +
+        `**XP Left**: ${afterStats.experience} / ${afterStats.nextLevelExperience}`,
+        true);
+
+    return embed;
+}
+
+/**
+ * 
  * @param {object} args 
  * @param {User|Discord.GuildMember} args.attacker Who commited the action.
  * @param {User|Discord.GuildMember} args.victim Who was the intended target.
@@ -97,7 +137,7 @@ module.exports.status = function (guildMember, userObj) {
 module.exports.useItem = function ({ attacker, victim, item }) {
     var embed = new Discord.RichEmbed()
         .setColor('DARK_RED')
-        .setAuthor(`${attacker.nickname} Attacked with an Item!`, attacker.user.displayAvatarURL)
+        .setAuthor(`${attacker.displayName} Attacked with an Item!`, attacker.user.displayAvatarURL)
 
     embed.setDescription(`**Target**: ${victim.user}
     **Damage**: ${item.item.attack}
@@ -129,10 +169,10 @@ module.exports.useItem = function ({ attacker, victim, item }) {
 module.exports.pelt = function ({ isNew, attacker, victim, item }) {
     var embed = this.useItem({ attacker, victim, item });
 
-    embed.setAuthor(`${attacker.nickname} Pelted!`, attacker.user.displayAvatarURL);
+    embed.setAuthor(`${attacker.displayName} Pelted!`, attacker.user.displayAvatarURL);
 
     if (isNew) {
-        embed.setFooter(`*New Item! ${item.item.name} was added to ${attacker.nickname}'s inventory.*`, 'http://puppy-bot.com/puppy-bot-discord/media/battle/items/treasure-chest.png');
+        embed.setFooter(`*New Item! ${item.item.name} was added to ${attacker.displayName}'s inventory.*`, 'http://puppy-bot.com/puppy-bot-discord/media/battle/items/treasure-chest.png');
     }
 
     return embed;

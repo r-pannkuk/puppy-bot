@@ -6,6 +6,7 @@ const Trap = require('./Trap.js');
 const User = require('./User.js');
 const RichEmbedBuilder = require('./RichEmbedBuilder.js');
 const UserInventoryItem = require('./UserInventoryItem');
+const UserStatistics = require('./UserStatistics');
 
 /** @typedef {import('./Item.js').ItemConfig} ItemConfig */
 /** @typedef {import('./UserStatistics.js').LevelConfig} LevelConfig */
@@ -127,6 +128,29 @@ module.exports = class BattleSystem {
     }
 
     /**
+     * 
+     * @param {User} user - Which user to grant experience.
+     * @param {number} amount - How much experience to grant.
+     */
+    addExperience(user, amount) {
+        user = new User(this._config, user);
+
+        var beforeStats = new UserStatistics(this._config.levels, user.stats);
+
+        user.stats.experience += amount;
+
+        user = this._serializeUser(user);
+
+        var guildMember = this.guildSettings.guild.members.get(user.id);
+
+        if (beforeStats.level < user.stats.level) {
+            this.guildSettings.client.emit('userLevelUp', guildMember, user, beforeStats);
+        }
+
+        return user;
+    }
+
+    /**
      * Damages a user.
      * @param {User} attacker 
      * @param {User} victim 
@@ -151,8 +175,7 @@ module.exports = class BattleSystem {
         if (attacker.id === victim.id) {
             attacker = victim;
         } else {
-            attacker.experience += experience;
-            attacker = this._serializeUser(attacker);
+            attacker = this.addExperience(attacker, experience);
         }
 
         return {
@@ -198,7 +221,7 @@ module.exports = class BattleSystem {
      */
     peltUser(attacker, victim) {
         victim = this.
-        _serializeUser(victim);
+            _serializeUser(victim);
         attacker = this._serializeUser(attacker);
 
         /** @type {ItemConfig[]} */
