@@ -117,12 +117,23 @@
             "id": 1,
             "name": "Paper Knife",
             "description": "Made from the strongest construction paper.  Mildly annoying and causes nasty paper cuts.",
-            "attack": 1,
+            "attack": 5,
             "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/paper-knife.png",
-            "energy": 2,
+            "energy": 10,
             "level": 1,
             "chance": 100,
             "cooldown": 300000
+        },
+        {
+            "id": 36,
+            "name": "Bug with a Gun",
+            "description": "Strikes from behind, killing low level targets when they least expect it.",
+            "attack": 10,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/bug-with-a-gun.jpg",
+            "energy": 20,
+            "level": 1,
+            "chance": 50,
+            "cooldown": 3600000
         },
         {
             "id": 2,
@@ -158,17 +169,6 @@
             "cooldown": 120000
         },
         {
-            "id": 17,
-            "name": "Ninja Info Cards",
-            "description": "What the heck are those?  It's hard to explain.  They may not look like much.",
-            "attack": 8,
-            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/ninja-info-card.jpg",
-            "energy": 12,
-            "level": 4,
-            "chance": 123,
-            "cooldown": 600000
-        },
-        {
             "id": 4,
             "name": "Real Knife",
             "description": "Like Paper Knives but actually does damage.  Good for users with time stop abilities.",
@@ -178,6 +178,17 @@
             "level": 4,
             "chance": 370,
             "cooldown": 540000
+        },
+        {
+            "id": 17,
+            "name": "Ninja Info Cards",
+            "description": "What the heck are those?  It's hard to explain.  They may not look like much.",
+            "attack": 8,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/ninja-info-card.jpg",
+            "energy": 12,
+            "level": 4,
+            "chance": 123,
+            "cooldown": 600000
         },
         {
             "id": 5,
@@ -202,17 +213,6 @@
             "cooldown": 2400000
         },
         {
-            "id": 19,
-            "name": "Sharken Shooter",
-            "description": "Transforms and launches to the opponent, causing a direct hit.  Victory is yours.",
-            "attack": 12,
-            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/sharken-shooter.jpg",
-            "energy": 20,
-            "level": 6,
-            "chance": 550,
-            "cooldown": 600000
-        },
-        {
             "id": 6,
             "name": "Zabuza Sword",
             "description": "Cannot be beat. ",
@@ -222,6 +222,17 @@
             "level": 6,
             "chance": 550,
             "cooldown": 1200000
+        },
+        {
+            "id": 35,
+            "name": "Sharken Shooter",
+            "description": "Transforms and launches to the opponent, causing a direct hit.  Victory is yours.",
+            "attack": 12,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/sharken-shooter.jpg",
+            "energy": 20,
+            "level": 6,
+            "chance": 550,
+            "cooldown": 600000
         },
         {
             "id": 7,
@@ -268,17 +279,6 @@
             "cooldown": 2400000
         },
         {
-            "id": 23,
-            "name": "Homingu Reizaa",
-            "description": "Lasers capable of instantaneously destroying a fleet of Space Monsters. Aim for the top, Noriko.",
-            "attack": 100,
-            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/homingu-reizaa.gif",
-            "energy": 80,
-            "level": 10,
-            "chance": 91,
-            "cooldown": 5400000
-        },
-        {
             "id": 10,
             "name": "Prog Knife",
             "description": "A giant knife which vibrates at an extremely high frequency, increasing cutting sharpness down to the molecular level.",
@@ -288,6 +288,17 @@
             "level": 10,
             "chance": 910,
             "cooldown": 2700000
+        },
+        {
+            "id": 23,
+            "name": "Homingu Reizaa",
+            "description": "Lasers capable of instantaneously destroying a fleet of Space Monsters. Aim for the top, Noriko.",
+            "attack": 100,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/homingu-reizaa.gif",
+            "energy": 80,
+            "level": 10,
+            "chance": 91,
+            "cooldown": 5400000
         },
         {
             "id": 11,
@@ -312,17 +323,6 @@
             "cooldown": 43200000
         },
         {
-            "id": 27,
-            "name": "Divine Axe Rhitta",
-            "description": "A giant and incredibly off-balance axe that stores the heat one generates throughout the day as solar energy.  It can be released all at once in a tremendous amount of force and blinding light. ",
-            "attack": 1000,
-            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/divine-axe-rhitta.png",
-            "energy": 600,
-            "level": 12,
-            "chance": 109,
-            "cooldown": 86400000
-        },
-        {
             "id": 12,
             "name": "Megaton Hammer",
             "description": "A massive hammer that makes no sense.  Does a lot of damage but has a pretty long swing time.",
@@ -332,6 +332,17 @@
             "level": 12,
             "chance": 1090,
             "cooldown": 7200000
+        },
+        {
+            "id": 27,
+            "name": "Divine Axe Rhitta",
+            "description": "A giant and incredibly off-balance axe that stores the heat one generates throughout the day as solar energy.  It can be released all at once in a tremendous amount of force and blinding light. ",
+            "attack": 1000,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/divine-axe-rhitta.png",
+            "energy": 600,
+            "level": 12,
+            "chance": 109,
+            "cooldown": 86400000
         },
         {
             "id": 13,
@@ -356,6 +367,17 @@
             "cooldown": 7200000
         },
         {
+            "id": 14,
+            "name": "Spear of Longinus",
+            "description": "An extraterrestrial artifact with the power to penetrate any A.T. field and imobilize godly beings.",
+            "attack": 200,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/spear-of-longinus.png",
+            "energy": 400,
+            "level": 14,
+            "chance": 1270,
+            "cooldown": 6600000
+        },
+        {
             "id": 30,
             "name": "Black Barrel Replica",
             "description": "A copy made from the original Black Barrel, a gun created from the original Longinus, a weapon that can even kill gods. It's output power is proportionate to the lifespan of the target, and can render even otherwise immortal enemies to have a finite lifespan and die.",
@@ -367,15 +389,37 @@
             "cooldown": 48000000
         },
         {
-            "id": 14,
-            "name": "Spear of Longinus",
-            "description": "An extraterrestrial artifact with the power to penetrate any A.T. field and imobilize godly beings.",
-            "attack": 200,
-            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/spear-of-longinus.png",
-            "energy": 400,
-            "level": 14,
-            "chance": 1270,
-            "cooldown": 6600000
+            "id": 15,
+            "name": "Tree Diagram",
+            "description": "The pride of Academy City; a super computer hailed as the most powerful in the world.",
+            "attack": 350,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/tree-diagram.jpg",
+            "energy": 700,
+            "level": 15,
+            "chance": 1360,
+            "cooldown": 10800000
+        },
+        {
+            "id": 32,
+            "name": "Axis Asteroid",
+            "description": "An asteroid base built by the Principality of Zeon in UC 0072.",
+            "attack": 1500,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/axis-asteroid.png",
+            "energy": 1300,
+            "level": 15,
+            "chance": 317.5,
+            "cooldown": 259200000
+        },
+        {
+            "id": 34,
+            "name": "Dark Matter Blade",
+            "description": "Hazzerous' weapon of choice.  It is the best weapon in the game.  Use it to kill people.\n-- Pointy\n-- Sharp\n-- Matches great with a hand bag",
+            "attack": 1000,
+            "image": "http://puppy-bot.com/puppy-bot-discord/media/battle/items/dark-matter-blade.png",
+            "energy": 1000,
+            "level": 15,
+            "chance": 68,
+            "cooldown": 36000000
         }
     ]
 }
