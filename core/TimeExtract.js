@@ -147,7 +147,7 @@ class TimeExtract {
     interval_date() {
         var date = this.extract();
 
-        return this.interval_string_milliseconds(date.getTime() - Date.now());
+        return TimeExtract.interval_string_milliseconds(date.getTime() - Date.now());
     }
 
     _process_spaceless() {
