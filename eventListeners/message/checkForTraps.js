@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const BattleSystem = require('../../core/battle/BattleSystem');
 
 /**
  * 
@@ -18,23 +19,21 @@ module.exports = function (client, message) {
         return;
     }
 
+    /** @type {BattleSystem} */
+    var battleSystem = message.guild.battleSystem;
     var content = message.content.toLowerCase();
-    var traps = message.guild.battleSystem.traps;
 
-    var validTraps = Object.values(traps).filter(t => {
+    var validTraps = Object.values(battleSystem.traps).filter(t => {
         return content.indexOf(t.phrase.toLowerCase()) > -1 && t.messageId !== message.id
     });
-    var validKeys = validTraps.reduce((p, t) => { p.push(t.phrase); return p; }, []);
-
-    for (i in validKeys) {
-        var validKey = validKeys[i];
+    
+    for (i in validTraps) {
+        var validKey = validTraps[i].phrase;
 
         if (content === `!disarmtrap ${validKey}` || content === `!removetrap ${validKey}`) {
-            return;
+            continue;
         }
 
-        client.emit('sprungTrap', { message: message, key: validKey });
-
-        message.guild.battleSystem.springTrap(message, validKey);
+        battleSystem.springTrap(message, validTraps[i]);
     }
 };

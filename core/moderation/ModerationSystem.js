@@ -20,7 +20,7 @@ class ModerationSystem {
         this.guildSettings = guildSettings;
     }
 
-    /** @type {Object.<string, Moderation} A container of moderations. */
+    /** @type {Object.<string, Moderation>} A container of moderations. */
     get moderations() { return this.guildSettings.get('moderation'); }
     set moderations(obj) { this.guildSettings.set('moderation', obj); }
 

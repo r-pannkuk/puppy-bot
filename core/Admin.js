@@ -1,7 +1,23 @@
 const Discord = require('discord.js');
 
+/**
+ * @typedef {Object} AdminSettings 
+ * @property {string} deleteChannelID
+ * @property {string} trapChannelID
+ * @property {string} roleChannelID
+ * @property {string} accountChannelID
+ * @property {string} moderationChannelID
+ * @property {string} moderationRoleID
+ */
+
 /** Represents the Admin object for channel administration. */
 class Admin {
+    /**
+     * 
+     * @param {object} guildSettings 
+     * @param {Discord.Client} guildSettings.client
+     * @param {Discord.Guild} guildSettings.guild 
+     */
     constructor(guildSettings) {
         if (guildSettings.get('admin') === undefined) {
             console.log("Admin settings not found, creating.");
@@ -38,6 +54,7 @@ class Admin {
         guildSettings.set('admin', settings);
     }
 
+    /** @type {AdminSettings} */
     get settings() { return this.guildSettings.get('admin'); }
     set settings(settings) { this.guildSettings.set('admin', settings); }
 
@@ -79,6 +96,20 @@ class Admin {
         this.settings = newSettings;
     }
 
+    /**
+     * 
+     * @callback NewChannelCallback
+     * @param {Discord.Channel} channel
+     */
+
+    /**
+     * Creates a new channel under the specified category.
+     * @param {Discord.Guild} guild 
+     * @param {string} channelName 
+     * @param {string} categoryName 
+     * @param {boolean} overwrites 
+     * @param {NewChannelCallback} callback
+     */
     addNewChannel(guild, channelName, categoryName, overwrites, callback) {
         guild.createChannel(channelName, 'text', overwrites)
             .then((channel) => {
@@ -100,6 +131,12 @@ class Admin {
             });
     }
 
+    /**
+     * Creates a new role with the specified
+     * @param {Discord.Guild} guild 
+     * @param {string} roleName 
+     * @param {Function.<Discord.Role>} callback 
+     */
     createRole(guild, roleName, callback) {
         guild.createRole({
             name: roleName,
@@ -107,16 +144,6 @@ class Admin {
             permissions: Discord.Permissions.DEFAULT,
             mentionable: true
         }).then(callback);
-    }
-
-    addRole(user, role, reason, callback) {
-        user.addRole(role, reason)
-            .then(callback);
-    }
-
-    removeRole(user, role, reason, callback) {
-        user.removeRole(role, reason)
-            .then(callback);
     }
 }
 

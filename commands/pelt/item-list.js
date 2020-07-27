@@ -42,7 +42,7 @@ module.exports = class StatusCommand extends commando.Command {
         var battleSystem = message.guild.battleSystem;
         var member = message.guild.members.get(user.id);
 
-        const stats = battleSystem.fetch(user.id);
+        const stats = battleSystem.fetchUser(user.id);
 
         var embed = RichEmbedBuilder.itemList(member, stats, battleSystem._config.items);
 

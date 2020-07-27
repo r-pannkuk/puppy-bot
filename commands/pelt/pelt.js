@@ -35,7 +35,7 @@ module.exports = class PeltCommand extends commando.Command {
         /** @type {BattleSystem} */
         var battleSystem = message.guild.battleSystem;
         var attacker = message.guild.members.get(message.author.id);
-        var attackerBattle = battleSystem.fetch(attacker);
+        var attackerBattle = battleSystem.fetchUser(attacker);
 
         var remainingDuration = battleSystem._config.peltInterval - (Date.now() - attackerBattle.lastPelt);
 
@@ -53,7 +53,7 @@ module.exports = class PeltCommand extends commando.Command {
                     m.user.id !== message.author.id
             ).array();
 
-            if (users.size === 0) {
+            if (users.length === 0) {
                 message.channel.send(`Nobody was around, so you pelted yourself!`);
                 user = message.author;
             } else {

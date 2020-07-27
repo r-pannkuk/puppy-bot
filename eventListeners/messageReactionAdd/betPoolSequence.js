@@ -25,14 +25,14 @@ module.exports = async function (client, messageReaction, user) {
         return;
     }
 
-    if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(user.id))) {
-        user.send(`You don't have permissions to change this wager.`);
-        return;
-    }
-
     var betPool = message.guild.pointSystem.findBetPoolByMessage(message.id);
 
     if (!betPool || betPool._status === BetPool.STATE.Refunded || betPool._status === BetPool.STATE.Awarded) {
+        return;
+    }
+
+    if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(user.id))) {
+        user.send(`You don't have permissions to change this wager.`);
         return;
     }
 

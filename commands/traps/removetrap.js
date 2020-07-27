@@ -1,6 +1,7 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
+const BattleSystem = require('../../core/battle/BattleSystem.js');
 
 module.exports = class RemoveTrapCommand extends commando.Command {
     constructor(client) {
@@ -9,7 +10,8 @@ module.exports = class RemoveTrapCommand extends commando.Command {
             group: 'traps',
             memberName: 'removetrap',
             description: 'Removes the last trap set by the command sender, or attempts to remove a trap phrase.',
-            examples: [ '!removetrap', '!removetrap test' ],
+            examples: ['!removetrap', '!removetrap test'],
+            aliases: ['disarmtrap', 'remove-trap', 'disarm-trap'],
             argsPromptLimit: 0,
             guildOnly: true,
             args: [
@@ -23,32 +25,45 @@ module.exports = class RemoveTrapCommand extends commando.Command {
         });
     }
 
-    
+    /**
+     * 
+     * @param {Discord.Message} message 
+     * @param {Object} args
+     * @param {string} args.phrase The phrase to check for.
+     */
     async run(message, { phrase }) {
-        if(!phrase) {
-            var traps = Object.values(message.guild.battleSystem.traps);
-    
-            var trap = traps.find(t => t.userid === message.author.id);
-    
-            if(trap !== undefined) {
-                message.guild.battleSystem.removeTrap(trap.phrase);
+        /** @type {BattleSystem]} */
+        var battleSystem = message.guild.battleSystem;
+        if (!phrase) {
+            var traps = Object.values(battleSystem.traps);
 
-                message.channel.send('Trap removed succesfully.');
+            var trap = traps.filter(t => t.owner === message.author.id)
+                .sort((a, b) => b.damage - a.damage);
+
+            if (trap.length > 0) {
+                battleSystem.removeTrap(trap.pop());
+
+                message.channel.send('Removed your most recent trap.');
             }
             else {
                 message.channel.send('You haven\'t set a trap yet.');
             }
         }
         else {
-            var traps = message.guild.battleSystem.traps;
+            var traps = battleSystem.traps;
             var sanitizedPhrase = phrase.toLowerCase();
 
-            if(Object.keys(traps).indexOf(sanitizedPhrase) > -1) {
-                var trap = message.guild.battleSystem.removeTrap(sanitizedPhrase);
+            var validTraps = traps.filter(t => t.phrase.toLowerCase() === sanitizedPhrase)
 
-                var owner = this.client.users.get(trap.ownerId);
-    
-                message.channel.send(`You removed ${owner}\'s trap!`);
+            if (validTraps.length > 0) {
+
+                validTraps.forEach(t => {
+                    var trap = battleSystem.removeTrap(t);
+
+                    var owner = message.guild.members.get(t.owner);
+
+                    message.channel.send(`You removed ${owner}\'s trap!`);
+                });
             }
             else {
                 message.channel.send('Trap not found.');

@@ -31,14 +31,14 @@ class UserStatistics {
         this._energy = _energy;
     }
 
-    get levelSchema() { 
+    get levelSchema() {
         return this._config.reduceRight((prev, val) => {
-            if(val.xp >= prev.xp && this._experience >= val.xp) {
+            if (val.xp >= prev.xp && this._experience >= val.xp) {
                 return val;
             } else {
                 return prev;
             }
-        }, {xp: 0}); 
+        }, { xp: 0 });
     }
 
     /** User's current level. */

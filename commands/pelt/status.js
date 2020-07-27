@@ -1,6 +1,7 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
+const BattleSystem = require('../../core/battle/BattleSystem.js');
 const RichEmbedBuilder = require('../../core/battle/RichEmbedBuilder.js')
 
 module.exports = class StatusCommand extends commando.Command {
@@ -32,13 +33,16 @@ module.exports = class StatusCommand extends commando.Command {
     async run(message, { user }) {
         /* Checking if user was passed or if sent as default parameter. */
 
+        /** @type {BattleSystem} */
+        var battleSystem = message.guild.battleSystem;
+
         if(Object.keys(user).length === 0) {
             user = message.author;
         }
 
         var member = message.guild.members.get(user.id);
 
-        const stats = message.guild.battleSystem.fetch(user.id);
+        const stats = battleSystem.fetchUser(user.id);
 
         var embed = RichEmbedBuilder.status(member, stats);
 

@@ -1,6 +1,8 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
+const BattleSystem = require('../../core/battle/BattleSystem.js');
+
 
 module.exports = class TrapCommand extends commando.Command {
     constructor(client) {
@@ -30,12 +32,15 @@ module.exports = class TrapCommand extends commando.Command {
      * @param {string} args.phrase Trap phrase
      */
     async run(message, { phrase }) {
-        var success = message.guild.battleSystem.addTrap(
-            message,
-            phrase,
-            message.author);
+        /** @type {BattleSystem]} */
+        var battleSystem = message.guild.battleSystem;
+        var success = battleSystem.addTrap({
+            _messageId: message,
+            _phrase: phrase,
+            _owner: message.author
+        });
 
-        var duration = 10000;
+        var duration = battleSystem._config.traps.timeToDeleteTrapMessage;
 
         if (success) {
             message.channel.send(`New trap set for phrase: "${phrase}"`)

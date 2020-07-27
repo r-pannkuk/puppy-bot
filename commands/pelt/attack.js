@@ -52,7 +52,7 @@ module.exports = class AttackCommand extends commando.Command {
 
         /** @type {BattleSystem} */
         var battleSystem = message.guild.battleSystem;
-        var attackerBattle = battleSystem.fetch(attacker);
+        var attackerBattle = battleSystem.fetchUser(attacker);
 
         var itemsAvailable = attackerBattle.inventory.availableItems;
 

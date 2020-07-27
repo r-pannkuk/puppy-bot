@@ -24,15 +24,15 @@ module.exports = async function (client, messageReaction, user) {
         return;
     }
 
-    if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(user.id))) {
-        user.send(`You don't have permissions to change this wager.`);
-        messageReaction.remove(message.user);
-        return;
-    }
-
     var account = message.guild.pointSystem.findAccountByMessage(message.id);
 
     if (!account || account._status !== Account.STATUS.Pending) {
+        return;
+    }
+
+    if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(user.id))) {
+        user.send(`You don't have permissions to authorize this account.`);
+        messageReaction.remove(message.user);
         return;
     }
 

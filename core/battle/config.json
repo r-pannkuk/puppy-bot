@@ -1,9 +1,28 @@
 {
     "name": "battle",
     "peltInterval": 3600000,
+    "traps": {
+        "timeToDeleteTrapMessage": 10000,
+        "timeIncrementals": {
+            "28800000": 0.00000027777777777777777777777777777778,
+            "86400000": 0.00000055555555555555555555555555555556,
+            "259200000": 0.000000833333333333333333333333333333343,
+            "604800000": 0.00000111111111111111111111111111111112,
+            "1209600000": 0.0000013888888888888888888888888888889,
+            "1814400000": 0.00000166666666666666666666666666666668,
+            "2419200000": 0.00000194444444444444444444444444444446
+        },
+        "wordMultiplier": 1.1,
+        "trapIconSource": "http://puppy-bot.com/puppy-bot-discord/media/battle/traps/trap-icon.png",
+        "trapSelfIconSource": "http://puppy-bot.com/puppy-bot-discord/media/battle/traps/trap-self.png"
+    },
     "regen": {
-        "health": 0.0000166666666666667,
+        "health": 0.0000016666666666667,
         "energy": 0.0000833333333333335
+    },
+    "topRankings": {
+        "trapContainerSize": 10,
+        "userContainerSize": 10
     },
     "levels": [
         {

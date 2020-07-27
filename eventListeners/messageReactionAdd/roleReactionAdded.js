@@ -1,3 +1,5 @@
+const Discord = require('discord.js');
+
 module.exports = function(client, messageReaction, user) {
     if(user === client.user) {
         return;
@@ -11,6 +13,7 @@ module.exports = function(client, messageReaction, user) {
         return;
     }
 
+    /** @type {Discord.GuildMember} */
     var member = channel.members.get(user.id);
 
     if(channel.id === message.guild.admin.roleChannelID) {

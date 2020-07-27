@@ -11,34 +11,68 @@ const Item = require('./Item.js');
  * 
  * @param {Trap} trap 
  * @param {Discord.Message} message 
+ */
+module.exports.checkTrap = function (trap, message) {
+    /** @type {BattleSystem} */
+    var owner = message.guild.members.get(trap.owner);
+
+    var embed = new Discord.RichEmbed()
+        .setColor('RED');
+
+    embed.setAuthor(`${owner.displayName}'s Trap: ${trap.phrase}`, trap._config.trapIconSource);
+
+    var duration = TimeExtract.interval_string_milliseconds((trap.firedAt || Date.now()) - trap.createdAt);
+    var createdAt = new Date(trap.createdAt);
+
+    embed.setDescription(
+        `**Phrase**: ${trap.phrase}\n` +
+        `**Owner**: ${owner}\n` +
+        `**Damage**: ${trap.damage}\n` +
+        `**Duration**: ${duration}\n\n` +
+        `*Traps deal more damage the longer they are alive for.*`);
+    embed.setFooter(`Trap set at ${createdAt.toDateString()} ${createdAt.toLocaleTimeString()}`, owner.user.displayAvatarURL);
+
+    return embed;
+}
+
+/**
+ * 
+ * @param {Trap} trap 
+ * @param {Discord.Message} message 
  * @param {User} victimStats 
  */
 module.exports.trapTriggered = function (trap, message, victimStats) {
     var victim = message.author;
-    var owner = message.client.users.get(trap.userid);
+    var owner = message.guild.members.get(trap.owner);
 
     var embed = new Discord.RichEmbed()
         .setColor('RED');
 
     if (owner.id === victim.id) {
-        embed.setAuthor(`${owner.username} Blew Themselves Up!`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Skull_and_crossbones.svg/2000px-Skull_and_crossbones.svg.png');
+        embed.setAuthor(`${owner.displayName} Blew Themselves Up!`);
+        embed.setThumbnail(trap._config.trapSelfIconSource);
     }
     else {
-        embed.setAuthor(`${owner.username}'s Trap Sprung!`, owner.avatarUrl);
+        embed.setAuthor(`${owner.displayName}'s Trap Sprung!`);
+        embed.setThumbnail(trap._config.trapIconSource);
     }
 
     if (victimStats.health === 0) {
-        embed.setThumbnail('https://www.galabid.com/wp-content/uploads/2017/11/rip-gravestone-md.png');
+        embed.setThumbnail(trap._config.trapIconSource);
     }
+
+    var duration = TimeExtract.interval_string_milliseconds(trap.firedAt - trap.createdAt);
+    var createdAt = new Date(trap.createdAt);
 
     embed.setDescription(
         `**Phrase**: ${trap.phrase}\n` +
         `**Owner**: ${owner}\n` +
-        `**Damage**: ${trap.getDamage()}\n\n` +
+        `**Damage**: ${trap.damage}\n` +
+        `**Duration**: ${duration}\n\n` +
         `**Victim**: ${victim}\n` +
         `**Remaining Health**: ${victimStats.health}\n\n` +
         `*Traps deal more damage the longer they are alive for.*`);
-    embed.setFooter(`Trap set at ${new Date(trap.createdAt).toString()}`, owner.avatarUrl);
+    embed.setFooter(`Trap set at ${createdAt.toDateString()} ${createdAt.toLocaleTimeString()}`, owner.user.displayAvatarURL);
 
     return embed;
 }
@@ -106,7 +140,7 @@ module.exports.itemList = function (guildMember, stats, itemConfig) {
 
     var itemList = itemConfig.filter(ic => ic.level <= stats.level).map(ic => {
         var foundItem = stats.inventory.items.find(i => ic.id === i.id);
-        return `${(!foundItem) ? `~~` : `**`}[${ic.level}] ${ic.name}${(!foundItem) ? `~~` : `**`}`;
+        return `${(!foundItem) ? `` : `~~`}[${ic.level}] ${ic.name}${(!foundItem) ? `` : `~~`}`;
     })
 
     embed.setDescription(itemList.join('\n'));
@@ -169,9 +203,7 @@ module.exports.useItem = function ({ attacker, victim, item }) {
     embed.addField(`**Energy**`, `${item.schema.energy}`, true);
     embed.addField(`**Cooldown**`, `${TimeExtract.interval_string_milliseconds(item.schema.cooldown)}`, true);
 
-    embed.setImage(`${item.schema.image}`);
-    embed.image.height = 100;
-    embed.image.width = 100;
+    embed.setThumbnail(`${item.schema.image}`);
 
     return embed;
 }

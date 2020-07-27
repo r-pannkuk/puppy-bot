@@ -1,6 +1,7 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
+const Admin = require('../../core/Admin.js');
 
 module.exports = class AddGroupChannel extends commando.Command {
     constructor(client) {
@@ -33,6 +34,13 @@ module.exports = class AddGroupChannel extends commando.Command {
     }
 
 
+    /**
+     * 
+     * @param {Discord.Message} msg 
+     * @param {Object} args
+     * @param {string} args.channel The name of the channel to add.
+     * @param {string} args.role The name of the role to add.
+     */
     async run(msg, { channel, role }) {
         if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
             msg.channel.send(`You don't have permission to use that command.`);
@@ -51,6 +59,7 @@ module.exports = class AddGroupChannel extends commando.Command {
             return;
         }
 
+        /** @type {string} */
         var categoryName = (channelInputs.length === 2) ? channelInputs[0] : msg.channel.parent.name;
         var channelName = (channelInputs.length === 2) ? channelInputs[1] : channelInputs[0];
 
@@ -66,6 +75,12 @@ module.exports = class AddGroupChannel extends commando.Command {
             guildRole = msg.guild.roles.get(roleName);
         }
 
+        /** @type {Admin} */
+        var admin = msg.guild.admin;
+
+        /**
+         * @param {Discord.Role} role 
+         */
         var createChannelCallback = (role) => {
             var overwrites = [{
                     id: msg.guild.defaultRole,
@@ -95,19 +110,21 @@ module.exports = class AddGroupChannel extends commando.Command {
                 }
             ]
 
-            msg.guild.admin.addNewChannel(msg.guild, channelName, categoryName, overwrites, (channel) => {
+            admin.addNewChannel(msg.guild, channelName, categoryName, overwrites, (channel) => {
                 msg.channel.send(`New channel ${channel} created under ${categoryName.toUpperCase()} for ${role}.`);
 
-                msg.guild.channels.get(msg.guild.admin.roleChannelID).send(
-                    `${role} - React with \:white_check_mark: to be added to the group and access ${channel}`
-                ).then(msg => {
-                    msg.react("✅");
-                });
+                if(admin.roleChannelID) {
+                    msg.guild.channels.get(admin.roleChannelID).send(
+                        `${role} - React with \:white_check_mark: to be added to the group and access ${channel}`
+                    ).then(msg => {
+                        msg.react("✅");
+                    });
+                }
             });
         };
 
         if (guildRole === null || guildRole === undefined) {
-            msg.guild.admin.createRole(msg.guild, roleName, createChannelCallback);
+            admin.createRole(msg.guild, roleName, createChannelCallback);
         } else {
             createChannelCallback(guildRole);
         }
