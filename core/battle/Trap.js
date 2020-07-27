@@ -71,7 +71,7 @@ module.exports = class Trap {
             lifetime -= incrementalThreshold;
         }
 
-        damage *= this._config.wordMultiplier;
+        damage *= Math.pow(this._config.wordMultiplier, (this.phrase.split(' ').length - 1));
 
         return Math.floor(damage);
     }
