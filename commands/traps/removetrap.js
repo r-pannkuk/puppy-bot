@@ -59,15 +59,21 @@ module.exports = class RemoveTrapCommand extends commando.Command {
 
                 validTraps.forEach(t => {
                     var trap = battleSystem.removeTrap(t);
-                    var experience = trap.damage + battleSystem._config.traps.removeTrapExperienceBonus
-
-                    battleSystem.addExperience(message.author.id, experience);
-                    
                     var owner = message.guild.members.get(trap.owner);
 
-                    message.channel.send(`You removed ${owner}\'s trap!\n` + 
-                    `${message.author} received ${experience} XP!`
-                    );
+                    var string = `You removed ${owner}\'s trap!`;
+
+                    if (trap.owner !== message.author.id) {
+                        var experience = trap.damage + battleSystem._config.traps.removeTrapExperienceBonus
+
+                        battleSystem.addExperience(message.author.id, experience);
+
+                        string += `\n${message.author} received ${experience} XP!`;
+                    }
+
+
+                    message.channel.send(string);
+
                 });
             }
             else {
