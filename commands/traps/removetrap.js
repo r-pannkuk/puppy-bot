@@ -64,9 +64,12 @@ module.exports = class RemoveTrapCommand extends commando.Command {
                     var string = `You removed ${owner}\'s trap!`;
 
                     if (trap.owner !== message.author.id) {
-                        var experience = trap.damage + battleSystem._config.traps.removeTrapExperienceBonus
 
-                        battleSystem.addExperience(message.author.id, experience);
+                        if(trap.damage > 0) {
+                            var experience = trap.damage + battleSystem._config.traps.removeTrapExperienceBonus;
+    
+                            battleSystem.addExperience(message.author.id, experience);
+                        }
 
                         string += `\n${message.author} received ${experience} XP!`;
                     }
