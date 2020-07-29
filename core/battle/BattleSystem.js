@@ -509,7 +509,6 @@ module.exports = class BattleSystem {
 
         temp.topRankings.traps.push(trap);
         temp.topRankings.traps = temp.topRankings.traps
-            .filter((v, i, s) => s.findIndex(a => a.id === v.id) === i)
             .map(t => new Trap(this._config.traps, t))
             .sort((a, b) => b.damage - a.damage);
         temp.topRankings.traps.splice(this._config.topRankings.trapContainerSize);
