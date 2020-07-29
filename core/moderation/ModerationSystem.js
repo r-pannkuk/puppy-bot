@@ -99,7 +99,9 @@ class ModerationSystem {
         /** @type {Discord.Guild} */
         var guild = this.guildSettings.guild;
         var member = guild.members.get(mod._userId);
-        member.send(`You have been moderated in **${guild.name}** until ${mod._endTime}.`);
+        var moderator = guild.members.get(mod._moderatorId);
+
+        member.send(`You have been moderated in **${guild.name}** by ${moderator} until ${mod._endTime}.`);
 
         moderations[mod._id] = mod;
 

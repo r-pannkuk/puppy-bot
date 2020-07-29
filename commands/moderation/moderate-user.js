@@ -63,13 +63,14 @@ class ModerateCommand extends commando.Command {
         });
 
         var endTime = new Date(mod._endTime);
-        var endTimeString = `${endTime.toDateString()} ${endTime.toLocaleTimeString()}`;
+        var endTimeString = `${endTime.toDateString()} ${endTime.toTimeString()}`;
 
         if (activeMod) {
-            msg.channel.send(`${member}'s moderated status was extended until ${endTimeString}`)
+            msg.channel.send(`${member}'s moderated status was extended until ${endTimeString}.`);
         } else {
             msg.channel.send(`${member} was moderated until ${endTimeString}.`)
         }
+
     }
 
 
