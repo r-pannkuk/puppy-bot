@@ -171,7 +171,19 @@ module.exports = class BattleSystem {
 
         /* Removing configs from stored object. */
         delete temp.users[userObj.id]._stats._config;
-        temp.users[userObj.id]._inventory._items.forEach(i => delete i._config)
+        temp.users[userObj.id]._inventory._items.forEach(i => delete i._config);
+
+        temp.topRankings.users.push(temp.users[userObj.id])
+
+        temp.topRankings.users = temp.topRankings.users
+            .filter((v, i, s) => s.findIndex(a => a.id === v.id) === i)
+            .map(u => new User(this._config, u))
+            .sort((a, b) => b.experience - a.experience);
+        temp.topRankings.users.splice(this._config.topRankings.userContainerSize);
+        temp.topRankings.users.forEach((u, i) => {
+            delete temp.topRankings.users[i]._stats.config;
+            delete temp.topRankings.users[i]._inventory._items.forEach(i => delete i._config);
+        });
 
         this.settings = temp;
 
@@ -460,7 +472,7 @@ module.exports = class BattleSystem {
         user.traps.splice(user.traps.indexOf(trap.id), 1);
 
         user.energy += this._config.abilities.trap.energy;
-        if(user.energy > user.stats.maxEnergy) {
+        if (user.energy > user.stats.maxEnergy) {
             user.energy = user.stats.maxEnergy;
         }
 
@@ -497,6 +509,7 @@ module.exports = class BattleSystem {
 
         temp.topRankings.traps.push(trap);
         temp.topRankings.traps = temp.topRankings.traps
+            .filter((v, i, s) => s.findIndex(a => a.id === v.id) === i)
             .map(t => new Trap(this._config.traps, t))
             .sort((a, b) => b.damage - a.damage);
         temp.topRankings.traps.splice(this._config.topRankings.trapContainerSize);

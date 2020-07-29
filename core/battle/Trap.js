@@ -35,6 +35,8 @@ module.exports = class Trap {
     get phrase() { return this._phrase; }
     /** User ID of the owner. */
     get owner() { return this._owner; }
+    /** User ID of the trap victim. */
+    get victim() { return this._victim; }
     /** Creation date. */
     get createdAt() { return this._createdAt; }
     /** Firing date (for inactive traps). */
