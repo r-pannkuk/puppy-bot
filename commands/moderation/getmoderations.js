@@ -5,6 +5,8 @@ const date = require('date-and-time');
 const ModerationSystem = require('../../core/moderation/ModerationSystem.js');
 const Moderation = require('../../core/moderation/Moderation.js');
 const TimeExtract = require('../../core/TimeExtract.js');
+const Admin = require('../../core/Admin.js');
+const BattleSystem = require('../../core/battle/BattleSystem.js');
 
 module.exports = class GetModerationsCommand extends commando.Command {
     constructor(client) {
@@ -42,42 +44,47 @@ module.exports = class GetModerationsCommand extends commando.Command {
      * @param {Discord.Message} message 
      */
     async run(message) {
-        if (!msg.guild.members.get(msg.author.id).hasPermission('KICK_MEMBERS')) {
-            msg.channel.send(`You don't have permission to use that command.`);
+        /** @type {Admin} */
+        var admin = message.guild.admin;
+        var member = message.guild.members.get(message.author.id);
+
+        if (member.hasPermission('KICK_MEMBERS') || admin.allowGulagUnmoderated) {
+            /** @type {ModerationSystem} The moderation object. */
+            var mods = message.guild.moderation;
+
+            var guild = message.guild;
+
+            var activeMods = Object.values(mods.moderations).filter(m => m._active);
+
+            if (activeMods.length === 0) {
+                message.channel.send(`No moderations were found.`);
+                return;
+            }
+
+            var description = '';
+
+            for (var i in activeMods) {
+                /** @type {Moderation} */
+                var mod = activeMods[i];
+                var user = guild.members.get(mod._userId);
+                var moderator = guild.members.get(mod._moderatorId);
+
+                var duration = new TimeExtract(mod._endTime);
+
+                description += `${user} [by ${moderator}] - ${duration.interval_date()}\n`;
+            }
+
+            var embed = new Discord.RichEmbed();
+
+            embed.setTitle(`Moderations`);
+
+            embed.setDescription(description);
+
+            message.channel.send(embed);
+
             return;
         }
 
-        /** @type {ModerationSystem} The moderation object. */
-        var mods = message.guild.moderation;
-
-        var guild = message.guild;
-
-        var activeMods = Object.values(mods.moderations).filter(m => m._active);
-
-        if (activeMods.length === 0) {
-            message.channel.send(`No moderations were found.`);
-            return;
-        }
-
-        var description = '';
-
-        for (var i in activeMods) {
-            /** @type {Moderation} */
-            var mod = activeMods[i];
-            var user = guild.members.get(mod._userId);
-            var moderator = guild.members.get(mod._moderatorId);
-
-            var duration = new TimeExtract(mod._endTime);
-
-            description += `${user} [by ${moderator}] - ${duration.interval_date()}\n`;
-        }
-
-        var embed = new Discord.RichEmbed();
-
-        embed.setTitle(`Moderations`);
-
-        embed.setDescription(description);
-
-        message.channel.send(embed);
+        message.channel.send(`You don't have permission to use that command.`);
     }
 }

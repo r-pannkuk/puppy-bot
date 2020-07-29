@@ -8,6 +8,7 @@ const Discord = require('discord.js');
  * @property {string} accountChannelID
  * @property {string} moderationChannelID
  * @property {string} moderationRoleID
+ * @property {boolean} allowGulagUnmoderated
  */
 
 /** Represents the Admin object for channel administration. */
@@ -50,6 +51,9 @@ class Admin {
         if (settings.moderationRoleID === undefined) {
             settings.moderationRoleID = null;
         }
+        if(settings.allowGulagUnmoderated === undefined) {
+            settings.allowGulagUnmoderated = false;
+        }
 
         guildSettings.set('admin', settings);
     }
@@ -64,6 +68,7 @@ class Admin {
     get accountChannelID() { return this.settings.accountChannelID; }
     get moderationChannelID() { return this.settings.moderationChannelID; }
     get moderationRoleID() { return this.settings.moderationRoleID; }
+    get allowGulagUnmoderated() { return this.settings.allowGulagUnmoderated; }
 
     set deleteChannelID(channelID) {
         var newSettings = this.settings;
@@ -93,6 +98,11 @@ class Admin {
     set moderationRoleID(roleID) {
         var newSettings = this.settings;
         newSettings.moderationRoleID = roleID;
+        this.settings = newSettings;
+    }
+    set allowGulagUnmoderated(b) {
+        var newSettings = this.settings;
+        newSettings.allowGulagUnmoderated = b;
         this.settings = newSettings;
     }
 

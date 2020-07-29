@@ -34,23 +34,26 @@ module.exports = class TrapCommand extends commando.Command {
     async run(message, { phrase }) {
         /** @type {BattleSystem]} */
         var battleSystem = message.guild.battleSystem;
-        var success = battleSystem.addTrap({
+        var result = battleSystem.addTrap({
             _messageId: message,
             _phrase: phrase,
             _owner: message.author
         });
 
+        var attackerStats = battleSystem.fetchUser(message.author);
+
         var duration = battleSystem._config.traps.timeToDeleteTrapMessage;
 
-        if (success) {
-            message.channel.send(`New trap set for phrase: "${phrase}"`)
+        if (!result.error) {
+            message.channel.send(`New trap set for phrase: "${phrase}"\n` +
+                `Consumed ${battleSystem._config.abilities.trap.energy} energy to create a new trap (${attackerStats.energy} remaining).\n`)
                 .then(msg => {
                     msg.delete(duration).catch(console.err);
                     message.delete(duration).catch(console.err);
                 });
         }
         else {
-            message.channel.send(`You've already set too many traps, type removetrap to remove your own trap.`);
+            message.channel.send(result.error);
         }
     }
 }

@@ -2,6 +2,7 @@
     "name": "battle",
     "peltInterval": 3600000,
     "traps": {
+        "removeTrapExperienceBonus": 100,
         "timeToDeleteTrapMessage": 10000,
         "timeIncrementals": {
             "28800000": 0.00000027777777777777777777777777777778,
@@ -440,5 +441,15 @@
             "chance": 68,
             "cooldown": 36000000
         }
-    ]
+    ],
+    "abilities": {
+        "gulag": {
+            "name": "gulag",
+            "energy": 0.00166666666666666666666666666666666666666666666667
+        },
+        "trap": {
+            "name": "trap",
+            "energy": 100
+        }
+    }
 }

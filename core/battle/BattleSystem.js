@@ -226,11 +226,16 @@ module.exports = class BattleSystem {
      * @param {number} amount - How much experience to grant.
      */
     addExperience(user, amount) {
-        user = new User(this._config, user);
+        user = this._serializeUser(user);
 
         var beforeStats = new UserStatistics(this._config.levels, user.stats);
 
         user.stats.experience += amount;
+
+        if (beforeStats.level < user.stats.level) {
+            user.stats.health = user.stats.maxHealth;
+            user.stats.energy = user.stats.maxEnergy;
+        }
 
         user = this._serializeUser(user);
 
@@ -283,6 +288,31 @@ module.exports = class BattleSystem {
     }
 
     /**
+     * 
+     * @param {Discord.User|Discord.GuildMember|User|string} user 
+     * @param {number} amount The number of energy to consume
+     * @param {Function} callback Compute any callback upon energy being consumed.
+     * @emits userUseEnergy
+     */
+    useEnergy(user, amount, callback) {
+        var user = this._serializeUser(user);
+
+        user.energy -= amount;
+
+        if (user.energy < 0) {
+            user.energy = 0;
+        }
+
+        this._serializeUser(user);
+
+        var payload = callback(user, amount);
+
+        this.guildSettings.client.emit('userUseEnergy', user, amount, payload);
+
+        return payload;
+    }
+
+    /**
      * Damages a user using an item.
      * @param {User} attacker The person using the item.
      * @param {User} victim The person having the item used against.
@@ -297,24 +327,20 @@ module.exports = class BattleSystem {
             item = item.schema;
         }
 
-        attacker.energy -= item.energy;
+        return this.useEnergy(attacker, item.energy, (user, eenrgy) => {
+            attacker.inventory._items.find(i => i.id === item.id).lastUsed = Date.now();
 
-        if (attacker.energy < 0) {
-            attacker.energy = 0;
-        }
+            if (attacker.id === victim.id) {
+                var damageEvent = this.damageUser(attacker, attacker, item.attack);
+            } else {
+                var damageEvent = this.damageUser(attacker, victim, item.attack);
+            }
 
-        attacker.inventory._items.find(i => i.id === item.id).lastUsed = Date.now();
-
-        if (attacker.id === victim.id) {
-            var damageEvent = this.damageUser(attacker, attacker, item.attack);
-        } else {
-            var damageEvent = this.damageUser(attacker, victim, item.attack);
-        }
-
-        return {
-            ...damageEvent,
-            item: damageEvent.attacker.inventory.getInventorySlot(item)
-        }
+            return {
+                ...damageEvent,
+                item: damageEvent.attacker.inventory.getInventorySlot(item)
+            }
+        });
     }
 
     /**
@@ -390,26 +416,29 @@ module.exports = class BattleSystem {
         var key = _phrase.toLowerCase();
 
         if (this.traps.find(t => t.phrase.toLowerCase() === key)) {
-            return false;
+            return { error: `Trap was already found.` };
         }
 
         var userObj = this._serializeUser(_owner);
 
         if (userObj.traps.length >= userObj._stats.maxTraps) {
-            return false;
+            return { error: `You have too many traps already.  Please type !removetrap to remove the most recent one.` };
         }
 
-        var newTrap = this._serializeTrap({
-            _phrase: _phrase,
-            _owner: _owner,
-            _createdAt: Date.now(),
-            _messageId: _messageId
+        return this.useAbility(userObj, 'trap', 1, (user, energy) => {
+            var newTrap = this._serializeTrap({
+                _phrase: _phrase,
+                _owner: _owner,
+                _createdAt: Date.now(),
+                _messageId: _messageId
+            });
+
+            user.traps.push(newTrap.id);
+
+            this._serializeUser(user);
+
+            return newTrap;
         });
-
-        userObj.traps.push(newTrap.id);
-        this._serializeUser(userObj);
-
-        return newTrap;
     }
 
     /**
@@ -429,6 +458,12 @@ module.exports = class BattleSystem {
         var user = this._serializeUser(trap.owner);
 
         user.traps.splice(user.traps.indexOf(trap.id), 1);
+
+        user.energy += this._config.abilities.trap.energy;
+        if(user.energy > user.stats.maxEnergy) {
+            user.energy = user.stats.maxEnergy;
+        }
+
         this._serializeUser(user);
 
         var temp = this.settings;
@@ -468,5 +503,24 @@ module.exports = class BattleSystem {
         temp.topRankings.traps.forEach((t, i) => delete temp.topRankings.traps[i]._config)
 
         this.settings = temp;
+    }
+
+
+    /**
+     * 
+     * @param {Discord.User|Discord.GuildMember|User|string} userObj The use to act with.
+     * @param {string} abilityName What ability to use.
+     */
+    useAbility(userObj, abilityName, amount, callback) {
+        var userObj = this._serializeUser(userObj);
+        var ability = Object.values(this._config.abilities).find(a => a.name === abilityName);
+
+        var totalCost = Math.ceil(ability.energy * amount);
+
+        if (userObj.energy < totalCost) {
+            return { error: `You do not have enough energy to use ${ability.name}${(amount > 1) ? ` (${amount})` : ``}. [Current Energy: ${userObj.energy}; Requires: ${totalCost}]` };
+        }
+
+        return this.useEnergy(userObj, totalCost, callback);
     }
 };

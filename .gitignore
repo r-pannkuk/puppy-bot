@@ -3,3 +3,5 @@ node_modules
 data/*
 commands/memes/saves/sylphie/*
 commands/memes/saves/duwang/*
+.env
+.gitignore

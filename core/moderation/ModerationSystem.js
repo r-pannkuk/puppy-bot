@@ -147,7 +147,7 @@ class ModerationSystem {
 
     /**
      * Finds an active moderation for a user if any.
-     * @param {(Discord.User|string|Moderation)} user User ID of the user to unmoderate.
+     * @param {(Discord.User|Discord.GuildMember|string|Moderation)} user User ID of the user to unmoderate.
      */
     getUserModerations(user) {
         if (user instanceof Moderation) {
