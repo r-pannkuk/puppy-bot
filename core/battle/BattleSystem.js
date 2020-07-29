@@ -181,7 +181,7 @@ module.exports = class BattleSystem {
             .sort((a, b) => b.experience - a.experience);
         temp.topRankings.users.splice(this._config.topRankings.userContainerSize);
         temp.topRankings.users.forEach((u, i) => {
-            delete temp.topRankings.users[i]._stats.config;
+            delete temp.topRankings.users[i]._stats._config;
             delete temp.topRankings.users[i]._inventory._items.forEach(i => delete i._config);
         });
 
