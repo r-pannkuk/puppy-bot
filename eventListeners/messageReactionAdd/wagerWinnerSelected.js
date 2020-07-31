@@ -4,7 +4,7 @@ const BetPool = require('../../core/bet/BetPool.js');
 const Bet = require('../../core/bet/Bet.js');
 const Source = require('../../core/points/Source.js');
 const emojis = require('../../core/bet/Emojis.js');
-const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/points/EmbedBuilder.js');
 
 module.exports = async function (client, messageReaction, user) {
     var message = messageReaction.message;
@@ -35,7 +35,7 @@ module.exports = async function (client, messageReaction, user) {
     var betPool = message.guild.pointSystem.findBetPoolByMessage(message.id);
 
     if (betPool) {
-        if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(user.id))) {
+        if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.cache.get(user.id))) {
             user.send(`Betting is closed. Only authorized roles can select a winner.`);
             return;
         }
@@ -48,8 +48,8 @@ module.exports = async function (client, messageReaction, user) {
 
         betPool = message.guild.pointSystem.completeBetPool(betPool, user, betPool._options[winningIndex]);
 
-        await message.clearReactions()
-        message.edit(RichEmbedBuilder.new(betPool));
+        await message.reactions.removeAll()
+        message.edit(MessageEmbedBuilder.new(betPool));
 
         message.channel.send(`*WINNER*: Bet pool **${betPool.name}** has paid out on **${betPool._winner}**. Winners will be notified.`);
 
@@ -57,7 +57,7 @@ module.exports = async function (client, messageReaction, user) {
 
         betPool = message.guild.pointSystem.awardBetPool(betPool);
 
-        message.edit(RichEmbedBuilder.new(betPool));
+        message.edit(MessageEmbedBuilder.new(betPool));
 
         var bets = Object.values(betPool._bets).filter(b => b && (b._status === Bet.STATUS.Lost || b._status === Bet.STATUS.Awarded));
         var betOutcomes = {};
@@ -65,7 +65,7 @@ module.exports = async function (client, messageReaction, user) {
         betOutcomes[Bet.STATUS.Awarded] = [];
 
         bets.forEach(bet => {
-            var user = client.users.get(bet._user);
+            var user = client.users.cache.get(bet._user);
 
             if (bet._status === Bet.STATUS.Awarded) {
                 user.send(`You've won **${bet._payout}** for betting on **${bet._outcome}** in bet pool **${betPool._name}**!`);
@@ -79,7 +79,7 @@ module.exports = async function (client, messageReaction, user) {
             });
         });
 
-        RichEmbedBuilder.results(betPool, betOutcomes).forEach(s => message.channel.send(s));
+        MessageEmbedBuilder.results(betPool, betOutcomes).forEach(s => message.channel.send(s));
 
     }
 };

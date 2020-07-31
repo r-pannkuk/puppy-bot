@@ -3,7 +3,7 @@ const commando = require('discord.js-commando');
 
 const User = require('../../core/battle/User.js');
 const Trap = require('../../core/battle/Trap.js');
-const RichEmbedBuilder = require('../../core/battle/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/battle/EmbedBuilder.js');
 const UserStatistics = require('../../core/battle/UserStatistics.js');
 const BattleSystem = require('../../core/battle/BattleSystem.js');
 const Admin = require('../../core/Admin.js');
@@ -23,7 +23,7 @@ module.exports = function (client,
     attacker) {
     if (trap !== undefined) {
 
-        var embed = RichEmbedBuilder.trapTriggered(trap, message, victim);
+        var embed = MessageEmbedBuilder.trapTriggered(trap, message, victim);
 
         message.channel.send(embed);
 
@@ -33,7 +33,7 @@ module.exports = function (client,
 
         /** Send to the trap channel if applicable. */
         if (trapChannelID !== null) {
-            var channel = message.client.channels.get(trapChannelID);
+            var channel = message.client.channels.cache.get(trapChannelID);
             channel.send(embed).catch((error) => console.log(error));
         }
     }

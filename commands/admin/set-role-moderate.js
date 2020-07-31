@@ -24,7 +24,7 @@ module.exports = class SetRoleModeration extends commando.Command {
     }
 
     async run(msg, { role }) {
-        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+        if (!msg.guild.members.cache.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
             msg.channel.send(`You don't have permission to use that command.`);
             return;
         }
@@ -34,7 +34,7 @@ module.exports = class SetRoleModeration extends commando.Command {
 
             msg.channel.send(`Moderation role set successfully.  Users will be assigned ${role} upon use of the !moderate/!gulag command.`);
         } else {
-            var role = msg.guild.roles.get(msg.guild.admin.moderationRoleID);
+            var role = msg.guild.roles.cache.get(msg.guild.admin.moderationRoleID);
             msg.channel.send(`Moderation role currently set to ${role}.`);
         }
 

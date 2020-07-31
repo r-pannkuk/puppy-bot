@@ -2,7 +2,7 @@ const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
 const BattleSystem = require('../../core/battle/BattleSystem.js');
-const RichEmbedBuilder = require('../../core/battle/RichEmbedBuilder.js')
+const MessageEmbedBuilder = require('../../core/battle/EmbedBuilder.js')
 
 module.exports = class StatusCommand extends commando.Command {
     constructor(client) {
@@ -40,11 +40,11 @@ module.exports = class StatusCommand extends commando.Command {
             user = message.author;
         }
 
-        var member = message.guild.members.get(user.id);
+        var member = message.guild.members.cache.get(user.id);
 
         const stats = battleSystem.fetchUser(user.id);
 
-        var embed = RichEmbedBuilder.status(member, stats);
+        var embed = MessageEmbedBuilder.status(member, stats);
 
         message.embed(embed);
     }

@@ -1,7 +1,7 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
-const GameKeys = require('../GameKeys.js');
+const GameKeys = require('../../../core/games/GameKeys.js');
 
 module.exports = class MHWUnhost extends commando.Command {
     constructor(client) {
@@ -23,11 +23,11 @@ module.exports = class MHWUnhost extends commando.Command {
 
         if(currentHost !== undefined) {
 
-            var hostChannel = guild.channels.get(guild.gameManager.get(GameKeys.MonsterHunterWorld, null, 'hostChannelID'));
+            var hostChannel = guild.channels.cache.get(guild.gameManager.get(GameKeys.MonsterHunterWorld, null, 'hostChannelID'));
 
             if(hostChannel !== undefined) {
                 var hostObj = guild.gameManager.get(GameKeys.MonsterHunterWorld, message.author.id, 'host');
-                var hostMessage = hostChannel.fetchMessage(hostObj.sentMessageID).then(msg => msg.delete());
+                var hostMessage = hostChannel.messages.fetch(hostObj.sentMessageID).then(msg => msg.delete());
             }
 
             guild.gameManager.delete(GameKeys.MonsterHunterWorld, message.author.id, 'host');

@@ -2,7 +2,7 @@ const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 const moment = require('moment');
 
-const GameKeys = require('../GameKeys.js');
+const GameKeys = require('../../../core/games/GameKeys.js');
 
 
 module.exports = class MHWHostChannel extends commando.Command {
@@ -33,7 +33,7 @@ module.exports = class MHWHostChannel extends commando.Command {
     
             msg.channel.send(`Host channel set to ${channel}.`);
         } else {
-            var channel = this.client.channels.get(msg.guild.gameManager.get(GameKeys.MonsterHunterWorld, null, 'hostChannelID'));
+            var channel = this.client.channels.cache.get(msg.guild.gameManager.get(GameKeys.MonsterHunterWorld, null, 'hostChannelID'));
             msg.channel.send(`Host channel currently set to ${channel}.`);
         }
     }

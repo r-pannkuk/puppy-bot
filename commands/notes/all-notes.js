@@ -23,7 +23,7 @@ module.exports = class AllNotesCommand extends commando.Command {
 
         var keyString = keys.reduce((string, key) => string = string + '\n' + key.toString(), "");
 
-        var embed = new Discord.RichEmbed()
+        var embed = new Discord.MessageEmbed()
             .setColor('YELLOW');
 
         embed.setAuthor(`Note Keys`, 'https://lh4.ggpht.com/er4T35JxjGnIFYL_p7HU9G0GFwNJ2eZzt1oGloPL9RC18f_MUU4h5_wwHI6IGGKWIuw=w300');

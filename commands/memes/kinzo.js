@@ -22,9 +22,9 @@ module.exports = class KinzoCommand extends commando.Command {
                         if (isDiscordLink) {
                             var parts = val.split('\/');
 
-                            var guild = await this.client.guilds.get(parts[4]);
-                            var channel = await guild.channels.get(parts[5]);
-                            var message = await channel.fetchMessage(parts[6]);
+                            var guild = await this.client.guilds.cache.get(parts[4]);
+                            var channel = await guild.channels.cache.get(parts[5]);
+                            var message = await channel.messages.fetch(parts[6]);
 
                             var user = await guild.member(message.author).displayName;
                             var content = message.content;
@@ -48,7 +48,7 @@ module.exports = class KinzoCommand extends commando.Command {
                         if (isDiscordLink) {
                             var parts = val.split('\/');
 
-                            var guild = await this.client.guilds.get(parts[4]);
+                            var guild = await this.client.guilds.cache.get(parts[4]);
 
                             if (!guild) {
                                 msg.channel.send("This bot is not a member of that server.");

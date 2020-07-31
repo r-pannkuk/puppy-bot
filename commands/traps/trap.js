@@ -45,12 +45,11 @@ module.exports = class TrapCommand extends commando.Command {
         var duration = battleSystem._config.traps.timeToDeleteTrapMessage;
 
         if (!result.error) {
-            message.channel.send(`New trap set for phrase: "${phrase}"\n` +
-                `Consumed ${battleSystem._config.abilities.trap.energy} energy to create a new trap (${attackerStats.energy} remaining).\n`)
-                .then(msg => {
-                    msg.delete(duration).catch(console.err);
-                    message.delete(duration).catch(console.err);
-                });
+            var msg = await message.channel.send(`New trap set for phrase: "${phrase}"\n` +
+                `Consumed ${battleSystem._config.abilities.trap.energy} energy to create a new trap (${attackerStats.energy} remaining).\n`);
+
+            msg.delete({timeout: duration}).catch(console.err);
+            message.delete({timeout: duration}).catch(console.err);
         }
         else {
             message.channel.send(result.error);

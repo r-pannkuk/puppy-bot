@@ -18,30 +18,18 @@ module.exports = class UnregisterChallonge extends commando.Command {
                 key: 'user',
                 prompt: 'Please enter the Discord User to associate with.',
                 type: 'user',
-                validate: (val, msg, arg) => {
-                    var bool = msg.guild.member(msg.author).permissions.bitfield & 'ADMINISTRATOR' ||
-                        msg.guild.pointSystem.authorizedRoles.find(r => msg.guild.member(msg.author).roles.has(r));
-
-                    if (!bool && msg.author !== val) {
-                        msg.channel.send('Only users with permissions can associate another user with Challonge.');
-                        return false;
-                    }
-
-                    return true;
-
-                },
                 default: ''
             }]
         });
     }
 
     async run(message, { user }) {
-        if (!message.guild.members.get(message.author.id).hasPermission('MANAGE_CHANNELS')) {
+        if (!message.guild.members.cache.get(message.author.id).hasPermission('MANAGE_CHANNELS')) {
             message.channel.send(`You don't have permission to use that command.`);
             return;
         }
 
-        if (user === '') {
+        if (user === '' || user === null) {
             user = message.author;
         }
 

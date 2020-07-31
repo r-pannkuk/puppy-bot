@@ -3,11 +3,13 @@ const BetPool = require('../bet/BetPool.js');
 const emojis = require('../bet/Emojis.js');
 const Bet = require('../bet/Bet.js');
 const Account = require('./Account.js');
+const Points = require('./Points.js');
+const User = require('./User.js');
 
 const LIMIT = 2000;
 
 module.exports.new = function (betPool) {
-    return new Discord.RichEmbed()
+    return new Discord.MessageEmbed()
         .setColor(betPool.message().color)
         .setAuthor(betPool.message().author, betPool.message().authorIcon)
         .setThumbnail(betPool.message().thumbnail)
@@ -71,7 +73,7 @@ module.exports.discordLink = discordLink;
 
 module.exports.userBet = function (bet, betPool, msg, user) {
     var index = Object.values(betPool._options).findIndex(o => o === bet._outcome) + 1;
-    var embed = new Discord.RichEmbed()
+    var embed = new Discord.MessageEmbed()
         .setColor(betPool.message().color)
         .setAuthor(`Bet Update`)
         .setDescription(
@@ -145,9 +147,13 @@ function addAccountField(richEmbed, account) {
 module.exports.userAccount = function ({
     user,
     serviceType,
-    embed = new Discord.RichEmbed()
+    embed = new Discord.MessageEmbed()
 }) {
-    var account = user._accounts.find(a => a._service === serviceType);
+    if(user instanceof User) {
+        var account = user._accounts.find(a => a._service === serviceType);
+    } else if(user instanceof Account) {
+        var account = user;
+    }
     embed = addAccountField(embed, account);
 
     return embed;
@@ -155,7 +161,7 @@ module.exports.userAccount = function ({
 
 module.exports.userAccounts = function ({
     user,
-    embed = new Discord.RichEmbed()
+    embed = new Discord.MessageEmbed()
 }) {
     for (var i in user._accounts) {
         embed = addAccountField(embed, user._accounts[i]);
@@ -165,7 +171,7 @@ module.exports.userAccounts = function ({
 }
 
 module.exports.listPendingAccounts = function (pendingAccounts) {
-    var embed = new Discord.RichEmbed();
+    var embed = new Discord.MessageEmbed();
 
     var keys = Object.keys(pendingAccounts);
 

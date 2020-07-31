@@ -35,7 +35,9 @@ client.registry.registerGroups([
     ['tournament', 'Commands for tournament creation and viewing'],
     ['traps', 'Trap Phrases which Explode']
 ]);
-client.registry.registerDefaults();
+client.registry.registerDefaultTypes();
+client.registry.registerDefaultGroups();
+client.registry.registerDefaultCommands();
 client.registry.registerCommandsIn(__dirname + '/commands');
 client.registry.registerCommandsIn(__dirname + '/commands/games');
 

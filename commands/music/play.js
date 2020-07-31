@@ -38,7 +38,7 @@ module.exports = class PlayCommand extends commando.Command {
                 var voiceChannel = message.member.voiceChannel;
 
                 if(voiceChannel === undefined) {
-                    voiceChannel = message.guild.channels.find(c => c.type === 'voice');
+                    voiceChannel = message.guild.channels.cache.find(c => c.type === 'voice');
 
                     if(voiceChannel === undefined) {
                         messageChannel.send(`Cannot find a voice channel to join.`);

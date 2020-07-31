@@ -3,7 +3,7 @@ const MusicPlayer = require('../../core/music/MusicPlayer.js');
 const BattleSystem = require('../../core/battle/BattleSystem.js');
 const Notepad = require('../../core/Notepad.js');
 const ReminderManager = require('../../core/reminders/ReminderManager.js');
-const ReminderRichEmbed = require('../../core/reminders/RichEmbedBuilder.js');
+const ReminderMessageEmbed = require('../../core/reminders/EmbedBuilder.js');
 const GameManager = require('../../core/GameManager.js');
 const Challonge = require('../../core/challonge/Challonge.js');
 const PointSystem = require('../../core/points/Points.js');
@@ -20,7 +20,8 @@ module.exports = function(client, guild) {
 
         /* MusicPlayer added to bot. */
         guild.musicPlayer = new MusicPlayer(guild.settings, {
-            youtube: process.env.YOUTUBE
+            youtube: process.env.YOUTUBE,
+            soundcloud: process.env.SOUNDCLOUD
         });
 
         /* Betting system for awarding users. */

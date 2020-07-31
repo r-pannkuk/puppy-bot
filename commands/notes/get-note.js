@@ -28,7 +28,7 @@ module.exports = class GetNoteCommand extends commando.Command {
             message.send()
         }
 
-        var embed = new Discord.RichEmbed()
+        var embed = new Discord.MessageEmbed()
             .setColor('YELLOW');
 
         embed.setAuthor(noteKey, 'https://lh4.ggpht.com/er4T35JxjGnIFYL_p7HU9G0GFwNJ2eZzt1oGloPL9RC18f_MUU4h5_wwHI6IGGKWIuw=w300');

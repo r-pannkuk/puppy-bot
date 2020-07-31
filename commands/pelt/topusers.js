@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 
 const User = require('../../core/battle/User.js');
 const BattleSystem = require('../../core/battle/BattleSystem.js');
-const RichEmbedBuilder = require('../../core/battle/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/battle/EmbedBuilder.js');
 
 module.exports = class TopUsersCommand extends commando.Command {
     constructor(client) {
@@ -28,7 +28,7 @@ module.exports = class TopUsersCommand extends commando.Command {
         var topUsers = battleSystem.topUsers;
 
         if (topUsers.length > 0) {
-            var embed = new Discord.RichEmbed()
+            var embed = new Discord.MessageEmbed()
                 .setColor(`GOLD`)
                 .setAuthor(`Top Users`);
 
@@ -36,7 +36,7 @@ module.exports = class TopUsersCommand extends commando.Command {
 
             for (var i in topUsers) {
                 var user = topUsers[i];
-                var member = message.guild.members.get(user.id);
+                var member = message.guild.members.cache.get(user.id);
 
                 string += `[${parseInt(i) + 1}] (${user.experience}) ${member} - Level ${user.level}\n`;
             }

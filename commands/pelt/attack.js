@@ -2,7 +2,7 @@ const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
 const BattleSystem = require('../../core/battle/BattleSystem.js');
-const RichEmbedBuilder = require('../../core/battle/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/battle/EmbedBuilder.js');
 const TimeExtract = require('../../core/TimeExtract.js');
 
 module.exports = class AttackCommand extends commando.Command {
@@ -38,7 +38,7 @@ module.exports = class AttackCommand extends commando.Command {
      * @param {string} args.item
      */
     async run(message, { user, item }) {
-        var attacker = message.guild.members.get(message.author.id);
+        var attacker = message.guild.members.cache.get(message.author.id);
 
         if (user.id === message.client.user.id) {
             message.channel.send(`I can't let you do that, ${attacker.displayName}.`)
@@ -74,12 +74,12 @@ module.exports = class AttackCommand extends commando.Command {
 
             if (!foundItem) {
                 message.channel.send(`${message.author}, item not found or on cooldown.  Please list one of the available items.`);
-                message.channel.send(RichEmbedBuilder.status(attacker, attackerBattle));
+                message.channel.send(MessageEmbedBuilder.status(attacker, attackerBattle));
                 return;
             }
         }
 
-        var victim = message.guild.members.get(user.id);
+        var victim = message.guild.members.cache.get(user.id);
 
         var damageEvent = battleSystem.useItem(attacker, victim, foundItem);
 
@@ -96,7 +96,7 @@ module.exports = class AttackCommand extends commando.Command {
         damageEvent.attacker.displayName = attacker.displayName;
         damageEvent.victim.displayName = victim.displayName;
 
-        var embed = RichEmbedBuilder.useItem(damageEvent);
+        var embed = MessageEmbedBuilder.useItem(damageEvent);
 
         message.embed(embed);
     }

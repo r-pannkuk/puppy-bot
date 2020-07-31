@@ -1,7 +1,7 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
-const GameKeys = require('../GameKeys.js');
+const GameKeys = require('../../../core/games/GameKeys.js');
 
 
 module.exports = class FreeBreadCommand extends commando.Command {
@@ -20,6 +20,6 @@ module.exports = class FreeBreadCommand extends commando.Command {
 
     
     async run(message) {
-        message.channel.send(`${message.guild.emojis.get('522930879853625429')}`);
+        // message.channel.send(`${message.guild.emojis.cache.get('522930879853625429')}`);
     }
 }

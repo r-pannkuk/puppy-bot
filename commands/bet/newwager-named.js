@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 const Source = require('../../core/points/Source.js');
 const emojis = require('../../core/bet/Emojis.js');
-const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/points/EmbedBuilder.js');
 const NewWagerCommand = require('./newwager.js');
 
 module.exports = class NewWagerNamedCommand extends commando.Command {
@@ -40,7 +40,7 @@ module.exports = class NewWagerNamedCommand extends commando.Command {
     }
 
     async run(message, { title, wager, options }) {
-        if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(message.author.id))) {
+        if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.cache.get(message.author.id))) {
             message.channel.send(`You don't have permission to use that command.`)
             return;
         }

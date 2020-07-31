@@ -18,7 +18,7 @@ module.exports = function(client, message) {
         return;
     }
 
-    var echoChannel = message.client.channels.get(message.guild.admin.deleteChannelID);
+    var echoChannel = message.client.channels.cache.get(message.guild.admin.deleteChannelID);
 
     var createdDate = new Date(message.createdTimestamp);
     var m = moment.tz(createdDate, 'America/New_York');
@@ -32,7 +32,7 @@ module.exports = function(client, message) {
             echoChannel.send(`ERROR: Unable to fetch attachment at: ${attachment.proxyURL}`);
         });
     } else if(message.embeds.length > 0) {
-        echoChannel.send(content, new Discord.RichEmbed(message.embeds[0]));
+        echoChannel.send(content, new Discord.MessageEmbed(message.embeds[0]));
     } else {
         echoChannel.send(content);
     }

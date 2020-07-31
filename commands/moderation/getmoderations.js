@@ -46,7 +46,7 @@ module.exports = class GetModerationsCommand extends commando.Command {
     async run(message) {
         /** @type {Admin} */
         var admin = message.guild.admin;
-        var member = message.guild.members.get(message.author.id);
+        var member = message.guild.members.cache.get(message.author.id);
 
         if (member.hasPermission('KICK_MEMBERS') || admin.allowGulagUnmoderated) {
             /** @type {ModerationSystem} The moderation object. */
@@ -66,15 +66,15 @@ module.exports = class GetModerationsCommand extends commando.Command {
             for (var i in activeMods) {
                 /** @type {Moderation} */
                 var mod = activeMods[i];
-                var user = guild.members.get(mod._userId);
-                var moderator = guild.members.get(mod._moderatorId);
+                var user = guild.members.cache.get(mod._userId);
+                var moderator = guild.members.cache.get(mod._moderatorId);
 
                 var duration = new TimeExtract(mod._endTime);
 
                 description += `${user} [by ${moderator}] - ${duration.interval_date()}\n`;
             }
 
-            var embed = new Discord.RichEmbed();
+            var embed = new Discord.MessageEmbed();
 
             embed.setTitle(`Moderations`);
 

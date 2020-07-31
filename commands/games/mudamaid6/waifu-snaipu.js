@@ -1,7 +1,7 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
-const GameKeys = require('../GameKeys.js');
+const GameKeys = require('../../../core/games/GameKeys.js');
 
 
 module.exports = class WaifuSnaipuCommand extends commando.Command {

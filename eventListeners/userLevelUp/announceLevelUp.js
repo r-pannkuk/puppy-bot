@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 
 const User = require('../../core/battle/User.js');
-const RichEmbedBuilder = require('../../core/battle/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/battle/EmbedBuilder.js');
 const UserStatistics = require('../../core/battle/UserStatistics.js');
 
 /**
@@ -17,5 +17,5 @@ module.exports = function (client, guildMember, userData, beforeStats) {
         return;
     }
 
-    guildMember.send(RichEmbedBuilder.levelUp(userData, beforeStats));
+    guildMember.send(MessageEmbedBuilder.levelUp(userData, beforeStats));
 };

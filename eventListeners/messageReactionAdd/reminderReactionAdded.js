@@ -45,7 +45,7 @@ module.exports = function(client, messageReaction, user) {
 
             var collectCallback = async(m, c) => {
                 isHandled = true;
-                c.stop();
+                // c.stop();
 
                 try {
                     var input = new TimeExtract(m.content);

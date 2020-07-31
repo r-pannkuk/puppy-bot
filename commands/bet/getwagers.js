@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 const Source = require('../../core/points/Source.js');
 const emojis = require('../../core/bet/Emojis.js');
-const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/points/EmbedBuilder.js');
 
 const OPTIONS_LIMIT = 16;
 
@@ -65,7 +65,7 @@ module.exports = class GetWagersCommand extends commando.Command {
                 continue;
             }
 
-            var channels = message.guild.channels.array();
+            var channels = message.guild.channels.cache.array();
 
             for (var i in channels) {
                 var foundMessage = false;
@@ -76,7 +76,7 @@ module.exports = class GetWagersCommand extends commando.Command {
                 }
 
                 try {
-                    foundMessage = await foundChannel.fetchMessage(betPool._message._id);
+                    foundMessage = await foundChannel.messages.fetch(betPool._message._id);
                 } catch (error) {
                     continue;
                 }
@@ -88,21 +88,23 @@ module.exports = class GetWagersCommand extends commando.Command {
 
             if (foundMessage) {
                 var foundChannel = foundMessage.channel;
-                var link = RichEmbedBuilder.discordLink(foundGuild, foundChannel, foundMessage);
+                var link = MessageEmbedBuilder.discordLink(foundGuild, foundChannel, foundMessage);
                 messageString += `**${betPool.name}**: ${link}\n`;
             } else {
                 message.channel.send(`Bet pool message for **${betPool.name}** was not found. Recreating:`);
-                foundMessage = await message.channel.send(RichEmbedBuilder.new(betPool));
+                foundMessage = await message.channel.send(MessageEmbedBuilder.new(betPool));
                 message.guild.pointSystem.subscribeBetPool(betPool, foundMessage);
 
-                await RichEmbedBuilder.addReactions({
+                await MessageEmbedBuilder.addReactions({
                     message: foundMessage, 
                     betPool: betPool
                 });
             }
         }
 
-        var pieces = messageString.split(2000);
-        pieces.forEach(s => message.channel.send(s));
+        if(messageString !=='') {
+            var pieces = messageString.split(2000);
+            pieces.forEach(s => message.channel.send(s));
+        }
     }
 }

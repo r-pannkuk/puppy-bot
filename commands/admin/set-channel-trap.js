@@ -24,7 +24,7 @@ module.exports = class SetChannelTrap extends commando.Command {
 
 
     async run(msg, { channel }) {
-        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+        if (!msg.guild.members.cache.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
             msg.channel.send(`You don't have permission to use that command.`);
             return;
         }
@@ -34,7 +34,7 @@ module.exports = class SetChannelTrap extends commando.Command {
 
             msg.channel.send(`Trap channel set successfully.  Traps will now be posted in ${channel}`);
         } else {
-            var channel = this.client.channels.get(msg.guild.admin.trapChannelID);
+            var channel = this.client.channels.cache.get(msg.guild.admin.trapChannelID);
             msg.channel.send(`Trap channel currently set to ${channel}.`);
         }
 

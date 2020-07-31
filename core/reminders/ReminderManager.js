@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Scheduler = require('node-schedule');
 
 const Reminder = require('./Reminder.js');
-const RichEmbedHelper = require('./RichEmbedBuilder.js');
+const MessageEmbedHelper = require('./EmbedBuilder.js');
 const TimeExtract = require('../TimeExtract.js');
 
 const CreateReminderResponse = {
@@ -90,7 +90,7 @@ module.exports = class ReminderManager {
         temp[currentReminder.id] = currentReminder;
         this.reminders = temp;
 
-        var newMessage = await RichEmbedHelper.create(client, currentReminder);
+        var newMessage = await MessageEmbedHelper.create(client, currentReminder);
         this.subscribeReminderMessage(currentReminder, newMessage);
     }
 

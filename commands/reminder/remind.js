@@ -4,7 +4,7 @@ const fs = require('fs');
 
 const Reminder = require('../../core/reminders/Reminder.js');
 const TimeExtract = require('../../core/TimeExtract.js');
-const RichEmbed = require('../../core/reminders/RichEmbedBuilder.js');
+const MessageEmbed = require('../../core/reminders/EmbedBuilder.js');
 const ReminderManager = require('../../core/reminders/ReminderManager.js');
 
 
@@ -44,7 +44,7 @@ module.exports = class RemindCommand extends commando.Command {
                         } else if (input.indexOf('<#') === 0) {
                             var input = input.slice(input.indexOf('<') + 2, -1);
 
-                            return msg.guild.channels.get(input);
+                            return msg.guild.channels.cache.get(input);
 
                             // Checking for users
                         } else if (input.indexOf('<@') === 0) {
@@ -54,7 +54,7 @@ module.exports = class RemindCommand extends commando.Command {
                             }
 
                             // Checks for guild then for DM
-                            return (msg.client.users.get(input) || msg.guild.members.get(input));
+                            return (msg.client.users.cache.get(input) || msg.guild.members.cache.get(input));
                         }
 
                         return null;
@@ -70,7 +70,7 @@ module.exports = class RemindCommand extends commando.Command {
                         } else if (input.indexOf('<#') === 0) {
                             var input = input.slice(input.indexOf('<') + 2, -1);
 
-                            return msg.guild && msg.guild.channels.get(input);
+                            return msg.guild && msg.guild.channels.cache.get(input);
 
                             // Checking for users
                         } else if (input.indexOf('<@') === 0) {
@@ -80,7 +80,7 @@ module.exports = class RemindCommand extends commando.Command {
                             }
 
                             // Checks for guild then for DM
-                            return (msg.guild && (msg.guild.members.get(input) || msg.guild.channels.get(input))) ||
+                            return (msg.guild && (msg.guild.members.cache.get(input) || msg.guild.channels.cache.get(input))) ||
                                 (msg.channel.recipient.id === input);
 
                         }
@@ -114,7 +114,7 @@ module.exports = class RemindCommand extends commando.Command {
 
         var sent = await message.channel.send(`Created a new reminder for ${target} at ${datetime}: "${reminderMessage}"`);
         reminderManager.subscribeReminderMessage(r, sent);
-        RichEmbed.addReactions({
+        MessageEmbed.addReactions({
             message: sent,
             reactCancel: true,
             reactRepeat: false,

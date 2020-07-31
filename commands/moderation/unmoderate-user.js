@@ -26,14 +26,14 @@ class UnmoderateCommand extends commando.Command {
 
 
     async run(msg, { user }) {
-        if (!msg.guild.members.get(msg.author.id).hasPermission('KICK_MEMBERS')) {
+        if (!msg.guild.members.cache.get(msg.author.id).hasPermission('KICK_MEMBERS')) {
             msg.channel.send(`You don't have permission to use that command.`);
             return;
         }
 
         /** @type {ModerationSystem} The moderation object. */
         var mods = msg.guild.moderation;
-        var member = msg.guild.members.get(user.id);
+        var member = msg.guild.members.cache.get(user.id);
 
         var mod = mods.getUserModerations(user);
 

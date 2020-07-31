@@ -59,7 +59,7 @@ module.exports = class RemoveTrapCommand extends commando.Command {
 
                 validTraps.forEach(t => {
                     var trap = battleSystem.removeTrap(t);
-                    var owner = message.guild.members.get(trap.owner);
+                    var owner = message.guild.members.cache.get(trap.owner);
 
                     var string = `You removed ${owner}\'s trap!`;
 

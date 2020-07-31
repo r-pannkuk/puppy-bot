@@ -17,18 +17,18 @@ module.exports = class AddGroupChannel extends commando.Command {
             ],
             argsPromptLimit: 0,
             guildOnly: true,
-            
+
             args: [{
-                    key: 'channel',
-                    prompt: "Store a channel for use.",
-                    type: 'string'
-                },
-                {
-                    key: 'role',
-                    prompt: 'Name for the role assigned to this channel.',
-                    type: 'string',
-                    default: ''
-                }
+                key: 'channel',
+                prompt: "Store a channel for use.",
+                type: 'string'
+            },
+            {
+                key: 'role',
+                prompt: 'Name for the role assigned to this channel.',
+                type: 'string',
+                default: ''
+            }
             ]
         });
     }
@@ -42,13 +42,8 @@ module.exports = class AddGroupChannel extends commando.Command {
      * @param {string} args.role The name of the role to add.
      */
     async run(msg, { channel, role }) {
-        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+        if (!msg.guild.members.cache.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
             msg.channel.send(`You don't have permission to use that command.`);
-            return;
-        }
-
-        if (msg.client.channels.exists('name', channel)) {
-            msg.channel.send(`Channel ${channel} already exists. Please use another.`);
             return;
         }
 
@@ -63,72 +58,68 @@ module.exports = class AddGroupChannel extends commando.Command {
         var categoryName = (channelInputs.length === 2) ? channelInputs[0] : msg.channel.parent.name;
         var channelName = (channelInputs.length === 2) ? channelInputs[1] : channelInputs[0];
 
+        if (msg.client.channels.cache.find(c => c.name === channelName && c.parent.name === categoryName)) {
+            msg.channel.send(`Channel ${channel} already exists. Please use another.`);
+            return;
+        }
+
         if (role === '') {
             role = `[${channelName}]`;
         }
 
         var roleName = role.split('@').join('').split('<').join('').split('>').join('').split('&').join('');
 
-        var guildRole = msg.guild.roles.find('name', roleName);
+        var guildRole = msg.guild.roles.cache.find(r => r.name === roleName);
 
         if (guildRole === null) {
-            guildRole = msg.guild.roles.get(roleName);
+            guildRole = msg.guild.roles.cache.get(roleName);
         }
 
         /** @type {Admin} */
         var admin = msg.guild.admin;
 
-        /**
-         * @param {Discord.Role} role 
-         */
-        var createChannelCallback = (role) => {
-            var overwrites = [{
-                    id: msg.guild.defaultRole,
-                    deny: [
-                        'SEND_MESSAGES',
-                        'VIEW_CHANNEL',
-                        'ADD_REACTIONS',
-                        'SEND_TTS_MESSAGES',
-                        'EMBED_LINKS',
-                        'ATTACH_FILES',
-                        'READ_MESSAGE_HISTORY',
-                        'USE_EXTERNAL_EMOJIS'
-                    ]
-                },
-                {
-                    id: role,
-                    allow: [
-                        'SEND_MESSAGES',
-                        'VIEW_CHANNEL',
-                        'ADD_REACTIONS',
-                        'SEND_TTS_MESSAGES',
-                        'EMBED_LINKS',
-                        'ATTACH_FILES',
-                        'READ_MESSAGE_HISTORY',
-                        'USE_EXTERNAL_EMOJIS'
-                    ]
-                }
-            ]
-
-            admin.addNewChannel(msg.guild, channelName, categoryName, overwrites, (channel) => {
-                msg.channel.send(`New channel ${channel} created under ${categoryName.toUpperCase()} for ${role}.`);
-
-                if(admin.roleChannelID) {
-                    msg.guild.channels.get(admin.roleChannelID).send(
-                        `${role} - React with \:white_check_mark: to be added to the group and access ${channel}`
-                    ).then(msg => {
-                        msg.react("✅");
-                    });
-                }
-            });
-        };
-
         if (guildRole === null || guildRole === undefined) {
-            admin.createRole(msg.guild, roleName, createChannelCallback);
-        } else {
-            createChannelCallback(guildRole);
+            guildRole = await admin.createRole(roleName);
         }
+
+        var overwrites = [{
+            id: msg.guild.roles.everyone,
+            deny: [
+                'SEND_MESSAGES',
+                'VIEW_CHANNEL',
+                'ADD_REACTIONS',
+                'SEND_TTS_MESSAGES',
+                'EMBED_LINKS',
+                'ATTACH_FILES',
+                'READ_MESSAGE_HISTORY',
+                'USE_EXTERNAL_EMOJIS'
+            ]
+        },
+        {
+            id: guildRole,
+            allow: [
+                'SEND_MESSAGES',
+                'VIEW_CHANNEL',
+                'ADD_REACTIONS',
+                'SEND_TTS_MESSAGES',
+                'EMBED_LINKS',
+                'ATTACH_FILES',
+                'READ_MESSAGE_HISTORY',
+                'USE_EXTERNAL_EMOJIS'
+            ]
+        }
+        ]
+
+        var channel = await admin.addNewChannel(channelName, categoryName, overwrites);
+        msg.channel.send(`New channel ${channel} created under ${categoryName.toUpperCase()} for ${guildRole}.`);
+
+        if (admin.roleChannelID) {
+            msg.guild.channels.cache.get(admin.roleChannelID).send(
+                `${guildRole} - React with \:white_check_mark: to be added to the group and access ${channel}`
+            ).then(msg => {
+                msg.react("✅");
+            });
+        }
+
     }
-
-
 }

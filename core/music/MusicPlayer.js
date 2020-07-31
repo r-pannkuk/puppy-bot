@@ -1,11 +1,11 @@
+const Discord = require('discord.js');
 const fs = require('fs');
 const ytdl = require('ytdl-core-discord');
 const request = require('request');
-const getYT = require('get-youtube-id');
-const fetchYT = require('youtube-info');
 const validURL = require('valid-url');
 const URL = require('url');
 const getYTID = require('get-youtube-id');
+const scdl = require('soundcloud-downloader');
 
 module.exports = class MusicPlayer {
     constructor(guildSettings, config) {
@@ -15,6 +15,7 @@ module.exports = class MusicPlayer {
         this.guildSettings = guildSettings;
 
         this._apiKeyYT = config.youtube;
+        this._apiKeySC = config.soundcloud;
         this._queue = [];
         this._isPlaying = false;
         this._dispatcher = null;
@@ -24,14 +25,14 @@ module.exports = class MusicPlayer {
     enqueue(source, fetchCallback, playCallback) {
         var musicPlayer = this;
 
-        this.getID(source, function(err, { type, id }) {
-            if(err) {
+        this.getID(source, function (err, { type, data }) {
+            if (err) {
                 fetchCallback(err, null);
             }
 
-            if(type === 'YouTube') {
-                fetchYT(id, function(err, videoInfo) {
-                    if(err) {
+            if (type === 'YouTube') {
+                ytdl.getInfo(data, function (err, videoInfo) {
+                    if (err) {
                         console.log(err);
                         return;
                     }
@@ -42,13 +43,20 @@ module.exports = class MusicPlayer {
                     musicPlayer._queue.push(videoInfo);
 
                     console.log("Added to queue: **" + videoInfo.title + "**");
-        
+
                     fetchCallback(null, videoInfo);
                 });
             }
 
-            else if(type === 'Soundcloud') {
-                // TBD
+            else if (type === 'SoundCloud') {
+                data.type = type;
+                data.callback = playCallback;
+
+                musicPlayer._queue.push(data);
+
+                console.log(`Added to queue: **${data.title}**`);
+
+                fetchCallback(null, data);
             }
         });
     }
@@ -58,18 +66,22 @@ module.exports = class MusicPlayer {
     }
 
     play(videoInfo, voiceChannel) {
-        
-        if(voiceChannel !== undefined) {
+
+        if (voiceChannel !== undefined) {
             this.setChannel(voiceChannel);
         }
 
-        if(this._voiceChannel === undefined) {
+        if (this._voiceChannel === undefined) {
             console.log("Channel not found!");
             return;
         }
 
         var musicPlayer = this;
 
+        /**
+         * @callback
+         * @property {Discord.VoiceConnection} connection
+         */
         this._voiceChannel.join().then(async (connection) => {
             var stream;
             var streamOptions = {
@@ -78,15 +90,14 @@ module.exports = class MusicPlayer {
                 bitrate: 192000
             };
 
-            if(videoInfo.type === 'YouTube') {
-                musicPlayer._dispatcher = await connection.playOpusStream(
-                    await ytdl(videoInfo.url, {
-                        quality: 'highestaudio',
-                        filter: 'audioonly'
-                    })
-                );
-            } else if(videoInfo.type === 'Soundcloud') {
-                // SoundCloud download
+            if (videoInfo.type === 'YouTube') {
+                var stream = await ytdl(videoInfo.video_url, {
+                    quality: 'highestaudio',
+                    filter: 'audioonly'
+                });
+                musicPlayer._dispatcher = await connection.play(stream, {type: 'opus'});
+            } else if (videoInfo.type === 'SoundCloud') {
+                musicPlayer._dispatcher = await connection.play(await scdl.download(videoInfo.uri, this._apiKeySC));
             }
 
             videoInfo.callback(videoInfo);
@@ -99,7 +110,7 @@ module.exports = class MusicPlayer {
 
                 musicPlayer._queue.shift();
 
-                if(musicPlayer._queue.length === 0) {
+                if (musicPlayer._queue.length === 0) {
                     musicPlayer.stop();
                 } else {
                     musicPlayer.play(musicPlayer._queue[0]);
@@ -113,11 +124,11 @@ module.exports = class MusicPlayer {
     }
 
     stop() {
-        if(this._dispatcher !== null) {
+        if (this._dispatcher !== null) {
             this._dispatcher.end();
         }
 
-        if(this._voiceChannel !== null) {
+        if (this._voiceChannel !== null) {
             this._voiceChannel.leave();
         }
 
@@ -143,45 +154,45 @@ module.exports = class MusicPlayer {
 
     getID(source, callback) {
         console.log(source);
-        if (MusicPlayer.isYouTube(source)) {
+        if (this.isYouTube(source)) {
             console.log("Determined to be YT Link.");
-            MusicPlayer.getYouTubeID(source, function(err, id) {
-                if(err) {
+            this.getYouTubeID(source, function (err, id) {
+                if (err) {
                     callback(err, null);
                 }
                 else {
                     console.log("YouTube ID found: " + id);
                     callback(null, {
                         type: 'YouTube',
-                        id: id
+                        data: id
                     });
                 }
             });
         }
-        else if (MusicPlayer.isSoundCloud(source)) {
+        else if (this.isSoundCloud(source)) {
             console.log("Determined to be SoundCloud Link.");
-            MusicPlayer.GetSoundCloudID(source, function(err, id) {
-                if(err) {
+            this.getSoundCloudID(source, function (err, data) {
+                if (err) {
                     callback(err, null);
                 }
                 else {
-                    console.log("Soundcloud ID found: " + id);
+                    console.log("Soundcloud ID found: " + data.id);
                     callback(null, {
                         type: 'SoundCloud',
-                        id: id
+                        data: data
                     });
                 }
             });
         }
         else {
             console.log("Nothing found.  Defaulting to search.");
-            MusicPlayer.searchYouTube(source, function(err, results) {
+            this.searchYouTube(source, function (err, results) {
                 callback(err, results);
             });
         }
     }
 
-    static isYouTube(url) {
+    isYouTube(url) {
         if (!validURL.isWebUri(url)) {
             return false;
         }
@@ -190,30 +201,30 @@ module.exports = class MusicPlayer {
 
         const regex = /[a-zA-Z0-9-_]+$/g;
 
-        if(data.host === 'youtube.com' || data.host === 'www.youtube.com') {
-            if(data.pathname === '/watch') {
-                
-                
-                if(!data.query.v === 'v') {
+        if (data.host === 'youtube.com' || data.host === 'www.youtube.com') {
+            if (data.pathname === '/watch') {
+
+
+                if (!data.query.v === 'v') {
                     return false;
                 }
 
                 return data.query.v.match(regex) !== null;
             } else if (data.pathname === '/playlist') {
-                if(!data.query.list) {
+                if (!data.query.list) {
                     return false;
                 }
 
                 return data.query.list.match(regex) !== null;
             }
-        } else if(data.host === 'youtu.be') {
+        } else if (data.host === 'youtu.be') {
             return data.pathname.substring(1).match(regex) !== null;
         }
 
         return false;
     }
 
-    static isSoundCloud(url) {
+    isSoundCloud(url) {
         if (!validURL.isWebUri(url)) {
             return false;
         }
@@ -224,50 +235,50 @@ module.exports = class MusicPlayer {
             return false;
         }
 
-        var tokens = data.pathname.split('/').slice(1);
+        // var tokens = data.pathname.split('/').slice(1);
 
-        const regex = /[a-zA-Z0-9-Z]+/g;
-        var validLength = 3;
+        // const regex = /[a-zA-Z0-9-Z]+/g;
+        // var validLength = 3;
 
-        for (var index in tokens) {
-            --validLength;
+        // for (var index in tokens) {
+        //     --validLength;
 
-            if (tokens[index] === 'sets') {
-                continue;
-            }
+        //     if (tokens[index] === 'sets') {
+        //         continue;
+        //     }
 
-            if (tokens[index].match(regex) === null) {
-                return false;
-            }
-        }
+        //     if (tokens[index].match(regex) === null) {
+        //         return false;
+        //     }
+        // }
 
-        if (validLength !== 0) {
-            return false;
-        }
+        // if (validLength !== 0) {
+        //     return false;
+        // }
 
         return true;
     }
 
-    
 
-    static getYouTubeID(query, callback) {
+
+    getYouTubeID(query, callback) {
         var results = getYTID(query);
 
-        if(results === null) {
+        if (results === null) {
             callback('No YouTube ID found in the URL.', null);
         } else {
             callback(null, results);
         }
     }
 
-    static searchYouTube(query, callback) {
+    searchYouTube(query, callback) {
         request(`https://googleapis.com/youtube/v3/search?` +
             `part=id&` +
             `type=video&` +
             `q=${encodeURIComponent(query)}&` +
-            `key=${this.apiKeyYT}`
+            `key=${this._apiKeyYT}`
             , function (error, body) {
-                if(error) {
+                if (error) {
                     callback(error);
                 }
 
@@ -276,8 +287,14 @@ module.exports = class MusicPlayer {
             });
     }
 
-    static getSoundCloudID(query, callback) {
-        callback('Not implemented.', null);
+    async getSoundCloudID(query, callback) {
+        var results = await scdl.getInfo(query, this._apiKeySC);
+
+        if (results === null) {
+            callback(`No soundcloud found in the URL.`, null);
+        } else {
+            callback(null, results);
+        }
     }
 
 }

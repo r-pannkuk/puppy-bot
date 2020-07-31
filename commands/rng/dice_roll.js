@@ -139,7 +139,7 @@ module.exports = class DiceRollCommand extends commando.Command {
 
         combinedString += ` = **${result}**`;
 
-        var embed = new Discord.RichEmbed()
+        var embed = new Discord.MessageEmbed()
             .setColor(14400597)
             .setAuthor(`Dice roll: ${originalString}`, 'https://vignette.wikia.nocookie.net/game-of-dice/images/c/cb/White_Dice.png/revision/latest?cb=20160113233423')
 

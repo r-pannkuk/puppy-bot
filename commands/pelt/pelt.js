@@ -2,7 +2,7 @@ const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
 const BattleSystem = require('../../core/battle/BattleSystem.js');
-const RichEmbedBuilder = require('../../core/battle/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/battle/EmbedBuilder.js');
 const TimeExtract = require('../../core/TimeExtract.js');
 
 module.exports = class PeltCommand extends commando.Command {
@@ -34,7 +34,7 @@ module.exports = class PeltCommand extends commando.Command {
     async run(message, { user }) {
         /** @type {BattleSystem} */
         var battleSystem = message.guild.battleSystem;
-        var attacker = message.guild.members.get(message.author.id);
+        var attacker = message.guild.members.cache.get(message.author.id);
         var attackerBattle = battleSystem.fetchUser(attacker);
 
         var remainingDuration = battleSystem._config.peltInterval - (Date.now() - attackerBattle.lastPelt);
@@ -61,7 +61,7 @@ module.exports = class PeltCommand extends commando.Command {
             }
         }
 
-        var victim = message.guild.members.get(user.id);
+        var victim = message.guild.members.cache.get(user.id);
 
         var damageEvent = battleSystem.peltUser(attacker, victim);
 
@@ -78,7 +78,7 @@ module.exports = class PeltCommand extends commando.Command {
         damageEvent.attacker.displayName = attacker.displayName;
         damageEvent.victim.displayName = victim.displayName;
 
-        var embed = RichEmbedBuilder.pelt(damageEvent);
+        var embed = MessageEmbedBuilder.pelt(damageEvent);
 
         message.embed(embed);
     }

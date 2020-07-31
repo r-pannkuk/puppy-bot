@@ -17,7 +17,7 @@ module.exports = class TrapListCommand extends commando.Command {
 
     
     async run(message) {
-        if (!message.guild.members.get(message.author.id).hasPermission('ADMINISTRATOR')) {
+        if (!message.guild.members.cache.get(message.author.id).hasPermission('ADMINISTRATOR')) {
             message.channel.send(`You don't have permission to use that command.`);
             return;
         }

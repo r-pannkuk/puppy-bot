@@ -7,6 +7,17 @@ const BetPool = require('../bet/BetPool.js');
 const PointChange = require('./PointChange.js');
 const Account = require('./Account.js');
 
+
+/**
+ * @typedef {Object} PointSystemSettings
+ * @property {Object.<string, User>} users
+ * @property {Object.<string, Award>} awards
+ * @property {Object.<string, Penalty>} penalties
+ * @property {Object.<string, BetPool>} betPools
+ * @property {string[]} authorizedRoles
+ */
+
+
 module.exports = class Points {
     constructor(guildSettings) {
         if (guildSettings.get('points') === undefined) {
@@ -48,6 +59,7 @@ module.exports = class Points {
         this.guildSettings.set('points', settings);
     }
 
+    /** @type {PointSystemSettings} */
     get settings() { return this.guildSettings.get('points'); }
     set settings(obj) { return this.guildSettings.set('points', obj); }
 
@@ -58,17 +70,31 @@ module.exports = class Points {
     get authorizedRoles() { return this.settings.authorizedRoles; }
 
 
+    /**
+     * 
+     * @param {Object.<string, User>|Object.<string, Award>|Object.<string, Penalty>|Object.<string, BetPool>} system 
+     * @param {Function} generator 
+     * @param {string} id 
+     */
     _serialize(system, generator, id) {
         var stored = generator(system[id] || { _id: id });
         system[id] = stored;
         return system[id];
     }
 
+    /** @returns {User} */
     _serializeUser(user_id) { return this._serialize(this.settings.users, (obj) => new User(obj), user_id); }
+    /** @returns {Award} */
     _serializeAward(award_id) { return this._serialize(this.settings.awards, (obj) => new Award(obj), award_id); }
+    /** @returns {Penalty} */
     _serializePenalty(penalty_id) { return this._serialize(this.settings.penalties, (obj) => new Penalty(obj), penalty_id); }
+    /** @returns {BetPool} */
     _serializeBetPool(betPool_id) { return this._serialize(this.settings.betPools, (obj) => new BetPool(obj), betPool_id); }
 
+    /**
+     * Adds a new role ID to the list of authorized role for use.
+     * @param {string} role_id 
+     */
     addAuthorizedRole(role_id) {
         var settings = this.settings;
 
@@ -77,6 +103,10 @@ module.exports = class Points {
         this.settings = settings;
     }
 
+    /**
+     * Returns a user by their given discord user object.
+     * @param {Discord.User} discordUser 
+     */
     getUser(discordUser) {
         return this._serializeUser(discordUser.id);
     }
@@ -89,7 +119,7 @@ module.exports = class Points {
         var hasAuthorization = false;
 
         for (var i in this.authorizedRoles) {
-            hasAuthorization = member.roles.has(this.authorizedRoles[i]) || hasAuthorization;
+            hasAuthorization = member.roles.cache.has(this.authorizedRoles[i]) || hasAuthorization;
 
             if (hasAuthorization) {
                 return true;
@@ -99,10 +129,12 @@ module.exports = class Points {
         return false;
     }
 
+    /**
+     * 
+     * @param {Discord.User|Discord.GuildMember|User} userObj 
+     */
     setUser(userObj) {
-        var settings = this.settings;
-        settings.users[userObj.id] = userObj;
-        this.settings = settings;
+        return this._serializeUser(userObj.id);
     }
 
     getUserByAccount(account) {
@@ -136,6 +168,7 @@ module.exports = class Points {
     }
 
     getAllUserAccounts() {
+        /** @type {Object.<string, Account[]>} */
         var users = {};
 
         Object.values(this.users).forEach(u => users[u._id] = u._accounts.map(a => new Account(a)));
@@ -144,6 +177,7 @@ module.exports = class Points {
     }
 
     findAccountByMessage(message_id) {
+        /** @type {} */
         var accounts = [].concat.apply([], Object.values(this.settings.users).map(u => u._accounts));
         return accounts.find(a => a._confirmationMessageId === message_id);
     }

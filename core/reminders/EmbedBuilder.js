@@ -3,11 +3,11 @@ const ReminderManager = require('./ReminderManager.js');
 const Reminder = require('./Reminder.js');
 
 module.exports.create = async function(client, reminder) {
-    var target = (client.users && client.users.get(reminder.target)) || client.channels.get(reminder.target) || client.members.get(reminder.target);
+    var target = (client.users && client.users.cache.get(reminder.target)) || client.channels.cache.get(reminder.target) || client.members.cache.get(reminder.target);
 
     var embed = module.exports.new(client, reminder)
 
-    var permissions = (client.me && client.me.permissions) || (target.guild && target.guild.members.get(client.user.id).permissions);
+    var permissions = (client.me && client.me.permissions) || (target.guild && target.guild.members.cache.get(client.user.id).permissions);
 
     if(target.type && target.guild && permissions.has('MENTION_EVERYONE')) {
         var message = await target.send("@here", {embed});
@@ -21,16 +21,16 @@ module.exports.create = async function(client, reminder) {
 }
 
 module.exports.new = function (client, reminder) {
-    var author = (client.users && client.users.get(reminder.author)) || (client.members && client.members.get(reminder.author));
+    var author = (client.users && client.users.cache.get(reminder.author)) || (client.members && client.members.cache.get(reminder.author));
     var footer = `ID: ${reminder.id} | Author: ${author.displayName || author.username} | Reminded ${reminder.executionNumber} times`;
 
     if(reminder.isRepeat) {
         footer += ` | Repeating every ${reminder.repeatInterval/1000} seconds`;
     }
-    return new Discord.RichEmbed()
+    return new Discord.MessageEmbed()
         .setColor('7F00FF')
         .setTitle('Reminder!')
-        // .setAuthor(client.users.get(reminder.author).username)
+        // .setAuthor(client.users.cache.get(reminder.author).username)
         .setDescription(reminder.message)
         .setFooter(footer);
 } 

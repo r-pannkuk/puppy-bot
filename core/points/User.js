@@ -1,3 +1,8 @@
+const Award = require('./Award.js');
+const Penalty = require('./Penalty.js');
+const Account = require('./Account.js');
+const Bet = require('../bet/Bet.js');
+
 module.exports = class User {
     constructor({
         _id = null,
@@ -9,13 +14,21 @@ module.exports = class User {
         _changes = [],
         _grants = []
     }) {
+        /** @private @type {string} */
         this._id = _id;
+        /** @private @type {Account[]} */
         this._accounts = _accounts;
+        /** @private @type {Date} */
         this._createdAt = _createdAt;
+        /** @private @type {number} */
         this._currentBalance = _currentBalance;
+        /** @private @type {number} */
         this._lifetimeBalance = _lifetimeBalance;
+        /** @private @type {Object.<string, Bet>} */
         this._bets = _bets;
+        /** @private @type {string[]} */
         this._changes = _changes;
+        /** @private @type {string[]} */
         this._grants = _grants;
     }
 

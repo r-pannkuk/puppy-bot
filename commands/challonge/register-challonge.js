@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 const Source = require('../../core/points/Source.js');
 const Account = require('../../core/points/Account.js');
-const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/points/EmbedBuilder.js');
 
 module.exports = class RegisterChallonge extends commando.Command {
     constructor(client) {
@@ -32,7 +32,7 @@ module.exports = class RegisterChallonge extends commando.Command {
     }
 
     async run(message, { challongeId, user }) {
-        if (!message.guild.members.get(message.author.id).hasPermission('MANAGE_CHANNELS')) {
+        if (!message.guild.members.cache.get(message.author.id).hasPermission('MANAGE_CHANNELS')) {
             message.channel.send(`You don't have permission to use that command.`);
             return;
         }
@@ -57,22 +57,22 @@ module.exports = class RegisterChallonge extends commando.Command {
         var userObj = message.guild.pointSystem.getUserByAccount(account);
 
         if (userObj) {
-            var discordUser = message.guild.members.get(userObj._id);
+            var discordUser = message.guild.members.cache.get(userObj._id);
             message.channel.send(`Found user ${discordUser} who has the Challonge account for **${challongeId}**.`);
             return;
         }
 
         userObj = message.guild.pointSystem.setUserAccount(user, account);
 
-        var embed = RichEmbedBuilder.userAccount({
+        var embed = MessageEmbedBuilder.userAccount({
             user: userObj,
             serviceType: Account.SERVICE.Challonge,
-            embed: new Discord.RichEmbed()
-                .setAuthor(user.username, user.avatarURL)
+            embed: new Discord.MessageEmbed()
+                .setAuthor(user.username, user.displayAvatarURL())
                 .setColor('BLUE')
         });
 
-        var accountChannel = message.guild.channels.get(message.guild.admin.accountChannelID);
+        var accountChannel = message.guild.channels.cache.get(message.guild.admin.accountChannelID);
         
         if(!accountChannel) {
             accountChannel = message.channel;
@@ -80,7 +80,7 @@ module.exports = class RegisterChallonge extends commando.Command {
         
         var message = await accountChannel.send(embed);
 
-        await RichEmbedBuilder.addReactions({
+        await MessageEmbedBuilder.addReactions({
             message: message,
             reactOptions: false
         });

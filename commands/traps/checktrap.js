@@ -2,7 +2,7 @@ const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 
 const BattleSystem = require('../../core/battle/BattleSystem.js');
-const RichEmbedBuilder = require('../../core/battle/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/battle/EmbedBuilder.js');
 
 module.exports = class CheckTrapCommand extends commando.Command {
     constructor(client) {
@@ -37,7 +37,7 @@ module.exports = class CheckTrapCommand extends commando.Command {
                 for (var i in user.traps) {
                     var trap = battleSystem.getTrapByID(user.traps[i]);
 
-                    channel.send(RichEmbedBuilder.checkTrap(trap, message));
+                    channel.send(MessageEmbedBuilder.checkTrap(trap, message));
                 }
             });
         }

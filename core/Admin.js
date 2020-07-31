@@ -51,7 +51,7 @@ class Admin {
         if (settings.moderationRoleID === undefined) {
             settings.moderationRoleID = null;
         }
-        if(settings.allowGulagUnmoderated === undefined) {
+        if (settings.allowGulagUnmoderated === undefined) {
             settings.allowGulagUnmoderated = false;
         }
 
@@ -114,46 +114,41 @@ class Admin {
 
     /**
      * Creates a new channel under the specified category.
-     * @param {Discord.Guild} guild 
      * @param {string} channelName 
      * @param {string} categoryName 
      * @param {boolean} overwrites 
      * @param {NewChannelCallback} callback
      */
-    addNewChannel(guild, channelName, categoryName, overwrites, callback) {
-        guild.createChannel(channelName, 'text', overwrites)
-            .then((channel) => {
-                var categories = guild.channels.filter(c => c.type === 'category');
+    async addNewChannel(channelName, categoryName, overwrites, callback) {
+        var guild = this.guildSettings.guild;
+        var categories = guild.channels.cache.filter(c => c.type === 'category');
+        var channelCategory = categories.find(c => c.name.toUpperCase() === categoryName.toUpperCase());
 
-                var channelCategory = categories.find(c => c.name.toUpperCase() === categoryName.toUpperCase());
+        if (!channelCategory) {
+            channelCategory = await guild.channels.create(categoryName, { type: 'category' });
+        }
 
-                var setChannelParentCallback = (parent) => {
-                    channel.setParent(parent)
-                        .then(callback);
-                }
-
-                if (channelCategory === null) {
-                    guild.createChannel(categoryName, 'category')
-                        .then(setChannelParentCallback);
-                } else {
-                    setChannelParentCallback(channelCategory);
-                }
-            });
+        return await guild.channels.create(channelName, { 
+            type: 'text', 
+            permissionOverwrites: overwrites, 
+            parent: channelCategory
+        });
     }
 
     /**
      * Creates a new role with the specified
-     * @param {Discord.Guild} guild 
      * @param {string} roleName 
      * @param {Function.<Discord.Role>} callback 
      */
-    createRole(guild, roleName, callback) {
-        guild.createRole({
-            name: roleName,
-            color: 'DEFAULT',
-            permissions: Discord.Permissions.DEFAULT,
-            mentionable: true
-        }).then(callback);
+    async createRole(roleName) {
+        return await this.guildSettings.guild.roles.create({
+            data: {
+                name: roleName,
+                color: 'DEFAULT',
+                permissions: Discord.Permissions.DEFAULT,
+                mentionable: true
+            }
+        });
     }
 }
 

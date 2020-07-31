@@ -25,7 +25,7 @@ module.exports = class SetChannelDelete extends commando.Command {
 
 
     async run(msg, { channel }) {
-        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+        if (!msg.guild.members.cache.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
             msg.channel.send(`You don't have permission to use that command.`);
             return;
         }
@@ -35,7 +35,7 @@ module.exports = class SetChannelDelete extends commando.Command {
 
             msg.channel.send(`Deletion channel set to ${channel}.`);
         } else {
-            var channel = this.client.channels.get(msg.guild.admin.deleteChannelID);
+            var channel = this.client.channels.cache.get(msg.guild.admin.deleteChannelID);
             msg.channel.send(`Deletion channel currently set to ${channel}.`);
         }
     }

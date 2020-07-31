@@ -2,7 +2,7 @@ const commando = require('discord.js-commando');
 const Discord = require('discord.js');
 const request = require('request-promise-native')
 
-const GameKeys = require('../GameKeys.js');
+const GameKeys = require('../../../core/games/GameKeys.js');
 
 module.exports = class MHWHost extends commando.Command {
     constructor(client) {
@@ -150,7 +150,7 @@ module.exports = class MHWHost extends commando.Command {
             else {
                 var result = results[0];
 
-                var richEmbed = new Discord.RichEmbed()
+                var richEmbed = new Discord.MessageEmbed()
                 .setTitle(result.name)
                 .setDescription(`https://monsterhunterworld.wiki.fextralife.com/${result.name.replace(/([ ]|[-])/g, '+')}`)
                 .setFooter(result.id + ':' + result.slug);

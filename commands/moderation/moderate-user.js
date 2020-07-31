@@ -49,11 +49,11 @@ class ModerateCommand extends commando.Command {
     static moderateUser(msg, user, duration) {
         /** @type {ModerationSystem} The moderation object. */
         var mods = msg.guild.moderation;
-        var member = msg.guild.members.get(user.id);
+        var member = msg.guild.members.cache.get(user.id);
 
         var activeMod = mods.getUserModerations(member);
 
-        var roles = member.roles.map(r => r.id).filter(r => r !== null && r != msg.guild.admin.moderationRoleID);
+        var roles = member.roles.cache.map(r => r.id).filter(r => r !== null && r != msg.guild.admin.moderationRoleID);
 
         var mod = mods.moderateUser({
             _moderatorId: msg.author.id,
@@ -94,7 +94,7 @@ class ModerateCommand extends commando.Command {
         /** @type {Admin} */
         var admin = msg.guild.admin;
 
-        var member = msg.guild.members.get(msg.author.id);
+        var member = msg.guild.members.cache.get(msg.author.id);
 
         if (member.hasPermission('KICK_MEMBERS')) {
             ModerateCommand.moderateUser(msg, user, duration);

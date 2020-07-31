@@ -61,7 +61,7 @@ module.exports = class AwardChallongeCommand extends commando.Command {
     }
 
     async run(message, { challonge, point_allocation, amounts }) {
-        if (!message.guild.members.get(message.author.id).hasPermission('MANAGE_CHANNELS')) {
+        if (!message.guild.members.cache.get(message.author.id).hasPermission('MANAGE_CHANNELS')) {
             message.channel.send(`You don't have permission to use that command.`);
             return;
         }
@@ -177,7 +177,7 @@ module.exports = class AwardChallongeCommand extends commando.Command {
             );
 
             if (award !== undefined) {
-                message.channel.send(`${message.guild.members.get(user._id)} was awarded **${award._amount}** by ${message.author} for: Placing [**${parseInt(i) + 1}**] in **${challonge}**.`);
+                message.channel.send(`${message.guild.members.cache.get(user._id)} was awarded **${award._amount}** by ${message.author} for: Placing [**${parseInt(i) + 1}**] in **${challonge}**.`);
             } else {
                 message.channel.send(`Something went wrong.  No award given.`);
             }

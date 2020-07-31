@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const emojis = require('../../core/bet/Emojis.js');
 const Account = require('../../core/points/Account.js');
-const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/points/EmbedBuilder.js');
 
 module.exports = async function (client, messageReaction, user) {
     var message = messageReaction.message;
@@ -30,16 +30,14 @@ module.exports = async function (client, messageReaction, user) {
         return;
     }
 
-    if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(user.id))) {
+    if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.cache.get(user.id))) {
         user.send(`You don't have permissions to authorize this account.`);
         messageReaction.remove(message.user);
         return;
     }
 
     var accountOwner = message.guild.pointSystem.getUserByAccount(account);
-    var accountOwnerDiscordUser = message.guild.members.find(a => a.id = accountOwner._id).user;
-
-    await message.clearReactions();
+    var accountOwnerDiscordUser = message.guild.members.cache.find(a => a.id = accountOwner._id).user;
 
     var embed = message.embeds[0];
 
@@ -49,11 +47,11 @@ module.exports = async function (client, messageReaction, user) {
         message.guild.pointSystem.setUserAccount(accountOwnerDiscordUser, account);
 
         var updatedUser = message.guild.pointSystem.getUser(accountOwnerDiscordUser);
-        embed = RichEmbedBuilder.userAccount({
+        embed = MessageEmbedBuilder.userAccount({
             user: updatedUser,
             serviceType: account._service,
-            embed: new Discord.RichEmbed()
-                .setAuthor(accountOwnerDiscordUser.username, accountOwnerDiscordUser.avatarURL)
+            embed: new Discord.MessageEmbed()
+                .setAuthor(accountOwnerDiscordUser.username, accountOwnerDiscordUser.displayAvatarURL())
                 .setColor('BLUE')
         });
 
@@ -62,6 +60,8 @@ module.exports = async function (client, messageReaction, user) {
 
         accountOwnerDiscordUser.send(`Your ${account._service} account has been **approved** by ${user}.`);
         message.channel.send(`Approved user ${accountOwnerDiscordUser}'s ${account._service} account: **${account._username}**.`);
+
+        await message.reactions.removeAll();
     } else if (emoji.name === '🚫') {
 
         var accountOwner = message.guild.pointSystem.getUserByAccount(account);

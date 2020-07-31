@@ -1,7 +1,7 @@
 const BetPool = require('../../core/bet/BetPool.js');
 const Source = require('../../core/points/Source.js');
 const emojis = require('../../core/bet/Emojis.js');
-const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/points/EmbedBuilder.js');
 
 module.exports = function(client, messageReaction, user) {
     var message = messageReaction.message;
@@ -50,9 +50,9 @@ module.exports = function(client, messageReaction, user) {
 
         var userPoints = message.guild.pointSystem.getUser(user);
         
-        message.edit(RichEmbedBuilder.new(betPool));
+        message.edit(MessageEmbedBuilder.new(betPool));
         
-        user.send(RichEmbedBuilder.userBet(bet, betPool, message, userPoints));
+        user.send(MessageEmbedBuilder.userBet(bet, betPool, message, userPoints));
     }
 };
 

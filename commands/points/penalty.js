@@ -36,8 +36,8 @@ module.exports = class PenaltyCommand extends commando.Command {
     }
 
     async run(message, { user, amount, reason }) {
-        if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(message.author.id))) {
-            msg.channel.send(`You don't have permission to use that command.`);
+        if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.cache.get(message.author.id))) {
+            message.channel.send(`You don't have permission to use that command.`);
             return;
         }
 

@@ -4,7 +4,7 @@ const fs = require('fs');
 
 const Reminder = require('../../core/reminders/Reminder.js');
 const TimeExtract = require('../../core/TimeExtract.js');
-const RichEmbed = require('../../core/reminders/RichEmbedBuilder.js');
+const MessageEmbed = require('../../core/reminders/EmbedBuilder.js');
 
 
 module.exports = class GetRemindersCommand extends commando.Command {

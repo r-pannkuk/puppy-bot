@@ -9,11 +9,20 @@ module.exports = class EmojiUsage extends commando.Command {
             group: 'admin',
             memberName: 'emoji-usage',
             description: 'Calculates total emoji usage for the entire server.',
-            examples: [ '!emoji-usage' ],
+            examples: ['!emoji-usage'],
             argsPromptLimit: 0,
             guildOnly: true,
-            userPermissions: [Discord.Permissions.FLAGS.ADMINISTRATOR],
-            args: [
+            
+            args: [{
+                    key: 'emoji',
+                    prompt: 'An emoji to get usage statistics on.',
+                    type: 'string',
+                    // validate: (val, msg, arg) => {
+                    //     var emojis = msg.guild.emojis;
+                    //     emojis.some(e => e.name === val)
+                    // },
+                    default: ''
+                },
                 {
                     key: 'user',
                     prompt: "User to check emoji usage for.",
@@ -24,60 +33,50 @@ module.exports = class EmojiUsage extends commando.Command {
         });
     }
 
-    
-    async run(msg, {user}) {
 
-        return;
-        
-        var channels = msg.guild.channels;
-        var promises = [];
-        var emojiUsage = {};
-        var emojis = msg.client.emojis;
-        
-        
-        var textChannels = channels.filter(channel => channel.type === 'text');
-        
-        var messages = [];
+    async run(msg, { emoji, user }) {
+        // if (!msg.guild.members.cache.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+        //     msg.channel.send(`You don't have permission to use that command.`);
+        //     return;
+        // }
 
-        var fetchCallback = (channel, messages, options) => {
+        // var channels = msg.guild.channels.cache.filter(c => c.type === 'text').array();
 
-            return channel.fetchMessages(options).then(results => {
-                if(results.size === 0) {
-                    console.log(`${channel.name} completed: ${messages.length} found.`);
-                    return;
-                }
+        // for (let channel of channels) {
+        //     await channel.messages.fetch();
+        // }
 
-                options.after = results.reduce((a, cv) => (cv.createdTimestamp < a.createdTimestamp) ? cv : a).id;
-                messages = messages.concat(results.array());
+        // var counts = {};
 
-                fetchCallback(channel, messages, options);
-            });
-        }
+        // var channelCount = (channel) => {
+        //     channel.messages.cache.forEach((m) => {
+        //         if (m.content.indexOf(emoji) > -1 || m.embeds.some(f => f.indexOf(emoji) > -1)) {
+        //             if (m.author.id in counts) {
+        //                 counts[m.author.id]++;
+        //             } else {
+        //                 counts[m.author.id] = 1;
+        //             }
+        //         }
+        //     });
+        // }
 
-        textChannels.map(channel => {
-            fetchCallback(channel, messages, {limit : 100})
-        });
+        // if (!emoji) {
+        //     console.log("No emoji found");
+        //     var emojis = msg.guild.emojis;
 
-        // Promise.all(promises).then(() => {
+        // } else {
+        //     channels.forEach(channelCount);
 
-        //     promises = [];
-        //     console.log('Finished with message promises.');
-        //     console.log(messages);
-        //     var embed = new Discord.RichEmbed();
-        //     embed.setTitle('Emoji Usage');
-
-        //     for(var i in emojis) {
-        //         var emoji = emojis[i];
-
-        //         var usage = messages.filter(message => message.content.indexOf(emoji.toString())).length;
-
-        //         embed.addField(emoji, usage);
+        //     if (!user) {
+        //         console.log("No user found");
+        //     } else {
+        //         console.log("Both found");
         //     }
 
-        //     msg.channel.send(embed);
-        // });
+        //     console.log(counts);
+        // }
 
     }
 
-    
+
 }

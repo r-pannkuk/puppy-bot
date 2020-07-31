@@ -5,7 +5,7 @@ const config = require('./config.json')
 const Item = require('./Item.js');
 const Trap = require('./Trap.js');
 const User = require('./User.js');
-const RichEmbedBuilder = require('./RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('./EmbedBuilder.js');
 const UserInventoryItem = require('./UserInventoryItem');
 const UserStatistics = require('./UserStatistics');
 
@@ -251,7 +251,7 @@ module.exports = class BattleSystem {
 
         user = this._serializeUser(user);
 
-        var guildMember = this.guildSettings.guild.members.get(user.id);
+        var guildMember = this.guildSettings.guild.members.cache.get(user.id);
 
         if (beforeStats.level < user.stats.level) {
             this.guildSettings.client.emit('userLevelUp', guildMember, user, beforeStats);
@@ -278,8 +278,8 @@ module.exports = class BattleSystem {
             experience = beforeHealth;
             victim.health = 0;
 
-            var victimGuildMember = this.guildSettings.guild.members.get(victim.id);
-            var attackerGuildMember = this.guildSettings.guild.members.get(attacker.id);
+            var victimGuildMember = this.guildSettings.guild.members.cache.get(victim.id);
+            var attackerGuildMember = this.guildSettings.guild.members.cache.get(attacker.id);
 
             this.guildSettings.client.emit(`userDeath`, victimGuildMember, victim, attacker, attackerGuildMember, amount);
         }

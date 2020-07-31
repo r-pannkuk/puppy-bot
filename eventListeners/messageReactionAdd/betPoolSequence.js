@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const emojis = require('../../core/bet/Emojis.js');
 const Bet = require('../../core/bet/Bet.js');
 const BetPool = require('../../core/bet/BetPool.js');
-const RichEmbedBuilder = require('../../core/points/RichEmbedBuilder.js');
+const MessageEmbedBuilder = require('../../core/points/EmbedBuilder.js');
 
 module.exports = async function (client, messageReaction, user) {
     var message = messageReaction.message;
@@ -31,7 +31,7 @@ module.exports = async function (client, messageReaction, user) {
         return;
     }
 
-    if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.get(user.id))) {
+    if (!message.guild.pointSystem.getUserAuthorization(message.guild.members.cache.get(user.id))) {
         user.send(`You don't have permissions to change this wager.`);
         return;
     }
@@ -44,7 +44,7 @@ module.exports = async function (client, messageReaction, user) {
                 betPool = message.guild.pointSystem.openBetPool(betPool, message.author);
                 user.send('Bet pool has opened.  Bets may now be placed.');
 
-                message.edit(RichEmbedBuilder.new(betPool));
+                message.edit(MessageEmbedBuilder.new(betPool));
 
                 for (var i in betPool._options) {
                     await message.react(`${emojis[parseInt(i) + 1]}`);
@@ -59,11 +59,11 @@ module.exports = async function (client, messageReaction, user) {
                 betPool = message.guild.pointSystem.closeBetPool(betPool, message.author);
                 user.send('Bet pool has been closed.  No more bets are being accepted.');
 
-                message.edit(RichEmbedBuilder.new(betPool));
+                message.edit(MessageEmbedBuilder.new(betPool));
 
-                await message.clearReactions();
+                await message.reactions.removeAll();
 
-                await RichEmbedBuilder.addReactions({
+                await MessageEmbedBuilder.addReactions({
                     message: message,
                     betPool: betPool
                 });
@@ -80,15 +80,15 @@ module.exports = async function (client, messageReaction, user) {
         betPool = message.guild.pointSystem.refundBetPool(betPool);
         user.send('Bet pool refunded.  All users will have their money returned to them.');
 
-        message.edit(RichEmbedBuilder.new(betPool));
+        message.edit(MessageEmbedBuilder.new(betPool));
 
         pendingRefunds.forEach(bet => {
             var wager = bet._wager;
             var owner = bet._user;
 
-            client.users.get(owner).send(`Bet pool **${betPool.name}** has been cancelled. Refunding your bet of **${wager}**.`)
+            client.users.cache.get(owner).send(`Bet pool **${betPool.name}** has been cancelled. Refunding your bet of **${wager}**.`)
         });
 
-        await message.clearReactions();
+        await message.reactions.removeAll();
     }
 }

@@ -25,7 +25,7 @@ module.exports = class AllowGulagUnmoderatedCommand extends commando.Command {
     }
 
     async run(msg, { enabled }) {
-        if (!msg.guild.members.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+        if (!msg.guild.members.cache.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
             msg.channel.send(`You don't have permission to use that command.`);
             return;
         }
