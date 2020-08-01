@@ -133,8 +133,6 @@ module.exports = class PlayCommand extends commando.Command {
 
                 var timer = setInterval(async function () {
 
-                    console.log("IN INTERVAL");
-
                     var progressBar = `${visualProgressBar(musicPlayer._dispatcher.streamTime, musicPlayer._totalDuration, {
                         scale: 30
                     })}`;
