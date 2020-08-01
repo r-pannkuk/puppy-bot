@@ -116,7 +116,7 @@ module.exports = class PlayCommand extends commando.Command {
             var playingMsg = await messageChannel.send(`Now playing: **${videoInfo.title}**`);
             var content = playingMsg.content;
 
-            musicPlayer._dispatcher.addListener('start', () => {
+            musicPlayer._dispatcher.on('start', () => {
                 var progressBar = `${visualProgressBar(0, musicPlayer._totalDuration, {
                     scale: 30
                 })}`;
