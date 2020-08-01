@@ -18,8 +18,12 @@ module.exports = class MusicPlayer {
         this._apiKeySC = config.soundcloud;
         this._queue = [];
         this._isPlaying = false;
+        /** @type {Discord.StreamDispatcher} */
         this._dispatcher = null;
+        /** @type {Discord.VoiceChannel} */
         this._voiceChannel = null;
+        /** @type {Number} */
+        this._totalDuration = null;
     }
 
     enqueue(source, fetchCallback, playCallback) {
@@ -76,8 +80,6 @@ module.exports = class MusicPlayer {
             return;
         }
 
-        var musicPlayer = this;
-
         /**
          * @callback
          * @property {Discord.VoiceConnection} connection
@@ -86,7 +88,7 @@ module.exports = class MusicPlayer {
             var stream;
             var streamOptions = {
                 volume: 1,
-                passes: 2,
+                plp: 0.5,
                 bitrate: 192000
             };
 
@@ -95,25 +97,29 @@ module.exports = class MusicPlayer {
                     quality: 'highestaudio',
                     filter: 'audioonly'
                 });
-                musicPlayer._dispatcher = await connection.play(stream, {type: 'opus'});
-            } else if (videoInfo.type === 'SoundCloud') {
-                musicPlayer._dispatcher = await connection.play(await scdl.download(videoInfo.uri, this._apiKeySC));
+                streamOptions.type = 'opus';
+                this._totalDuration = parseInt(videoInfo.length_seconds) * 1000;
+            } else if (videoInfo.type === 'SoundCloud') {;
+                var stream = await scdl.download(videoInfo.uri, this._apiKeySC);
+                this._totalDuration = videoInfo.duration;
             }
+
+            this._dispatcher = await connection.play(stream, streamOptions);
 
             videoInfo.callback(videoInfo);
 
-            musicPlayer._isPlaying = true;
+            this._isPlaying = true;
 
-            musicPlayer._dispatcher.on('error', console.error);
+            this._dispatcher.addListener('error', console.error);
 
-            musicPlayer._dispatcher.on('end', (reason) => {
+            this._dispatcher.addListener('finish', (reason) => {
 
-                musicPlayer._queue.shift();
+                this._queue.shift();
 
-                if (musicPlayer._queue.length === 0) {
-                    musicPlayer.stop();
+                if (this._queue.length === 0) {
+                    this.stop();
                 } else {
-                    musicPlayer.play(musicPlayer._queue[0]);
+                    this.play(this._queue[0]);
                 }
             })
         }).catch(console.error);
