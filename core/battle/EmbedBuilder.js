@@ -65,7 +65,7 @@ module.exports.trapTriggered = function (trap, message, victimStats) {
     var createdAt = new Date(trap.createdAt);
 
     embed.setDescription(
-        `**Phrase**: ${trap.phrase}\n` +
+        `**Phrase**: [${trap.phrase}](${message.url})\n` +
         `**Owner**: ${owner}\n` +
         `**Damage**: ${trap.damage}\n` +
         `**Duration**: ${duration}\n\n` +
