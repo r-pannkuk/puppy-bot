@@ -21,19 +21,20 @@ client.setProvider(provider).catch(console.error);
 /* Command group registry. */
 client.registry.registerGroups([
     ['admin', 'Admin Functions'],
-    ['bet', 'Wagers and placing bets.'],
-    ['challonge', 'Links discord users with challonge accounts.'],
+    ['bet', 'Wagers and Placing Bets'],
+    ['challonge', 'Links Discord Users with Challonge Accounts'],
+    ['custom', 'Create Custom Commands for Posting Memes'],
     ['games', 'Commands for Games'],
     ['memes', 'Memes and Stupidity'],
-    ['moderation', 'Moderates users with bans and timeouts.'],
+    ['moderation', 'Moderates Users with Bans and Timeouts'],
     ['music', 'Music Player'],
     ['notes', 'User Notes'],
     ['pelt', 'PvP System for Abusing Scrubs'],
-    ['points', 'A system for betting and awarding points for users.'],
+    ['points', 'A System for Betting and Awarding Points to Users'],
     ['reminders', 'Reminders and Notifications'],
     ['rng', 'Random Number Generators'],
-    ['tournament', 'Commands for tournament creation and viewing'],
-    ['traps', 'Trap Phrases which Explode']
+    ['tournament', 'Commands for Tournament Creation and Viewing'],
+    ['traps', 'Trap Phrases Which Explode']
 ]);
 client.registry.registerDefaultTypes();
 client.registry.registerDefaultGroups();

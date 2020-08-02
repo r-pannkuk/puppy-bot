@@ -80,13 +80,13 @@ module.exports = class EnmapProvider extends commando.SettingProvider {
 				.set('commandStatusChange', (guild, command, enabled) => this.set(guild, `cmd-${command.name}`, enabled))
 				.set('groupStatusChange', (guild, group, enabled) => this.set(guild, `grp-${group.id}`, enabled))
 				.set('commandRegister', command => {
-					for (const [guild, settings] of this.settings) {
+					for (const [guild, settings] of this._enmap) {
 						if (guild !== 'global' && !client.guilds.cache.has(guild)) continue;
 						this.setupGuildCommand(client.guilds.cache.get(guild), command, settings);
 					}
 				})
 				.set('groupRegister', group => {
-					for (const [guild, settings] of this.settings) {
+					for (const [guild, settings] of this._enmap) {
 						if (guild !== 'global' && !client.guilds.cache.has(guild)) continue;
 						this.setupGuildGroup(client.guilds.cache.get(guild), group, settings);
 					}

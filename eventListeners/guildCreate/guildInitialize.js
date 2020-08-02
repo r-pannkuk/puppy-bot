@@ -8,6 +8,7 @@ const GameManager = require('../../core/GameManager.js');
 const Challonge = require('../../core/challonge/Challonge.js');
 const PointSystem = require('../../core/points/Points.js');
 const ModerationSystem = require('../../core/moderation/ModerationSystem.js');
+const CustomManager = require('../../core/custom/CustomManager.js');
 
 module.exports = function(client, guild) {
 
@@ -34,6 +35,10 @@ module.exports = function(client, guild) {
 
         /* Moderation system for managing user activity. */
         guild.moderation = new ModerationSystem(guild.settings);
+
+        /* Custom command system unique to each guild. */
+        guild.customManager = new CustomManager(guild.settings);
+        guild.customManager.registerCustomCommands();
 
         /* Notepad for user notes. */
         // guild.notepad = new Notepad(guild.settings);
