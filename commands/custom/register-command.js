@@ -11,7 +11,7 @@ module.exports = class RegisterCommand extends commando.Command {
             memberName: 'register-command',
             description: 'Adds a custom meme command.',
             examples: ['!register-command newCommandName http://bit.ly/2DaER2o'],
-            aliases: ['registercommand', 'meme'],
+            aliases: ['registercommand', 'newcommand', 'new-command', 'meme'],
             argsPromptLimit: 0,
             args: [
                 {

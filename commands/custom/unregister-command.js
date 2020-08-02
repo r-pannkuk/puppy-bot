@@ -12,7 +12,7 @@ module.exports = class UnregisterCommand extends commando.Command {
             memberName: 'unregister-command',
             description: 'Adds a custom meme command.',
             examples: ['!unregister-command newCommandName'],
-            aliases: ['unregistercommand', 'unmeme'],
+            aliases: ['unregistercommand', 'deletecommand', 'delete-command', 'unmeme'],
             argsPromptLimit: 0,
             args: [
                 {

@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 
+const CustomManager = require('./CustomManager.js');
 const CustomCommandSchema = require('./CustomCommandSchema.js');
 
 module.exports = class CustomCommand extends commando.Command {
@@ -12,7 +13,7 @@ module.exports = class CustomCommand extends commando.Command {
     constructor(client, commandSchema) {
         super(client, {
             name: commandSchema._name,
-            group: 'memes',
+            group: 'custom',
             description: ``,
             memberName: commandSchema._name,
             examples: [`!${commandSchema._name}`],
@@ -28,6 +29,15 @@ module.exports = class CustomCommand extends commando.Command {
     }
 
     async run(message) {
+        /** @type {CustomManager} */
+        var custom = message.guild.customManager;
         message.channel.send(this.commandSchema._content);
+
+        var temp = custom.settings;
+
+        temp.commands[this.name]._lastUsedDate = Date.now();
+        temp.commands[this.name]._useCount += 1;
+        
+        custom.settings = temp;
     }
 }
