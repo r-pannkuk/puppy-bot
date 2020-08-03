@@ -42,7 +42,7 @@ module.exports = class PeltCommand extends commando.Command {
         if (remainingDuration > 0) {
             var durationString = TimeExtract.interval_string_milliseconds(remainingDuration);
             message.channel.send(`It's been too soon since you last pelted.\nPlease wait for **${durationString}**.`);
-            // return;
+            return;
         }
 
         /* Checking if user was passed or if sent as default parameter. */
