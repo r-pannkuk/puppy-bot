@@ -11,6 +11,7 @@ module.exports = class EmojiUsage extends commando.Command {
             description: 'Calculates total emoji usage for the entire server.',
             examples: ['!emoji-usage'],
             argsPromptLimit: 0,
+            aliases: ['emojiusage', 'emoji-count', 'emojicount', 'count-emoji', 'countemoji'],
             guildOnly: true,
 
             args: [
@@ -52,12 +53,19 @@ module.exports = class EmojiUsage extends commando.Command {
 
         var emojiList = {};
 
-        emojis.forEach(e => emojiList[e.name] = 0);
+        emojis.forEach(e => emojiList[e.id] = 0);
 
         var messageCount = 0;
+        var lastMessageCount = 0;
 
         var interval = setInterval(() => {
             responseMessage.edit(`Searched ${messageCount} messages...`);
+
+            if(messageCount === lastMessageCount) {
+                clearInterval(interval);
+            }
+            
+            lastMessageCount = messageCount;
         }, 5000);
 
         for (const [key, channel] of channels) {
@@ -73,7 +81,7 @@ module.exports = class EmojiUsage extends commando.Command {
 
                 for(const [key, emoji] of emojis) {
                     var validMessages = messages.filter(m => m.content.indexOf(emoji.identifier) > -1)
-                    emojiList[emoji.name] += validMessages.size;
+                    emojiList[emoji.id] += validMessages.size;
                 }
 
                 var sorted = messages.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
@@ -88,20 +96,32 @@ module.exports = class EmojiUsage extends commando.Command {
             } while (true)
         }
 
-        var embed = new Discord.MessageEmbed();
-        embed.setAuthor(`Emoji Usage`);
+        var descriptionChunks = [''];
+        var descriptionChunkIterator = 0;
+        var descriptionChunkLength = 2000;
 
-        var description = '';
+        var sortedEntries = Object.entries(emojiList).sort((a, b) => b[1] - a[1]);
 
-        for(const [id, emoji] of emojis) {
-            var count = emojiList[emoji.name];
-            description += `${emoji} - ${count} time${count !== 1 ? `s` : ``}\n`;
+        for(const [id, count] of sortedEntries) {
+            var emoji = emojis.get(id);
+            var description = `${emoji} - ${count} time${count !== 1 ? `s` : ``}\n`;
+
+            if((descriptionChunks[descriptionChunkIterator] + description).length >= descriptionChunkLength) {
+                descriptionChunkIterator += 1;
+                descriptionChunks.push('');
+            }
+
+            descriptionChunks[descriptionChunkIterator] += description;
         }
 
-        embed.setDescription(description);
-        embed.setFooter(`Searched ${messageCount} messages.`);
+        responseMessage.edit(`Searched ${messageCount} messages.`);
 
-        responseMessage.edit(embed);
+        msg.channel.send(`${msg.author}, emoji-usage command finished (${messageCount} messages searched):`);
+
+        for(const chunk of descriptionChunks) {
+            msg.channel.send(chunk);
+        }
+
     }
 
 
