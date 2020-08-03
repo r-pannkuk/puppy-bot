@@ -16,8 +16,8 @@ class Admin {
     /**
      * 
      * @param {object} guildSettings 
-     * @param {Discord.Client} guildSettings.client
-     * @param {Discord.Guild} guildSettings.guild 
+     * @param {commando.CommandoClient} guildSettings.client
+     * @param {commando.CommandoGuild} guildSettings.guild 
      */
     constructor(guildSettings) {
         if (guildSettings.get('admin') === undefined) {

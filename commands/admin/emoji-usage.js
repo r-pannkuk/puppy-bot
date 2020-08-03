@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 
+const GuildMessageCache = require('../../core/simulator/GuildMessageCache.js');
+
 
 module.exports = class EmojiUsage extends commando.Command {
     constructor(client) {
@@ -45,55 +47,50 @@ module.exports = class EmojiUsage extends commando.Command {
             return;
         }
 
+        /** @type {GuildMessageCache} */
+        var guildMessageCache = msg.guild.messageCache;
+
         var responseMessage = await msg.channel.send(`Searching...`);
 
+        await guildMessageCache.fetchAll(5000, (status, count) => {
+            if (status.error) {
+                responseMessage.edit(`ERROR: ${status.error}`);
+            } else {
+                responseMessage.edit(`Searching ${count} messages...`);
+            }
+        });
+
+        var data = guildMessageCache.userMessageFiles;
+
         /** @type {Discord.TextChannel[]} */
-        var channels = msg.guild.channels.cache.filter(c => c.type === 'text');
         var emojis = msg.guild.emojis.cache.filter(e => (emoji === '') || e.id === emoji.id);
 
         var emojiList = {};
 
         emojis.forEach(e => emojiList[e.id] = 0);
 
-        var messageCount = 0;
-        var lastMessageCount = 0;
-
-        var interval = setInterval(() => {
-            responseMessage.edit(`Searched ${messageCount} messages...`);
-
-            if(messageCount === lastMessageCount) {
-                clearInterval(interval);
-            }
-            
-            lastMessageCount = messageCount;
-        }, 5000);
-
-        for (const [key, channel] of channels) {
-            var firstMessageID = null;
-
-            var limit = 100;
-
-            do {
-                var messages = await channel.messages.fetch({
-                    limit: limit,
-                    before: firstMessageID
-                });
-
-                for(const [key, emoji] of emojis) {
-                    var validMessages = messages.filter(m => m.content.indexOf(emoji.identifier) > -1)
-                    emojiList[emoji.id] += validMessages.size;
+        var messages = Object.values(guildMessageCache.userMessageFiles)
+            .filter(v => {
+                if (user) {
+                    return v.user === user.id;
                 }
 
-                var sorted = messages.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
-                messageCount += messages.size;
+                var member = msg.guild.members.resolve(v.user);
 
-                if(sorted.size !== limit) {
-                    break;
-                } else {
-                    firstMessageID = messages.first().id;
+                if (member && member.user.bot) {
+                    return false;
                 }
 
-            } while (true)
+                return true;
+            })
+            .map(v => Object.values(v.channelData))
+            .flat()
+            .map(d => d._data)
+            .flat();
+
+        for (const [key, emoji] of emojis) {
+            var validMessages = messages.filter(m => m.indexOf(emoji.identifier) > -1)
+            emojiList[emoji.id] += validMessages.length;
         }
 
         var descriptionChunks = [''];
@@ -102,11 +99,11 @@ module.exports = class EmojiUsage extends commando.Command {
 
         var sortedEntries = Object.entries(emojiList).sort((a, b) => b[1] - a[1]);
 
-        for(const [id, count] of sortedEntries) {
+        for (const [id, count] of sortedEntries) {
             var emoji = emojis.get(id);
             var description = `${emoji} - ${count} time${count !== 1 ? `s` : ``}\n`;
 
-            if((descriptionChunks[descriptionChunkIterator] + description).length >= descriptionChunkLength) {
+            if ((descriptionChunks[descriptionChunkIterator] + description).length >= descriptionChunkLength) {
                 descriptionChunkIterator += 1;
                 descriptionChunks.push('');
             }
@@ -114,11 +111,7 @@ module.exports = class EmojiUsage extends commando.Command {
             descriptionChunks[descriptionChunkIterator] += description;
         }
 
-        responseMessage.edit(`Searched ${messageCount} messages.`);
-
-        msg.channel.send(`${msg.author}, emoji-usage command finished (${messageCount} messages searched):`);
-
-        for(const chunk of descriptionChunks) {
+        for (const chunk of descriptionChunks) {
             msg.channel.send(chunk);
         }
 

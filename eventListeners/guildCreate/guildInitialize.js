@@ -9,6 +9,7 @@ const Challonge = require('../../core/challonge/Challonge.js');
 const PointSystem = require('../../core/points/Points.js');
 const ModerationSystem = require('../../core/moderation/ModerationSystem.js');
 const CustomManager = require('../../core/custom/CustomManager.js');
+const GuildMessageCache = require('../../core/simulator/GuildMessageCache.js');
 
 module.exports = function(client, guild) {
 
@@ -40,6 +41,10 @@ module.exports = function(client, guild) {
         /* Custom command system unique to each guild. */
         guild.customManager = new CustomManager(guild.settings);
         guild.customManager.registerCustomCommands();
+
+        /* Guild message cache for tracking user stats and simulations. */
+        guild.messageCache = new GuildMessageCache(guild.settings);
+        guild.messageCache.init();
 
         /* Notepad for user notes. */
         // guild.notepad = new Notepad(guild.settings);

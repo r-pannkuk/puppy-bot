@@ -38,8 +38,8 @@ module.exports = class BattleSystem {
     /**
      * 
      * @param {object} guildSettings 
-     * @param {Discord.Client} guildSettings.client
-     * @param {Discord.Guild} guildSettings.guild 
+     * @param {commando.CommandoClient} guildSettings.client
+     * @param {commando.CommandoGuild} guildSettings.guild 
      */
     constructor(guildSettings) {
         if (guildSettings.get('battle') === undefined) {
