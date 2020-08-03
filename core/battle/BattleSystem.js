@@ -361,13 +361,17 @@ module.exports = class BattleSystem {
      * @param {User|Discord.User|string} victim 
      */
     peltUser(attacker, victim) {
-        victim = this.
-            _serializeUser(victim);
+        victim = this._serializeUser(victim);
         attacker = this._serializeUser(attacker);
 
         /** @type {ItemConfig[]} */
         var config = this._config.items;
-        var choices = config.filter(ic => ic.level <= attacker.level);
+        var allChoices = config.filter(ic => ic.level <= attacker.level);
+        var choices = allChoices.filter(ic => !attacker.inventory.items.some(i => i.id === ic.id));
+
+        if(choices.length === 0) {
+            choices = allChoices;
+        }
 
         /** Rollng against all items that are qualified for. */
         var roll = Math.floor(Math.random() * choices.reduce((prev, i) => prev + i.chance, 0));

@@ -35,6 +35,7 @@ module.exports = function(client, guild) {
 
         /* Moderation system for managing user activity. */
         guild.moderation = new ModerationSystem(guild.settings);
+        guild.moderation.scheduleAllModerations();
 
         /* Custom command system unique to each guild. */
         guild.customManager = new CustomManager(guild.settings);

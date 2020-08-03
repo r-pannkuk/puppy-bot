@@ -1,5 +1,5 @@
-const commando = require('discord.js-commando');
 const Discord = require('discord.js');
+const commando = require('discord.js-commando');
 
 
 module.exports = class EmojiUsage extends commando.Command {
@@ -12,70 +12,96 @@ module.exports = class EmojiUsage extends commando.Command {
             examples: ['!emoji-usage'],
             argsPromptLimit: 0,
             guildOnly: true,
-            
-            args: [{
-                    key: 'emoji',
-                    prompt: 'An emoji to get usage statistics on.',
-                    type: 'string',
-                    // validate: (val, msg, arg) => {
-                    //     var emojis = msg.guild.emojis;
-                    //     emojis.some(e => e.name === val)
-                    // },
-                    default: ''
-                },
+
+            args: [
                 {
                     key: 'user',
                     prompt: "User to check emoji usage for.",
                     type: 'user',
                     default: ''
+                },
+                {
+                    key: 'emoji',
+                    prompt: 'An emoji to get usage statistics on.',
+                    type: 'custom-emoji',
+                    default: ''
                 }
+
             ]
         });
     }
 
+    /**
+     * 
+     * @param {Discord.Message} msg 
+     * @param {Object} args
+     * @param {Discord.User} args.user
+     * @param {Discord.Emoji} args.emoji
+     */
+    async run(msg, { user, emoji }) {
+        if (!msg.guild.members.cache.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
+            msg.channel.send(`You don't have permission to use that command.`);
+            return;
+        }
 
-    async run(msg, { emoji, user }) {
-        // if (!msg.guild.members.cache.get(msg.author.id).hasPermission('ADMINISTRATOR')) {
-        //     msg.channel.send(`You don't have permission to use that command.`);
-        //     return;
-        // }
+        var responseMessage = await msg.channel.send(`Searching...`);
 
-        // var channels = msg.guild.channels.cache.filter(c => c.type === 'text').array();
+        /** @type {Discord.TextChannel[]} */
+        var channels = msg.guild.channels.cache.filter(c => c.type === 'text');
+        var emojis = msg.guild.emojis.cache.filter(e => (emoji === '') || e.id === emoji.id);
 
-        // for (let channel of channels) {
-        //     await channel.messages.fetch();
-        // }
+        var emojiList = {};
 
-        // var counts = {};
+        emojis.forEach(e => emojiList[e.name] = 0);
 
-        // var channelCount = (channel) => {
-        //     channel.messages.cache.forEach((m) => {
-        //         if (m.content.indexOf(emoji) > -1 || m.embeds.some(f => f.indexOf(emoji) > -1)) {
-        //             if (m.author.id in counts) {
-        //                 counts[m.author.id]++;
-        //             } else {
-        //                 counts[m.author.id] = 1;
-        //             }
-        //         }
-        //     });
-        // }
+        var messageCount = 0;
 
-        // if (!emoji) {
-        //     console.log("No emoji found");
-        //     var emojis = msg.guild.emojis;
+        var interval = setInterval(() => {
+            responseMessage.edit(`Searched ${messageCount} messages...`);
+        }, 5000);
 
-        // } else {
-        //     channels.forEach(channelCount);
+        for (const [key, channel] of channels) {
+            var firstMessageID = null;
 
-        //     if (!user) {
-        //         console.log("No user found");
-        //     } else {
-        //         console.log("Both found");
-        //     }
+            var limit = 100;
 
-        //     console.log(counts);
-        // }
+            do {
+                var messages = await channel.messages.fetch({
+                    limit: limit,
+                    before: firstMessageID
+                });
 
+                for(const [key, emoji] of emojis) {
+                    var validMessages = messages.filter(m => m.content.indexOf(emoji.identifier) > -1)
+                    emojiList[emoji.name] += validMessages.size;
+                }
+
+                var sorted = messages.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+                messageCount += messages.size;
+
+                if(sorted.size !== limit) {
+                    break;
+                } else {
+                    firstMessageID = messages.first().id;
+                }
+
+            } while (true)
+        }
+
+        var embed = new Discord.MessageEmbed();
+        embed.setAuthor(`Emoji Usage`);
+
+        var description = '';
+
+        for(const [id, emoji] of emojis) {
+            var count = emojiList[emoji.name];
+            description += `${emoji} - ${count} time${count !== 1 ? `s` : ``}\n`;
+        }
+
+        embed.setDescription(description);
+        embed.setFooter(`Searched ${messageCount} messages.`);
+
+        responseMessage.edit(embed);
     }
 
 
