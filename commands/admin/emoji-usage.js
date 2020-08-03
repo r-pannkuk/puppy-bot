@@ -100,6 +100,10 @@ module.exports = class EmojiUsage extends commando.Command {
         var sortedEntries = Object.entries(emojiList).sort((a, b) => b[1] - a[1]);
 
         for (const [id, count] of sortedEntries) {
+            if(user && count === 0) {
+                continue;
+            }
+            
             var emoji = emojis.get(id);
             var description = `${emoji} - ${count} time${count !== 1 ? `s` : ``}\n`;
 
