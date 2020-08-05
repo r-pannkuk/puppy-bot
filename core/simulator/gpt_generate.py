@@ -110,12 +110,12 @@ def main():
     args = parser.parse_args()
     return args.func(args)
 
-daemon = Daemonize(
-    app='Puppy-Bot Simulator',
-    pid='/var/run/puppy-bot-discord/simulator.pid',
-    action=main
-)
-daemon.start()
+# daemon = Daemonize(
+#     app='Puppy-Bot Simulator',
+#     pid='/var/run/puppy-bot-discord/simulator.pid',
+#     action=main
+# )
+# daemon.start()
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
