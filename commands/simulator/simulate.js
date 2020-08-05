@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 const pyShell = require('python-shell');
 
-const EmbedBuilder = require('./EmbedBuilder.js');
+const EmbedBuilder = require('../../core/simulator/EmbedBuilder.js');
 
 
 module.exports = class SimulateCommand extends commando.Command {
@@ -39,6 +39,10 @@ module.exports = class SimulateCommand extends commando.Command {
             scriptPath: '../../core/simulator/',
             args: ['run', target.id]
         }, function (err, results) {
+            if(err) {
+                console.log(err);
+            }
+            
             callback(err, results);
         });
     }
