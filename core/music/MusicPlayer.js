@@ -87,7 +87,7 @@ module.exports = class MusicPlayer {
         this._voiceChannel.join().then(async (connection) => {
             var stream;
             var streamOptions = {
-                volume: 1,
+                volume: 0.75,
                 plp: 0.5,
                 bitrate: 192000
             };
