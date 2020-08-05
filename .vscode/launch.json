@@ -13,20 +13,19 @@
                 "<node_internals>/**"
             ]
         },
-        
-
         {
             "name": "Python",
             "type": "python",
             "request": "launch",
             "stopOnEntry": false,
-            "pythonPath": "${config:python.interpreterPath}",
+            "pythonPath": "${command:python.interpreterPath}",
             "program": "${file}",
             "cwd": "${workspaceFolder}",
             "env": {},
             "envFile": "${workspaceFolder}/.env",
             "args": [
-                "https://cdn.discordapp.com/avatars/331669086813814784/7a57d173810e22bcac7931e0daea71e7.png?size=2048"
+                "run",
+                "174037015858249730"
             ]
         }
     ]

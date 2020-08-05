@@ -1,1 +1,4 @@
 pillow==5.0.0
+tensorflow==1.15.0
+gpt-2-simple==0.7.1
+daemonize==2.5.0

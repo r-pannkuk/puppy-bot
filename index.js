@@ -33,6 +33,7 @@ client.registry.registerGroups([
     ['points', 'A System for Betting and Awarding Points to Users'],
     ['reminders', 'Reminders and Notifications'],
     ['rng', 'Random Number Generators'],
+    ['simulator', 'Simulate Responses From Certain People Using GPT-2'],
     ['tournament', 'Commands for Tournament Creation and Viewing'],
     ['traps', 'Trap Phrases Which Explode']
 ]);
