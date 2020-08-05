@@ -5,7 +5,7 @@ import os
 import sys
 import time
 
-# from daemonize import Daemonize
+from daemonize import Daemonize
 
 
 class SimulationManager():
