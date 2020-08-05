@@ -10,7 +10,7 @@ from daemonize import Daemonize
 
 class SimulationManager():
     def __init__(self):
-        self.session = gpt2.start_tf_sess(threads=8)
+        self.session = gpt2.start_tf_sess(threads=0)
         self.runs = {
             '174037015858249730': 'Hazelyn',
             '287188227667001345': 'Huz',
