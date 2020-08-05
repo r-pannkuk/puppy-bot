@@ -5,3 +5,4 @@ commands/memes/saves/sylphie/*
 commands/memes/saves/duwang/*
 .env
 .gitignore
+checkpoint/*
