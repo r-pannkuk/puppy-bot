@@ -49,7 +49,8 @@ class SimulationManager():
         if self.currentModel != run_name:
             gpt2.load_gpt2(
                 self.session,
-                run_name=run_name
+                run_name=run_name,
+                multi_gpu=True
             )
 
         console.log('=======GENERATING========')
