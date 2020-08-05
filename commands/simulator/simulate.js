@@ -36,13 +36,13 @@ module.exports = class SimulateCommand extends commando.Command {
             mode: 'text',
             pythonOptions: ['-u'],
             pythonPath: 'python3',
-            scriptPath: '../../core/simulator/',
+            scriptPath: './core/simulator/',
             args: ['run', target.id]
         }, function (err, results) {
             if(err) {
                 console.log(err);
             }
-            
+
             callback(err, results);
         });
     }
@@ -61,7 +61,7 @@ module.exports = class SimulateCommand extends commando.Command {
             
             this.getGenerated(target, (err, results) => {
                 if (err) {
-                    message.channel.send(err);
+                    message.channel.send(err.toString());
                 } else {
                     this._simulatedResponses[target.id] = results;
                     message.channel.send(
