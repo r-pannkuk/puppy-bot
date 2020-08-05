@@ -52,6 +52,8 @@ class SimulationManager():
                 run_name=run_name
             )
 
+        console.log('=======GENERATING========')
+
         text = gpt2.generate(self.session,
                              length=200,
                              top_k=40,
@@ -64,6 +66,8 @@ class SimulationManager():
                              batch_size=count,
                              return_as_list=True
                              )
+
+        console.log('====GENERATE FINISHED====')
 
         text = [s.replace(prefix, '').replace(suffix, '') for s in text]
 
