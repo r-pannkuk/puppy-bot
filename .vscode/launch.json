@@ -25,7 +25,9 @@
             "envFile": "${workspaceFolder}/.env",
             "args": [
                 "run",
-                "174037015858249730"
+                "174037015858249730",
+                "--count=5000",
+                "--file=.\\data\\Hazelyn_simulated.csv"
             ]
         }
     ]

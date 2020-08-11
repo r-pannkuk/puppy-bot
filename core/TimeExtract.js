@@ -1,5 +1,7 @@
 const date = require('date-and-time');
 
+const chrono = require('chrono-node');
+
 /**
  * Ensures proper formatting for a date string.
  * @param {string} string Formats a date string to be proper for Date conversions.
@@ -13,7 +15,7 @@ class TimeExtract {
     constructor(string, timezone = null) {
         if (string instanceof Date) {
             string = string.toString();
-        } else if (typeof(string) === 'number') {
+        } else if (typeof (string) === 'number') {
             string = string.toString();
         }
 
@@ -36,7 +38,7 @@ class TimeExtract {
 
         if (delimeterMatch && delimeterMatch.length > 0) {
             this.process_type = TimeExtract.Types.DISPLACEMENT;
-        } else if (!isNaN(string) || string.indexOf('/') >= 0 || string.indexOf(':') >= 0) {
+        } else {
             this.process_type = TimeExtract.Types.EXPLICIT;
         }
     }
@@ -51,15 +53,17 @@ class TimeExtract {
         // Checking if there's nothing but duration tokens in the string.
         var stripped = str.trim().replace(/([0-9]+y)|([0-9]+mo)|([0-9]+w)|([0-9]+d)|([0-9]+h)|([0-9]+m)|([0-9]+s)/g, '');
 
-        var int = parseInt(str);
-
         // Converting to milliseconds
-        if (int && int < 999999999999) {
-            int *= 1000;
+        if (stripped.match(/^[\d]+$/)) {
+            var int = parseInt(stripped);
+
+            if (int < 999999999999) {
+                int *= 1000;
+            }
         }
 
         // Checking if the string makes a valid date object.
-        var date = (int && new Date(int)) || new Date(str);
+        var date = (int && new Date(int)) || chrono.parseDate(str);
 
         return (stripped.length === 0) || (date instanceof Date && !isNaN(date.getTime()) && date.getTime() > Date.now());
     }
@@ -164,7 +168,7 @@ class TimeExtract {
      * processing times that dictate a specific time
      */
     _process_explicit() {
-        var date = ((!isNaN(this.time_string)) ? new Date(parseInt(this.time_string)) : new Date(this.time_string));
+        var date = ((!isNaN(this.time_string)) ? chrono.parseDate(parseInt(this.time_string)) : chrono.parseDate(this.time_string));
         return new Date(date.getTime() - Date.now());
     }
 
