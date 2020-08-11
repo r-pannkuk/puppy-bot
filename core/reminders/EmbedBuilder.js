@@ -9,8 +9,8 @@ module.exports.create = async function(client, reminder) {
 
     var permissions = (client.me && client.me.permissions) || (target.guild && target.guild.members.cache.get(client.user.id).permissions);
 
-    if(target.type && target.guild && permissions.has('MENTION_EVERYONE')) {
-        var message = await target.send("@here", {embed});
+    if(reminder.mentions !== undefined) {
+        var message = await target.send(reminder.mentions, {embed});
     } else {
         var message = await target.send({embed});
     }

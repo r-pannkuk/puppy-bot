@@ -10,6 +10,7 @@ class Reminder {
         target = null,
         author = null, 
         message = null, 
+        mentions = null,
         source = null,
         isEnabled = false,
         isFired = false,
@@ -29,6 +30,7 @@ class Reminder {
         this.target = target;
         this.author = author;
         this.message = message;
+        this.mentions = mentions;
         this.source = source;
         this.isEnabled = isEnabled;
         this.isFired = isFired;

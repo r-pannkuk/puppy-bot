@@ -1,4 +1,5 @@
 const commando = require('discord.js-commando');
+const Discord = require('discord.js');
 const pyShell = require('python-shell');
 const fs = require('fs');
 
@@ -21,86 +22,116 @@ module.exports = class RemindCommand extends commando.Command {
             ],
             argsPromptLimit: 0,
             args: [{
-                    key: 'datetime',
-                    prompt: 'Please enter a valid time for the reminder to be set.',
-                    parse: (input, msg) => {
-                        var t = new TimeExtract(input);
-                        var s = t.extract();
-                        return s;
-                    },
-                    validate: (input, msg, arg) => {
-                        return TimeExtract.validate_time_string(input);
-                    }
+                key: 'datetime',
+                prompt: 'Please enter a valid time for the reminder to be set.',
+                parse: (input, msg) => {
+                    var t = new TimeExtract(input);
+                    var s = t.extract();
+                    return s;
                 },
-                {
-                    key: 'target',
-                    prompt: 'Please enter who the reminder should be for.',
-                    parse: (input, msg) => {
-                        // Checking for @here (message current users in channel)
-                        if (input === '@here') {
-                            return msg.channel;
-
-                            // Checking for channels
-                        } else if (input.indexOf('<#') === 0) {
-                            var input = input.slice(input.indexOf('<') + 2, -1);
-
-                            return msg.guild.channels.cache.get(input);
-
-                            // Checking for users
-                        } else if (input.indexOf('<@') === 0) {
-                            var input = input.slice(input.indexOf('<') + 2, -1);
-                            if (input[0] === '!') {
-                                input = input.slice(1);
-                            }
-
-                            // Checks for guild then for DM
-                            return (msg.client.users.cache.get(input) || msg.guild.members.cache.get(input));
-                        }
-
-                        return null;
-
-                    },
-                    validate: (input, msg, arg) => {
-
-                        // Checking for @here (message current users in channel)
-                        if (input === '@here') {
-                            return true;
-
-                            // Checking for channels
-                        } else if (input.indexOf('<#') === 0) {
-                            var input = input.slice(input.indexOf('<') + 2, -1);
-
-                            return msg.guild && msg.guild.channels.cache.get(input);
-
-                            // Checking for users
-                        } else if (input.indexOf('<@') === 0) {
-                            var input = input.slice(input.indexOf('<') + 2, -1);
-                            if (input[0] === '!') {
-                                input = input.slice(1);
-                            }
-
-                            // Checks for guild then for DM
-                            return (msg.guild && (msg.guild.members.cache.get(input) || msg.guild.channels.cache.get(input))) ||
-                                (msg.channel.recipient.id === input);
-
-                        }
-
-                        return false;
-                    }
-                },
-                {
-                    key: 'reminderMessage',
-                    prompt: 'Please enter the message for reminder.',
-                    type: 'string'
+                validate: (input, msg, arg) => {
+                    return TimeExtract.validate_time_string(input);
                 }
+            },
+            {
+                key: 'target',
+                prompt: 'Please enter who the reminder should be for.',
+                parse: (input, msg) => {
+                    // Checking for @here (message current users in channel)
+                    if (input === '@here') {
+                        return msg.channel;
+
+                        // Checking for channels
+                    } else if (input.indexOf('<#') === 0) {
+                        var input = input.slice(input.indexOf('<') + 2, -1);
+
+                        return msg.guild.channels.cache.get(input);
+
+                        // Checking for users
+                    } else if (input.indexOf('<@') === 0) {
+                        var input = input.slice(input.indexOf('<') + 2, -1);
+                        if (input[0] === '!') {
+                            input = input.slice(1);
+                        }
+
+                        if(input[0] === '&') {
+                            input = input.slice(1);
+                            return msg.guild.roles.cache.get(input);
+                        }
+
+                        // Checks for guild then for DM
+                        return (msg.client.users.cache.get(input) || msg.guild.members.cache.get(input) || msg.guild.roles.cache.get(input));
+                    }
+
+                    return null;
+
+                },
+                validate: (input, msg, arg) => {
+
+                    // Checking for @here (message current users in channel)
+                    if (input === '@here') {
+                        return true;
+
+                        // Checking for channels
+                    } else if (input.indexOf('<#') === 0) {
+                        var input = input.slice(input.indexOf('<') + 2, -1);
+
+                        return msg.guild && msg.guild.channels.cache.get(input);
+
+                        // Checking for users
+                    } else if (input.indexOf('<@') === 0) {
+                        var input = input.slice(input.indexOf('<') + 2, -1);
+                        if (input[0] === '!') {
+                            input = input.slice(1);
+                        }
+
+                        if(input[0] === '&') {
+                            input = input.slice(1);
+                            return msg.guild && msg.guild.roles.cache.get(input);
+                        }
+
+                        // Checks for guild then for DM
+                        return (msg.guild && (
+                            msg.guild.members.cache.get(input) ||
+                            msg.guild.channels.cache.get(input) || 
+                            msg.guild.roles.cache.get(input)
+                        )) || (msg.chanel.recipieint && msg.channel.recipient.id === input);
+
+                    }
+
+                    return false;
+                }
+            },
+            {
+                key: 'reminderMessage',
+                prompt: 'Please enter the message for reminder.',
+                type: 'string'
+            }
 
             ]
         });
     }
 
+    /**
+     * 
+     * @param {Discord.Message} message 
+     * @param {Object} args 
+     * @param {Date} args.datetime
+     * @param {string} reminderMessage
+     * 
+     */
     async run(message, { datetime, target, reminderMessage }) {
         /** @type {ReminderManager} */
         var reminderManager = this.client.reminders;
+
+        var mentions = null;
+
+        if(target instanceof Discord.Role) {
+            mentions = `${target}`;
+            target = message.channel;
+        } else if (target instanceof Discord.Channel) {
+            mentions = '@here';
+        }
 
         var r = reminderManager.createReminder(new Reminder({
             author: message.author.id,
@@ -108,6 +139,7 @@ module.exports = class RemindCommand extends commando.Command {
             source: message.id,
             target: target.id,
             message: reminderMessage,
+            mentions: mentions
         }));
 
         reminderManager.scheduleReminder(message.guild || this.client, r);
