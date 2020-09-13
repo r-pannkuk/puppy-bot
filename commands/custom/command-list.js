@@ -39,7 +39,7 @@ module.exports = class CommandListCommand extends commando.Command {
             var member = message.guild.members.resolve(command._owner);
             description += `\`${command._name}\` [${member}]` +
                 ` - Used ${command._useCount} time${(command._useCount === 1) ? `` : `s`}` +
-                `${(command._useCount > 0) ? `, last on ${new Date(command._lastUsedDate).toDateString()}` : ``}.`;
+                `${(command._useCount > 0) ? `, last on ${new Date(command._lastUsedDate).toDateString()}` : ``}.\n`;
         }
 
         embed.setDescription(description);

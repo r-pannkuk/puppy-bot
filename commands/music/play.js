@@ -99,7 +99,7 @@ module.exports = class PlayCommand extends commando.Command {
             messageChannel.send(`Added track: **${videoInfo.title}**`);
 
             if (!musicPlayer.isPlaying()) {
-                var voiceChannel = message.member.voiceChannel;
+                var voiceChannel = message.member.voice.channel;
 
                 if (voiceChannel === undefined) {
                     voiceChannel = message.guild.channels.cache.find(c => c.type === 'voice');
