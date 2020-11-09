@@ -29,27 +29,29 @@ module.exports = class MusicPlayer {
     enqueue(source, fetchCallback, playCallback) {
         var musicPlayer = this;
 
-        this.getID(source, function (err, { type, data }) {
+        this.getID(source, async function (err, { type, data }) {
             if (err) {
                 fetchCallback(err, null);
             }
 
             if (type === 'YouTube') {
-                ytdl.getInfo(data, function (err, videoInfo) {
-                    if (err) {
-                        console.log(err);
-                        return;
-                    }
+                try {
+                    var videoInfo = await ytdl.getInfo(data);
+                } catch(e) {
+                    console.log(e);
+                    return;
+                }
 
-                    videoInfo.type = 'YouTube';
-                    videoInfo.callback = playCallback;
+                var ret = videoInfo.videoDetails;
 
-                    musicPlayer._queue.push(videoInfo);
+                ret.type = 'YouTube';
+                ret.callback = playCallback;
 
-                    console.log("Added to queue: **" + videoInfo.title + "**");
+                musicPlayer._queue.push(ret);
 
-                    fetchCallback(null, videoInfo);
-                });
+                console.log("Added to queue: **" + ret.title + "**");
+
+                fetchCallback(null, ret);
             }
 
             else if (type === 'SoundCloud') {
@@ -75,7 +77,7 @@ module.exports = class MusicPlayer {
             this.setChannel(voiceChannel);
         }
 
-        if (this._voiceChannel === undefined) {
+        if (this._voiceChannel === undefined || this._voiceChannel === null) {
             console.log("Channel not found!");
             return;
         }
@@ -98,8 +100,9 @@ module.exports = class MusicPlayer {
                     filter: 'audioonly'
                 });
                 streamOptions.type = 'opus';
-                this._totalDuration = parseInt(videoInfo.length_seconds) * 1000;
-            } else if (videoInfo.type === 'SoundCloud') {;
+                this._totalDuration = parseInt(videoInfo.lengthSeconds) * 1000;
+            } else if (videoInfo.type === 'SoundCloud') {
+                ;
                 var stream = await scdl.download(videoInfo.uri, this._apiKeySC);
                 this._totalDuration = videoInfo.duration;
             }
@@ -164,7 +167,7 @@ module.exports = class MusicPlayer {
             console.log("Determined to be YT Link.");
             this.getYouTubeID(source, function (err, id) {
                 if (err) {
-                    callback(err, null);
+                    callback(err, { type: null, data: null});
                 }
                 else {
                     console.log("YouTube ID found: " + id);
@@ -179,7 +182,7 @@ module.exports = class MusicPlayer {
             console.log("Determined to be SoundCloud Link.");
             this.getSoundCloudID(source, function (err, data) {
                 if (err) {
-                    callback(err, null);
+                    callback(err, { type: null, data: null});
                 }
                 else {
                     console.log("Soundcloud ID found: " + data.id);

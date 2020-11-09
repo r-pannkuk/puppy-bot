@@ -38,6 +38,6 @@
     "valid-url": "^1.0.9",
     "walk": "^2.3.14",
     "ytdl-core": "^0.20.4",
-    "ytdl-core-discord": "^1.2.1"
+    "ytdl-core-discord": "^1.2.4"
   }
 }

@@ -168,7 +168,7 @@ class TimeExtract {
      * processing times that dictate a specific time
      */
     _process_explicit() {
-        var date = ((!isNaN(this.time_string)) ? chrono.parseDate(parseInt(this.time_string)) : chrono.parseDate(this.time_string));
+        var date = ((!isNaN(this.time_string)) ? new Date(parseInt(this.time_string)) : chrono.parseDate(this.time_string));
         return new Date(date.getTime() - Date.now());
     }
 
