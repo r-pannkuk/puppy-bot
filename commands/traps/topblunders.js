@@ -5,16 +5,16 @@ const Trap = require('../../core/battle/Trap.js');
 const BattleSystem = require('../../core/battle/BattleSystem.js');
 const MessageEmbedBuilder = require('../../core/battle/EmbedBuilder.js');
 
-module.exports = class TopTrapCommand extends commando.Command {
+module.exports = class TopBlunderCommand extends commando.Command {
     constructor(client) {
         super(client, {
-            name: 'toptraps',
+            name: 'topblunders',
             group: 'traps',
-            memberName: 'toptraps',
-            description: 'List the top traps ever fired in the server.',
+            memberName: 'topblunders',
+            description: 'List the top blunders / self-explosions ever fired in the server.',
             guildOnly: true,
-            aliases: ['top-traps', 'toptrap', 'top-trap'],
-            examples: ['!toptraps']
+            aliases: ['top-blunders', 'topdumb', 'top-dumb', 'topidiots', 'top-idiots'],
+            examples: ['!topblunders']
         });
     }
 
@@ -26,28 +26,27 @@ module.exports = class TopTrapCommand extends commando.Command {
         /** @type {BattleSystem} */
         var battleSystem = message.guild.battleSystem;
 
-        var topTraps = battleSystem.topTraps;
+        var topBlunders = battleSystem.topBlunders;
 
-        if (topTraps.length > 0) {
+        if (topBlunders.length > 0) {
             var embed = new Discord.MessageEmbed()
                 .setColor(`DARK_RED`)
-                .setAuthor(`Top Traps`, topTraps[0]._config.trapIconSource);
+                .setAuthor(`Top Blunders`, topBlunders[0]._config.trapIconSource);
 
             var string = ``;
 
-            for (var i in topTraps) {
-                var trap = topTraps[i];
+            for (var i in topBlunders) {
+                var trap = topBlunders[i];
                 var owner = message.guild.members.cache.get(trap.owner);
-                var victim = message.guild.members.cache.get(trap.victim)
 
-                string += `[${parseInt(i) + 1}] (${trap.damage}) "${trap.phrase}" by ${owner} blew up ${victim}.\n`;
+                string += `[${parseInt(i) + 1}] (${trap.damage}) "${trap.phrase}" by ${owner}.\n`;
             }
 
             embed.setDescription(string);
 
             message.channel.send(embed);
         } else {
-            message.channel.send(`No successful traps were found for this server.`);
+            message.channel.send(`No blunders were found for this server.`);
         }
     }
 }

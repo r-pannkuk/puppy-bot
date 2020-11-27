@@ -23,6 +23,7 @@ const UserStatistics = require('./UserStatistics');
 /**
  * @typedef {Object} TopRankings
  * @property {Trap[]} traps
+ * @property {Trap[]} blunders
  * @property {User[]} users
  */
 
@@ -71,12 +72,17 @@ module.exports = class BattleSystem {
 
         {
             if (battle.topRankings.traps === undefined) {
-                console.log("Top traps list not found, creating");
+                console.log("Top traps list not found, creating.");
                 battle.topRankings.traps = [];
             }
 
+            if(battle.topRankings.blunders === undefined) {
+                console.log("Top blunders list not found, creating.");
+                battle.topRankings.blunders = [];
+            }
+
             if (battle.topRankings.users === undefined) {
-                console.log("Top users list not found, creating");
+                console.log("Top users list not found, creating.");
                 battle.topRankings.users = [];
             }
         }
@@ -125,6 +131,11 @@ module.exports = class BattleSystem {
     get topTraps() { return this.settings.topRankings.traps.map(t => new Trap(this._config.traps, t)); }
 
     /**
+     * List of top blunders in the rankings.
+     */
+    get topBlunders() { return this.settings.topRankings.blunders.map(t => new Trap(this._config.traps, t)); }
+
+    /**
      * List of top users in the rankings.
      */
     get topUsers() { return this.settings.topRankings.users.map(u => new User(this._config, u)); }
@@ -135,6 +146,7 @@ module.exports = class BattleSystem {
     get topRankings() {
         return {
             traps: this.topTraps,
+            blunders: this.topBlunders,
             users: this.topUsers
         };
     }
@@ -511,12 +523,19 @@ module.exports = class BattleSystem {
 
         var temp = this.settings;
 
-        temp.topRankings.traps.push(trap);
-        temp.topRankings.traps = temp.topRankings.traps
+        /** If it's a blunder, we'll store in the blunders store.  Otherwise it defaults to trap store. */
+        if(damageEvent.victim.id === damageEvent.attacker.id) {
+            var destination = 'blunders';
+        } else {
+            var destination = 'traps';
+        }
+
+        temp.topRankings[destination].push(trap);
+        temp.topRankings[destination] = temp.topRankings[destination]
             .map(t => new Trap(this._config.traps, t))
             .sort((a, b) => b.damage - a.damage);
-        temp.topRankings.traps.splice(this._config.topRankings.trapContainerSize);
-        temp.topRankings.traps.forEach((t, i) => delete temp.topRankings.traps[i]._config)
+        temp.topRankings[destination].splice(this._config.topRankings.trapContainerSize);
+        temp.topRankings[destination].forEach((t, i) => delete temp.topRankings[destination][i]._config)
 
         this.settings = temp;
     }
