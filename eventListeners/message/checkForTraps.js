@@ -1,9 +1,10 @@
 const Discord = require('discord.js');
+const commando = require('discord.js-commando');
 const BattleSystem = require('../../core/battle/BattleSystem');
 
 /**
  * 
- * @param {Discord.Client} client 
+ * @param {commando.CommandoClient} client 
  * @param {Discord.Message} message 
  */
 module.exports = function (client, message) {
@@ -28,9 +29,11 @@ module.exports = function (client, message) {
     });
     
     for (i in validTraps) {
-        var validKey = validTraps[i].phrase;
+        var validKey = validTraps[i].phrase.toLowerCase();
+        var removeTrapCommand = client.registry.findCommands('removetrap', true)[0];
+        var prefix = client.commandPrefix;
 
-        if (content === `!disarmtrap ${validKey}` || content === `!removetrap ${validKey}`) {
+        if(removeTrapCommand.aliases.some(alias => content === `${prefix}${alias} ${validKey}`)) {
             continue;
         }
 

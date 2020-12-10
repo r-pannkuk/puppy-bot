@@ -11,7 +11,7 @@ module.exports = class RemoveTrapCommand extends commando.Command {
             memberName: 'removetrap',
             description: 'Removes the last trap set by the command sender, or attempts to remove a trap phrase.',
             examples: ['!removetrap', '!removetrap test'],
-            aliases: ['disarmtrap', 'remove-trap', 'disarm-trap'],
+            aliases: ['disarmtrap', 'remove-trap', 'disarm-trap', 'disarm'],
             argsPromptLimit: 0,
             guildOnly: true,
             args: [
