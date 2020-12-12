@@ -188,6 +188,8 @@ module.exports = class ReminderManager {
 
         temp[r.id] = r;
         this.reminderes = temp;
+
+        return r;
     }
 
     repeat(obj, interval) {
@@ -199,7 +201,7 @@ module.exports = class ReminderManager {
         temp[r.id] = r;
         this.reminders = temp;
 
-        this.repeatOnce(r, interval);
+        return this.repeatOnce(r, interval);
     }
 
     /**

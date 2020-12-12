@@ -56,8 +56,10 @@ module.exports = function(client, messageReaction, user) {
 
                 client.reminders.enableReminder(reminder);
 
+                var r = reminder;
+
                 if (emoji.name === '🔂') {
-                    client.reminders.repeatOnce(reminder, input);
+                    r = client.reminders.repeatOnce(reminder, input);
 
                 } else if (emoji.name === '🔁') {
                     if (input.process_type === TimeExtract.Types.EXPLICIT) {
@@ -69,10 +71,10 @@ module.exports = function(client, messageReaction, user) {
                         return;
                     }
 
-                    client.reminders.repeat(reminder, input);
-                    channel.send(`Reminder set to repeat on an ongoing base every ${reminder.repeatInterval / 1000} seconds.`)
+                    r = client.reminders.repeat(reminder, input);
+                    channel.send(`Reminder set to repeat on an ongoing base every ${r.repeatInterval / 1000} seconds.`)
                 }
-                channel.send(`Next reminder set to repeat next at: ${reminder.reminderTime}`);
+                channel.send(`Next reminder set to repeat next at: ${r.reminderTime}`);
             }
 
             var endCallback = () => {
