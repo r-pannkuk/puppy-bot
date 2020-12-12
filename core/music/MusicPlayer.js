@@ -99,7 +99,7 @@ module.exports = class MusicPlayer {
                     quality: 'highestaudio',
                     filter: 'audioonly'
                 });
-                streamOptions.type = 'opus';
+                // streamOptions.type = 'opus';
                 this._totalDuration = parseInt(videoInfo.lengthSeconds) * 1000;
             } else if (videoInfo.type === 'SoundCloud') {
                 ;

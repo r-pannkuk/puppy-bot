@@ -24,7 +24,11 @@ module.exports = class GetWagersCommand extends commando.Command {
                     prompt: "Enter a search searchParametereter to look for.",
                     type: 'string',
                     parse: (val, msg, arg) => {
-                        return val.toLowerCase();
+                        if (val) {
+                            return val.toLowerCase();
+                        } else {
+                            return val;
+                        }
                     },
                     default: ''
                 }
@@ -96,13 +100,13 @@ module.exports = class GetWagersCommand extends commando.Command {
                 message.guild.pointSystem.subscribeBetPool(betPool, foundMessage);
 
                 await MessageEmbedBuilder.addReactions({
-                    message: foundMessage, 
+                    message: foundMessage,
                     betPool: betPool
                 });
             }
         }
 
-        if(messageString !=='') {
+        if (messageString !== '') {
             var pieces = messageString.split(2000);
             pieces.forEach(s => message.channel.send(s));
         }

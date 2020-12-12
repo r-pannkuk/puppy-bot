@@ -19,9 +19,9 @@ class Moderation {
         _userId = null,
         _moderatorId = null,
         _roles = [],
-        _startTime = new Date(),
-        _lastEditedTime = new Date(),
-        _endTime = new Date('Dec 31 23:59:59 2099 UTC'),
+        _startTime = Date.now(),
+        _lastEditedTime = Date.now(),
+        _endTime = new Date('Dec 31 23:59:59 2099 UTC').toString(),
         _active = true
     }) {
         this._id = _id;

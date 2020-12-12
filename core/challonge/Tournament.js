@@ -4,7 +4,7 @@ module.exports = class Tournament {
     constructor({
         _id = null,
         _name = null,
-        _startTime = new Date(),
+        _startTime = Date.now(),
         _endTime = undefined,
         _matches = [],
         _participants = [],

@@ -12,8 +12,8 @@ class UserInventoryItem {
      */
     constructor(_config, {
         id = null,
-        _lastUsed = new Date(),
-        _acquired = new Date(),
+        _lastUsed = Date.now(),
+        _acquired = Date.now(),
         _quantity = 1
     }) {
         /** 

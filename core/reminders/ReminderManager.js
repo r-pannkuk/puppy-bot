@@ -138,6 +138,8 @@ module.exports = class ReminderManager {
             }
         }
 
+        r.reminderTime = r.reminderTime.toString();
+
         temp[r.id] = r;
         this.reminders = temp;
 

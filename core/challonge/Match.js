@@ -4,7 +4,7 @@ module.exports = class Match {
         _challongeID = null,
         _tournamentID = null,
         _participants = [],
-        _startTime = new Date(),
+        _startTime = Date.now(),
         _endTime = undefined,
         _status = Match.STATE.Pending
     }) {
