@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const fs = require('fs');
-const ytdl = require('ytdl-core-discord');
+const ytdl = require('ytdl-core');
 const request = require('request');
 const validURL = require('valid-url');
 const URL = require('url');
