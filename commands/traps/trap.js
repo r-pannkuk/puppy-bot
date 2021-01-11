@@ -27,8 +27,8 @@ module.exports = class TrapCommand extends commando.Command {
 
     /**
      * 
-     * @param {Discord.Message} message 
-     * @param {object} args 
+     * @param {Discord.Message} message - The command message being read.
+     * @param {object} args - Ignore
      * @param {string} args.phrase Trap phrase
      */
     async run(message, { phrase }) {

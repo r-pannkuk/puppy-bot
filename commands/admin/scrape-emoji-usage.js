@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 
-const GuildMessageCache = require('../../core/simulator/GuildMessageCache.js');
+const GuildMessageCache = require('../../core/scraping/GuildMessageCache.js');
 
 
 module.exports = class EmojiUsage extends commando.Command {
@@ -13,7 +13,7 @@ module.exports = class EmojiUsage extends commando.Command {
             description: 'Calculates total emoji usage for the entire server.',
             examples: ['!emoji-usage'],
             argsPromptLimit: 0,
-            aliases: ['emojiusage', 'emoji-count', 'emojicount', 'count-emoji', 'countemoji'],
+            aliases: ['scrape-emoji-usage', 'scrapeemojiusage', 'emojiusage', 'emoji-count', 'emojicount', 'count-emoji', 'countemoji'],
             guildOnly: true,
 
             args: [

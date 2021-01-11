@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 
-const config = require('./config.json')
+const config = require('../../data/default/battle/config.json')
 const Item = require('./Item.js');
 const Trap = require('./Trap.js');
 const User = require('./User.js');

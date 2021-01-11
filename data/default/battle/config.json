@@ -451,5 +451,25 @@
             "name": "trap",
             "energy": 100
         }
-    }
+    },
+    "statistics": [
+        {
+            "name": "Endurance"
+        },
+        {
+            "name": "Intellect"
+        },
+        {
+            "name": "Precision"
+        },
+        {
+            "name": "Power"
+        },
+        {
+            "name": "Popularity"
+        },
+        {
+            "name": "Growth Potential"
+        }
+    ]
 }
