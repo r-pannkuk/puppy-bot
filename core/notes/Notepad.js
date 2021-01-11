@@ -210,8 +210,8 @@ module.exports = class Notepad {
         }
 
         return Object.values(this.notes).map(n => new Note(n)).filter(
-            n => n.user === user &&
-                (guild !== undefined) ? (n.guild === guild) : true
+            n => n.authorId === user &&
+                ((guild !== undefined) ? (n.guild === guild) : true)
         );
     }
 }
