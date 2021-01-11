@@ -1,5 +1,8 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
+const Notepad = require('../../core/notes/Notepad.js');
+const Note = require('../../core/notes/Note.js');
+const EmbedBuilder = require('../../core/notes/EmbedBuilder.js');
 
 
 module.exports = class GetNoteCommand extends commando.Command {
@@ -9,32 +12,74 @@ module.exports = class GetNoteCommand extends commando.Command {
             group: 'notes',
             memberName: 'get-note',
             description: 'Retrieves a stored note.',
-            examples: [ '!get-note myNoteKey' ],
+            aliases: ['getnote'],
+            examples: ['!get-note myNoteKey'],
             argsPromptLimit: 0,
             args: [
                 {
                     key: 'noteKey',
                     prompt: "Enter a note key to read the note stored for you.",
                     type: 'string'
+                },
+                {
+                    key: 'user',
+                    prompt: "Enter the user to search the note for.",
+                    type: 'user',
+                    error: 'Please enter a valid user.',
+                    default: ''
                 }
             ]
         });
     }
 
-    
-    async run(message, { noteKey }) {
-        var note = message.guild.notepad.getNote(message.author.id, noteKey);
-        if(note === undefined) {
-            message.send()
+
+    /**
+     * 
+     * @param {Discord.Message} message 
+     * @param {*} args 
+     * @param {string} noteKey - Key for checking notes.
+     * @param {Discord.User} user - The user targetted. 
+     */
+    async run(message, { noteKey, user }) {
+
+        if (message.guild) {
+            /** @type {Notepad} */
+            var notepad = message.guild.notepad;
+            var resolvable = message.guild;
+        } else {
+            /** @type {Notepad} */
+            var notepad = message.client.notepad;
+            var resolvable = message.client;
+            user = message.author;
         }
 
-        var embed = new Discord.MessageEmbed()
-            .setColor('YELLOW');
+        if (user === '') {
+            var notes = notepad.getNotesByKey(noteKey);
+            if (notes.length === 0) {
+                message.channel.send(`No notes found.`);
+                return;
+            }
 
-        embed.setAuthor(noteKey, 'https://lh4.ggpht.com/er4T35JxjGnIFYL_p7HU9G0GFwNJ2eZzt1oGloPL9RC18f_MUU4h5_wwHI6IGGKWIuw=w300');
-        embed.setDescription(`${note.description}`);
-        embed.setFooter(`${message.author.username} | ${note.timestamp.toString()}`, message.author.avatarUrl);
-            
-        message.channel.send(embed);
+            if (notes.length === 1) {
+                message.channel.send(await EmbedBuilder.displayNote(resolvable, notes[0]));
+            } else {
+                var myNotes = notes.filter(n => n.authorId === message.author.id);
+
+                if (myNotes.length === 1) {
+                    message.channel.send(await EmbedBuilder.displayNote(resolvable, myNotes[0]));
+                } else {
+                    message.channel.send(await EmbedBuilder.displayKeys(resolvable, notes));
+                }
+            }
+
+        } else {
+            if (!notepad.hasNote(user, noteKey)) {
+                message.channel.send(`No note found.`);
+                return;
+            }
+
+            var note = notepad.getNote(user, noteKey);
+            message.channel.send(await EmbedBuilder.displayNote(resolvable, note));
+        }
     }
 }

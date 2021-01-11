@@ -1,7 +1,7 @@
 const Admin = require('../../core/Admin.js');
 const MusicPlayer = require('../../core/music/MusicPlayer.js');
 const BattleSystem = require('../../core/battle/BattleSystem.js');
-const Notepad = require('../../core/Notepad.js');
+const Notepad = require('../../core/notes/Notepad.js');
 const ReminderManager = require('../../core/reminders/ReminderManager.js');
 const ReminderMessageEmbed = require('../../core/reminders/EmbedBuilder.js');
 const GameManager = require('../../core/GameManager.js');
@@ -9,7 +9,7 @@ const Challonge = require('../../core/challonge/Challonge.js');
 const PointSystem = require('../../core/points/Points.js');
 const ModerationSystem = require('../../core/moderation/ModerationSystem.js');
 const CustomManager = require('../../core/custom/CustomManager.js');
-const GuildMessageCache = require('../../core/simulator/GuildMessageCache.js');
+const GuildMessageCache = require('../../core/scraping/GuildMessageCache.js');
 
 module.exports = function(client, guild) {
 
@@ -47,7 +47,7 @@ module.exports = function(client, guild) {
         guild.messageCache.init();
 
         /* Notepad for user notes. */
-        // guild.notepad = new Notepad(guild.settings);
+        guild.notepad = new Notepad(guild.settings);
 
         /* Game manager for managing game keys and settings. */
         guild.gameManager = new GameManager(guild.settings);

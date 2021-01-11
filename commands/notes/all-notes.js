@@ -1,5 +1,8 @@
 const commando = require('discord.js-commando');
 const Discord = require('discord.js');
+const Notepad = require('../../core/notes/Notepad.js');
+const Note = require('../../core/notes/Note.js');
+const EmbedBuilder = require('../../core/notes/EmbedBuilder.js');
 
 
 module.exports = class AllNotesCommand extends commando.Command {
@@ -9,27 +12,64 @@ module.exports = class AllNotesCommand extends commando.Command {
             group: 'notes',
             memberName: 'all-notes',
             description: 'Returns a list of keys to all notes you own.',
-            examples: [ '!all-notes' ]
+            aliases: ['allnotes', 'get-all-notes', 'getallnotes', 'get-notes', 'getnotes'],
+            examples: [ '!all-notes' ],
+            args: [
+                {
+                    key: 'user',
+                    prompt: "Enter the user to search notes for.",
+                    type: 'user',
+                    default: ''
+                }
+            ]
         });
     }
 
-    
-    async run(message) {
-        var keys = message.guild.notepad.getKeys(message.author.id);
-        if(keys.length === 0) {
-            message.channel.send("No keys found. Please enter a note first.");
+    /**
+     * 
+     * @param {Discord.Message} message - The message for the command.
+     * @param {object} args 
+     * @param {Discord.User} args.user - The User targetted. 
+     */
+    async run(message, { user }) {
+        
+        if (message.guild) {
+            /** @type {Notepad} */
+            var notepad = message.guild.notepad;
+            var resolvable = message.guild;
+        } else {
+            /** @type {Notepad} */
+            var notepad = message.client.notepad;
+            var resolvable = message.client;
+            user = message.author;
+        }
+
+        if(user !== '') {
+            var notes = notepad.getAllNotesByUserAndGuild(user, message.guild);
+        } else {
+            var notes = notepad.getAllNotesByGuild(message.guild);
+        }
+
+        if(notes.length === 0) {
+            var errorMsg = `No notes found`;
+
+            if(user !== '') {
+                errorMsg += ` for ${user}`;
+            }
+
+            errorMsg += `.`;
+
+            message.channel.send(errorMsg);
             return;
         }
 
-        var keyString = keys.reduce((string, key) => string = string + '\n' + key.toString(), "");
+        notes.sort((a, b) => a.key < b.key);
 
-        var embed = new Discord.MessageEmbed()
-            .setColor('YELLOW');
+        const EMBED_SIZE = 30;
 
-        embed.setAuthor(`Note Keys`, 'https://lh4.ggpht.com/er4T35JxjGnIFYL_p7HU9G0GFwNJ2eZzt1oGloPL9RC18f_MUU4h5_wwHI6IGGKWIuw=w300');
-        embed.setDescription(keyString);
-        embed.setFooter(message.author.username, message.author.avatarUrl);
-            
-        message.channel.send(embed);
+        for(var i = 0; i < notes.length; i += EMBED_SIZE) {
+            var notesSlice = notes.slice(i, i + EMBED_SIZE);
+            message.channel.send(await EmbedBuilder.displayKeys(resolvable, notesSlice));
+        }
     }
 }
