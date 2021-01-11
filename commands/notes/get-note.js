@@ -42,6 +42,8 @@ module.exports = class GetNoteCommand extends commando.Command {
      */
     async run(message, { noteKey, user }) {
 
+        noteKey = noteKey.toLowerCase();
+
         if (message.guild) {
             /** @type {Notepad} */
             var notepad = message.guild.notepad;
