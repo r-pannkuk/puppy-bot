@@ -5,6 +5,8 @@ const os = require('os');
 const path = require('path');
 const appDir = path.dirname(require.main.filename);
 
+const MAX_TRIES_LIMIT = 3;
+
 const UserMessageFile = require('./UserMessageFile.js');
 
 module.exports = class GuildMessageCache {
@@ -35,6 +37,10 @@ module.exports = class GuildMessageCache {
      * Initializes the UserMessageCache files by loading data. 
      */
     async init() {
+
+        await this.guild.members.fetch();
+
+        console.log("Completed");
 
         for (const [key, member] of this.guild.members.cache) {
             if (member.user.bot) {
@@ -135,6 +141,7 @@ module.exports = class GuildMessageCache {
         this.inUse = true;
         this._messageCount = 0;
         var lastCount = 0;
+        var tries = MAX_TRIES_LIMIT;
 
         var timer = setInterval(() => {
             callback({
@@ -142,10 +149,15 @@ module.exports = class GuildMessageCache {
             }, this._messageCount);
 
             if (this._messageCount === lastCount) {
-                this._clearInterval(timer, callback, `Message fetch stalled out.`);
+                if(tries === 0) {
+                    this._clearInterval(timer, callback, `Message fetch stalled out.`);
+                } else {
+                    tries--;
+                }
+            } else {
+                lastCount = this._messageCount;
+                tries = MAX_TRIES_LIMIT;
             }
-
-            lastCount = this._messageCount;
         }, timeout);
 
         return timer;

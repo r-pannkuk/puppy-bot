@@ -8,10 +8,14 @@ const moment = require('moment');
 const path = require('path');
 const fs = require('fs');
 
+let intents = new Discord.Intents(Discord.Intents.NON_PRIVILEGED);
+intents.add('GUILD_MEMBERS');
+
 /* Bot client creation. */
 var client = new commando.Client({
     owner: process.env.OWNER,
-    unknownCommandResponse: false
+    unknownCommandResponse: false,
+    ws: { intents: intents }
 });
 
 /* Guild settings load. */
