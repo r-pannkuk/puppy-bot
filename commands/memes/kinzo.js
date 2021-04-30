@@ -1,6 +1,7 @@
 const commando = require('discord.js-commando');
 const pyShell = require('python-shell');
 
+DISCORD_LINK_REGEX = /(https?:\/\/)?(www\.)?(discord(app)?\.com\/channels\/([0-9]+|\@me)\/[0-9]+\/[0-9]+)/
 
 module.exports = class KinzoCommand extends commando.Command {
     constructor(client) {
@@ -17,7 +18,7 @@ module.exports = class KinzoCommand extends commando.Command {
                     key: 'whineObject',
                     prompt: 'Provide a link to a discord message where a user is whining.',
                     parse: async (val, msg) => {
-                        var isDiscordLink = /(https?:\/\/)?(www\.)?(discordapp\.com\/channels\/([0-9]+|\@me)\/[0-9]+\/[0-9]+)/g.test(val);
+                        var isDiscordLink = DISCORD_LINK_REGEX.test(val);
 
                         if (isDiscordLink) {
                             var parts = val.split('\/');
@@ -44,7 +45,7 @@ module.exports = class KinzoCommand extends commando.Command {
                         return { user, content };
                     },
                     validate: async (val, msg) => {
-                        var isDiscordLink = /(https?:\/\/)?(www\.)?(discordapp\.com\/channels\/([0-9]+|\@me)\/[0-9]+\/[0-9]+)/g.test(val);
+                        var isDiscordLink = DISCORD_LINK_REGEX.test(val);
                         if (isDiscordLink) {
                             var parts = val.split('\/');
 
