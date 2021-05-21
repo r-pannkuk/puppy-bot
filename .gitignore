@@ -1,0 +1,6 @@
+node_modules
+data/*
+!data/default
+commands/memes/saves/*
+checkpoint/*
+.env
