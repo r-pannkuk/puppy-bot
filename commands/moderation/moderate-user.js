@@ -53,7 +53,7 @@ class ModerateCommand extends commando.Command {
 
         var activeMod = mods.getUserModerations(member);
 
-        var roles = member.roles.cache.map(r => r.id).filter(r => r !== null && r != msg.guild.admin.moderationRoleID);
+        var roles = member.roles.cache.filter(r => r !== null && r.name !== '@everyone' && r.id !== msg.guild.admin.moderationRoleID).map(r => r.id);
 
         var mod = mods.moderateUser({
             _moderatorId: msg.author.id,

@@ -1,8 +1,0 @@
-node_modules
-data/*
-!data/default
-commands/memes/saves/sylphie/*
-commands/memes/saves/duwang/*
-.gitignore
-checkpoint/*
-.env
