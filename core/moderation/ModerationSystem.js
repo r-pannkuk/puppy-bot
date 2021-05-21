@@ -92,7 +92,11 @@ class ModerationSystem {
 
         var mod = new Moderation(moderationPayload);
 
-        this._changeUserRoles(mod._userId, [this.guildSettings.guild.admin.moderationRoleID].filter(r => r !== null), mod._roles);
+        if(this.guildSettings.guild.admin.moderationRoleID) {
+            this._changeUserRoles(mod._userId, [this.guildSettings.guild.admin.moderationRoleID].filter(r => r !== null), mod._roles);
+        } else {
+            this._changeUserRoles(mod._userId, [], mod._roles);
+        }
 
         this.scheduleUnmoderation(mod);
 
