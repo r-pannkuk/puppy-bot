@@ -7,16 +7,18 @@ const CustomCommandSchema = require('./CustomCommandSchema.js');
 module.exports = class CustomCommand extends commando.Command {
     /**
      * 
-     * @param {commando.CommandoClient} client 
-     * @param {CustomCommandSchema} commandSchema 
+     * @param {commando.CommandoClient} client - The client in use.
+     * @param {CustomCommandSchema} commandSchema - The command schema for this custom command.
+     * @param {string} groupID - The identifier for the command group to add to.
      */
-    constructor(client, commandSchema) {
+    constructor(client, commandSchema, groupID) {
         super(client, {
             name: commandSchema._name,
-            group: 'custom',
-            description: ``,
+            group: groupID,
             memberName: commandSchema._name,
             examples: [`!${commandSchema._name}`],
+            description: ``,
+            hidden: true,
             argsPromptLimit: 0
         })
 

@@ -38,6 +38,7 @@ module.exports = class UnregisterCommand extends commando.Command {
 
         if(!customCommandSchema) {
             message.channel.send(`Custom command \`${commandName}\` was not found.`);
+            return;
         }
 
         var owner = message.guild.members.resolve(customCommandSchema._owner);

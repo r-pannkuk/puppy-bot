@@ -65,15 +65,20 @@ module.exports = class RegisterCommand extends commando.Command {
             // Valid image
         }
 
+        if(content === undefined || content === '') {
+            await message.channel.send(`Cannot create a custom command from nothing.`);
+            return;
+        }
+
         /** @type {CustomManager} */
         var customManager = message.guild.customManager;
 
         var customCommandSchema = await customManager.addCustomCommand(commandName, message.author, content);
 
         if (customCommandSchema.error) {
-            message.channel.send(customCommandSchema.error);
+            await message.channel.send(customCommandSchema.error);
         } else {
-            message.channel.send(`New command created under !${customCommandSchema.name}.`);
+            await message.channel.send(`New command created under \`${this.client.commandPrefix}${customCommandSchema.name}\`.`);
         }
     }
 }

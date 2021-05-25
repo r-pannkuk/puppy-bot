@@ -29,21 +29,38 @@ module.exports = class CommandListCommand extends commando.Command {
             return;
         }
 
-        var embed = new Discord.MessageEmbed()
-            .setAuthor(`Custom Commands`);
+        var commandSchemas = Object.values(customManager.commands).sort((a, b) => a.name - b.name)
 
-        var description = "";
+        while(commandSchemas.length > 0)
+        {
+            var embed = new Discord.MessageEmbed()
+                .setAuthor(`Custom Commands`);
 
-        for (var i in customManager.commands) {
-            var command = customManager.commands[i];
-            var member = message.guild.members.resolve(command._owner);
-            description += `\`${command._name}\` [${member}]` +
+            var description = "";
+
+            while(commandSchemas.length > 0) {
+                var command = commandSchemas[0];
+                var member = message.guild.members.resolve(command._owner);
+                var text = `\`${command._name}\` [${member}]` +
                 ` - Used ${command._useCount} time${(command._useCount === 1) ? `` : `s`}` +
-                `${(command._useCount > 0) ? `, last on ${new Date(command._lastUsedDate).toDateString()}` : ``}.\n`;
+                `${(command._useCount > 0) ? `, last on ${new Date(command._lastUsedDate).toDateString()}` : ``}.\n`
+
+                if(description.length + text.length > 2048) {
+                    if(description.length === 0) {
+                        message.channel.send(`Something went wrong.  Please contact ${this.client.owners}.`);
+                        return;
+                    }
+                    break;
+                }
+
+                description += text;
+
+                commandSchemas = commandSchemas.splice(1);
+            }
+
+            embed.setDescription(description);
+
+            await message.channel.send(embed);
         }
-
-        embed.setDescription(description);
-
-        message.channel.send(embed);
     }
 }

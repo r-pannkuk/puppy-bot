@@ -40,6 +40,21 @@ class CustomManager {
         }
 
         guildSettings.set('custom', settings);
+
+        this.commandGroupID = `custom-${this.guildSettings.guild.id}`;
+
+        var client = this.guildSettings.client;
+        var guild = this.guildSettings.guild;
+
+        var commandGroups = client.registry.findGroups(this.commandGroupID, true);
+
+        if(commandGroups.length > 0) {
+            this.commandGroup = commandGroups[0];
+        } else {
+            client.registry.registerGroup(this.commandGroupID, `Custom commands for **${guild.name}**.`);
+            this.commandGroup = client.registry.findGroups(this.commandGroupID, true)[0];
+        }
+
     }
 
     /** @type {CustomSettings} */
@@ -72,7 +87,7 @@ class CustomManager {
             return { error: `Custom command was already found for \`${commandName}\`.` };
         }
 
-        var command = new CustomCommandSchema({
+        var commandSchema = new CustomCommandSchema({
             _name: commandName,
             _owner: owner,
             _content: content
@@ -80,27 +95,77 @@ class CustomManager {
 
         var temp = this.settings;
 
-        temp.commands[commandName] = command;
+        temp.commands[commandName] = commandSchema;
 
         this.settings = temp;
 
-        await this.registerCustomCommand(command);
+        var registeredCommand = await this.registerCustomCommand(commandSchema);
 
-        return command;
+        return commandSchema;
     }
+
+
+    async _setGuildCustomCommandsEnabled(target, enabled) {
+        var client = this.guildSettings.client;
+        var guild = this.guildSettings.guild;
+
+        if(target instanceof commando.CommandoGuild) {
+            target = target.id;
+        }
+
+        var targetCommandGroupID = client.guilds.cache.find(g => g.id = target).customManager.commandGroupID;
+
+        for(var i in client.registry.commands) {
+            /** @type {commando.Command} */
+            var command = client.registry.commands[i];
+
+            if(command.groupID === targetCommandGroupID) {
+                command.setEnabledIn(guild, enabled);
+            }
+        }
+    }
+
+    
+    /**
+     * Enables guild custom commands from a specific server.
+     * @param {commando.CommandoGuild|string|number} target 
+     */
+    async enableGuildCustomCommands(target) {
+        this._setGuildCustomCommandsEnabled(target, true);
+    }
+
+    
+    /**
+     * Enables guild custom commands from a specific server.
+     * @param {commando.CommandoGuild|string|number} target 
+     */
+    async disableGuildCustomCommands(target) {
+        this._setGuildCustomCommandsEnabled(target, false);
+    }
+
 
     /**
      * Registers a specified custom command.
      * @param {CustomCommandSchema} commandSchema
+     * @returns {CustomCommand}
      */
     async registerCustomCommand(commandSchema) {
         /** @type {commando.CommandoClient} */
         var client = this.guildSettings.client;
-        var command = new CustomCommand(client, commandSchema);
+        var guild = this.guildSettings.guild;
+        var command = new CustomCommand(client, commandSchema, this.commandGroupID);
 
         await command.init();
 
         await client.registry.registerCommand(command);
+
+        client.guilds.cache.forEach((g) => {
+            command.setEnabledIn(g, false);
+        })
+
+        command.setEnabledIn(guild, true);
+
+        return command;
     }
 
     /**
@@ -108,7 +173,7 @@ class CustomManager {
      */
     async registerCustomCommands() {
         for (var i in this.commands) {
-            await this.registerCustomCommand(this.commands[i]);
+            var registeredCommand = await this.registerCustomCommand(this.commands[i]);
         }
     }
 
