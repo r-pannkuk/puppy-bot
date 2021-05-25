@@ -31,6 +31,11 @@ module.exports = class UnregisterCommand extends commando.Command {
      * @param {string} args.commandName
      */
     async run(message, { commandName }) {
+        if (!message.guild.members.cache.get(message.author.id).hasPermission('ADMINISTRATOR')) {
+            message.channel.send(`You don't have permission to use that command.`);
+            return;
+        }
+        
         /** @type { CustomManager } */
         var customManager = message.guild.customManager;
 
