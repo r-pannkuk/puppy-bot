@@ -43,7 +43,10 @@ client.registry.registerGroups([
 ]);
 client.registry.registerDefaultTypes();
 client.registry.registerDefaultGroups();
-client.registry.registerDefaultCommands();
+client.registry.registerDefaultCommands({
+    eval: false, 
+    unknownCommand: false
+});
 client.registry.registerCommandsIn(__dirname + '/commands');
 client.registry.registerCommandsIn(__dirname + '/commands/games');
 
