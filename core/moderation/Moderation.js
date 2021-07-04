@@ -1,4 +1,4 @@
-const uuid = require('uuid/v1');
+import { v4 as uuidv4 } from 'uuid';
 
 /** A Moderation for a user, stripping them of the roles specified for the duration between _startTime and _endTime. */
 class Moderation {
@@ -15,7 +15,7 @@ class Moderation {
      * @param {boolean} params._active - If the Moderation is currently enabled.
      */
     constructor({
-        _id = uuid(),
+        _id = uuidv4(),
         _userId = null,
         _moderatorId = null,
         _roles = [],

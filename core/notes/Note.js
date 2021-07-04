@@ -1,4 +1,4 @@
-const uuid = require('uuid/v1');
+import { v4 as uuidv4 } from 'uuid';
 const Discord = require('discord.js');
 const commando = require('discord.js-commando');
 
@@ -18,7 +18,7 @@ class Note {
      * @param {NoteResolvable} param0
      */
     constructor({
-        _id = uuid(),
+        _id = uuidv4(),
         _authorId = null,
         _guild = null,
         _key = null,

@@ -1,4 +1,4 @@
-const uuid = require('uuid/v1');
+import { v4 as uuidv4 } from 'uuid';
 
 class PointChange {
     constructor({
@@ -9,7 +9,7 @@ class PointChange {
         _amount = 0,
         _source = null
     }) {
-        this._id = _id || uuid();
+        this._id = _id || uuidv4();
         this._type = _type;
         this._granter = _granter;
         this._user = _user;

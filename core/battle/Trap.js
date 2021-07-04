@@ -1,8 +1,8 @@
-const uuid = require('uuid/v1');
+import { v4 as uuidv4 } from 'uuid';
 
 module.exports = class Trap {
     constructor(_config, {
-        _id = uuid(),
+        _id = uuidv4(),
         _phrase = null,
         _owner = null,
         _victim = null,

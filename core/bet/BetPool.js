@@ -1,5 +1,5 @@
 const Bet = require('./Bet.js');
-const uuid = require('uuid/v1');
+import { v4 as uuidv4 } from 'uuid';
 const emojis = require('./Emojis.js');
 
 class BetPool {
@@ -24,7 +24,7 @@ class BetPool {
             closing: `\n\n**Admin**: Open bets with ✅ or refund with 🚫.`
         }
     }) {
-        this._id = _id || uuid();
+        this._id = _id || uuidv4();
         this._name = _name || this._id;
         this._source = _source;
         this._owner = _owner;
