@@ -15,6 +15,7 @@ class UserStatistics {
      * @param {number} args._experience - User's current experience.
      * @param {number} args._health - User's current health.
      * @param {number} args._energy - User's max health.
+     * @param {number} args._
      */
     constructor(config, {
         _experience = 0,

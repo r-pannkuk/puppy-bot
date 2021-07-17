@@ -34,7 +34,7 @@
     "soundcloud-downloader": "^0.1.9",
     "sqlite": "^4.0.23",
     "sqlite3": "^4.2.0",
-    "uuid": "^3.4.0",
+    "uuid": "^8.3.2",
     "valid-url": "^1.0.9",
     "walk": "^2.3.14",
     "ytdl-core": "^4.8.3"

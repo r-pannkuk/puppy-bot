@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+const { v4: uuidv4 } = require('uuid');
 
 /** A Moderation for a user, stripping them of the roles specified for the duration between _startTime and _endTime. */
 class Moderation {
