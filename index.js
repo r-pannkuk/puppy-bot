@@ -8,8 +8,7 @@ const moment = require('moment');
 const path = require('path');
 const fs = require('fs');
 
-let intents = new Discord.Intents(Discord.Intents.NON_PRIVILEGED);
-intents.add('GUILD_MEMBERS');
+let intents = new Discord.Intents(Discord.Intents.ALL);
 
 /* Bot client creation. */
 var client = new commando.Client({
