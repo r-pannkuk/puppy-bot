@@ -12,8 +12,8 @@ module.exports = class ThugCycleCommand extends commando.Command {
             group: 'memes',
             memberName: 'thugcycle',
             description: 'This is really dumb.',
-            aliases: ['!thugscycle'],
-            examples: ['!thugcycle'],
+            aliases: ['thugscycle'],
+            examples: ['!thugcycle', '!thugcycle league'],
             hidden: true,
             args: [
                 {
