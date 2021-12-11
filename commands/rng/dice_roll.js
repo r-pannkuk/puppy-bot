@@ -98,7 +98,7 @@ module.exports = class DiceRollCommand extends commando.Command {
                 var dice = groups[0];
                 var sides = groups[1];
 
-                if (dice > 100 || sides > 100) {
+                if (dice > 1000 || sides > 1000) {
                     invalid = true;
                     return;
                 }
@@ -125,7 +125,7 @@ module.exports = class DiceRollCommand extends commando.Command {
         });
 
         if (invalid) {
-            message.channel.send(`Please limit dice rolls to 100 sides or 100 dice.`);
+            message.channel.send(`Please limit dice rolls to 1000 sides or 1000 dice.`);
             return;
         }
 
