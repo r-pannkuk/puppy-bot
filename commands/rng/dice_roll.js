@@ -50,7 +50,7 @@ module.exports = class DiceRollCommand extends commando.Command {
             group: 'rng',
             memberName: 'roll',
             aliases: ['decision'],
-            description: 'Rolls a combination of dice. Can throw up to 999 dice with 999 sides. Must throw at least one die and only dice with 2 or more sides.',
+            description: 'Rolls a combination of dice. Can throw up to 100 dice with up to 9999 sides. Must throw at least one die and only dice with 2 or more sides.',
             examples: ['!roll 3d6', '!roll 4d8', '!roll 3d6 4d8'],
             argsPromptLimit: 0,
             args: [{
@@ -98,7 +98,7 @@ module.exports = class DiceRollCommand extends commando.Command {
                 var dice = groups[0];
                 var sides = groups[1];
 
-                if (dice > 100 || sides > 1000) {
+                if (dice > 100 || sides > 9999) {
                     invalid = true;
                     return;
                 }
@@ -125,7 +125,7 @@ module.exports = class DiceRollCommand extends commando.Command {
         });
 
         if (invalid) {
-            message.channel.send(`Please limit dice rolls to 1000 sides or 100 dice.`);
+            message.channel.send(`Please limit dice rolls to 9999 sides or 100 dice.`);
             return;
         }
 
