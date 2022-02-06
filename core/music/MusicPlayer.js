@@ -5,7 +5,7 @@ const request = require('request');
 const validURL = require('valid-url');
 const URL = require('url');
 const getYTID = require('get-youtube-id');
-const scdl = require('soundcloud-downloader');
+const scdl = require('soundcloud-downloader').default;
 
 module.exports = class MusicPlayer {
     constructor(guildSettings, config) {
