@@ -60,7 +60,7 @@ export default class AdvanceWarsByWeb {
 
         this.checkGames();
 
-        Scheduler.scheduleJob("Check-AWBW", "*/30 * * * * *", () => this.checkGames());
+        Scheduler.scheduleJob("Check-AWBW", "*/5 * * * *", () => this.checkGames());
     }
 
     /** @type {AWBWSettings} */
@@ -191,7 +191,8 @@ export default class AdvanceWarsByWeb {
             /** @type {Discord.User} */
             var user = guild.members.cache.get(discordUserId);
 
-            await channel.send(`It's ${user}'s turn in AWBW game ${gameId}.`);
+            await channel.send(`It's ${user}'s turn in AWBW game ${gameId}:\n
+            https://awbw.amarriner.com/2030.php?games_id=${gameId}.`);
         }
     }
 

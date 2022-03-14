@@ -28,7 +28,7 @@ module.exports = class AWBWGameList extends commando.Command {
         for(var gameId in games) {
             var game = games[gameId];
             var name = game["name"] || gameId;
-            gamesArray.push(`${name}: ${game["currentUser"] || "Not yet tracked."}`);
+            gamesArray.push(`[${name}](https://awbw.amarriner.com/2030.php?games_id=${gameId}): ${game["currentUser"] || "Not yet tracked."}`);
         }
 
         /** @type {Discord.MessageEmbed} */
