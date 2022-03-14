@@ -191,8 +191,7 @@ export default class AdvanceWarsByWeb {
             /** @type {Discord.User} */
             var user = guild.members.cache.get(discordUserId);
 
-            await channel.send(`It's ${user}'s turn in AWBW game ${gameId}:\n
-            https://awbw.amarriner.com/2030.php?games_id=${gameId}.`);
+            await channel.send(`It's ${user}'s turn in AWBW game ${gameId}:\nhttps://awbw.amarriner.com/2030.php?games_id=${gameId}.`);
         }
     }
 
