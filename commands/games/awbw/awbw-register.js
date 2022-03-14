@@ -37,12 +37,12 @@ module.exports = class AWBWRegister extends commando.Command {
      * @param {Discord.Member} obj.user
      */
     async run(message, { userId, user }) {
-        if(member === '') {
-            member = message.author;
+        if(user === '') {
+            user = message.guild.members.cache.get(message.author.id);
         }
 
         message.guild.AWBW.addUser(user.id, userId);
 
-        await message.channel.send(`Added user ${userId} under ${user.displayName}.`)
+        await message.channel.send(`Added AWBW username ${userId} under ${user}.`)
     }
 }

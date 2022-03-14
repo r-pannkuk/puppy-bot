@@ -33,8 +33,8 @@ module.exports = class AWBWUnregister extends commando.Command {
      */
     async run(message, { users }) {
         var removedUsers = message.guild.AWBW.removeDiscordUsers(users.map(u => u.id));
-        removedUsers = removedUsers.map(u => message.guild.users.get(u));
+        removedUsers = removedUsers.map(u => message.guild.members.cache.get(u));
 
-        message.channel.send("Removed the users from AWBW tracking:\n" + users.map(u => u.displayName).join('\n'));
+        message.channel.send("Removed the users from AWBW tracking:\n" + users.join('\n'));
     }
 }

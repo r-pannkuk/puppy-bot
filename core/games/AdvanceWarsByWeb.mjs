@@ -1,6 +1,7 @@
 import { default as got } from 'got';
 import { default as jsdom } from 'jsdom';
 import { default as Discord } from 'discord.js';
+import { default as Scheduler } from 'node-schedule'
 const { JSDOM } = jsdom;
 
 import { default as GameKeys } from './GameKeys.js';
@@ -56,6 +57,10 @@ export default class AdvanceWarsByWeb {
         }
 
         this._guildSettings.set(GameKeys.AWBW, settings);
+
+        this.checkGames();
+
+        Scheduler.scheduleJob("Check-AWBW", "*/30 * * * * *", () => this.checkGames());
     }
 
     /** @type {AWBWSettings} */
@@ -76,7 +81,7 @@ export default class AdvanceWarsByWeb {
 
     addUser(discordUserId, userID) {
         var users = this.users;
-        users[userID] = discordUserId;
+        users[discordUserId] = userID;
         this.users = users;
     }
 
@@ -181,19 +186,18 @@ export default class AdvanceWarsByWeb {
             var guild = this._guildSettings.guild;
 
             /** @type {Discord.TextChannel} */
-            var channel = guild.channels.get(this.outputChannelID);
+            var channel = guild.channels.cache.get(this.outputChannelID);
 
             /** @type {Discord.User} */
-            var user = guild.users.get(discordUserId);
+            var user = guild.members.cache.get(discordUserId);
 
             await channel.send(`It's ${user}'s turn in AWBW game ${gameId}.`);
         }
     }
 
     async checkGame(gameId) {
-        console.log(`Checking game ${gameId}.`);
         const url = `https://awbw.amarriner.com/game.php?games_id=${gameId}`
-        got(url).then(response => {
+        got(url).then(async response => {
             const dom = new JSDOM(response.body);
             const document = dom.window.document;
             var elements = document.getElementsByClassName('norm bold');
@@ -210,7 +214,7 @@ export default class AdvanceWarsByWeb {
             var games = this.games;
 
             if (games[gameId].currentUser !== name) {
-                var discordUserId = this.users[name];
+                var discordUserId = Object.keys(this.users).filter(u => this.users[u] === name)[0];
 
                 if (discordUserId !== undefined) {
                     await this.notify(discordUserId, gameId);
@@ -230,10 +234,8 @@ export default class AdvanceWarsByWeb {
     }
 
     checkGames() {
-        var gameIds = this.games().map(g => g.id);
-
-        for (var i in gameIds) {
-            this.checkGame(gameIds[i]);
+        for (var i in this.games) {
+            this.checkGame(this.games[i].id);
         }
     }
 }

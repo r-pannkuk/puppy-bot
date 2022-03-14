@@ -21,14 +21,14 @@ module.exports = class AWBWGameList extends commando.Command {
      * @param {Discord.Message} message 
      */
     async run(message) {
-        var games = message.guild.games;
+        var games = message.guild.AWBW.games;
 
         var gamesArray = [];
 
         for(var gameId in games) {
             var game = games[gameId];
             var name = game["name"] || gameId;
-            gamesArray.push(`${name}: ${game[currentUser]}`);
+            gamesArray.push(`${name}: ${game["currentUser"] || "Not yet tracked."}`);
         }
 
         /** @type {Discord.MessageEmbed} */

@@ -33,8 +33,8 @@ module.exports = class AWBWChannel extends commando.Command {
      */
     async run(message, { channel }) {
         if(channel !== "") {
-            message.guild.outputChannelID = channel.id;
+            message.guild.AWBW.outputChannelID = channel.id;
         }
-        message.channel.send(`AWBW channel set to ${message.guild.channels.get(message.guild.AWBW.outputChannelID)}`)
+        message.channel.send(`AWBW channel set to ${message.guild.channels.cache.get(message.guild.AWBW.outputChannelID)}`)
     }
 }

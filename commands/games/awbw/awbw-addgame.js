@@ -34,7 +34,7 @@ module.exports = class AWBWAddGame extends commando.Command {
     async run(message, { gameIds }) {
         message.guild.AWBW.addGames(gameIds);
 
-        var response = "The following games were added to tracking:";
+        var response = "The following games were added to tracking:\n";
         response += gameIds.join('\n');
 
         message.channel.send(response);

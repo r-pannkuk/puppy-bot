@@ -21,13 +21,13 @@ module.exports = class AWBWUserList extends commando.Command {
      * @param {Discord.Message} message 
      */
     async run(message) {
-        var users = message.guild.users;
+        var users = message.guild.AWBW.users;
 
         var userArray = [];
 
         for(var discordId in users) {
-            var discordUser = await message.guild.users.get(discordUserId);
-            userArray.push(`${discordUser.mention}: ${users[discordId]}`);
+            var discordUser = await message.guild.members.cache.get(discordId);
+            userArray.push(`${discordUser}: ${users[discordId]}`);
         }
 
         /** @type {Discord.MessageEmbed} */
