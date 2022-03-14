@@ -2,8 +2,6 @@ const Admin = require('../../core/Admin.js');
 const MusicPlayer = require('../../core/music/MusicPlayer.js');
 const BattleSystem = require('../../core/battle/BattleSystem.js');
 const Notepad = require('../../core/notes/Notepad.js');
-const ReminderManager = require('../../core/reminders/ReminderManager.js');
-const ReminderMessageEmbed = require('../../core/reminders/EmbedBuilder.js');
 const GameManager = require('../../core/GameManager.js');
 const Challonge = require('../../core/challonge/Challonge.js');
 const PointSystem = require('../../core/points/Points.js');
@@ -13,7 +11,7 @@ const GuildMessageCache = require('../../core/scraping/GuildMessageCache.js');
 
 module.exports = function(client, guild) {
 
-    client.provider.initGuild(client, guild, () => {
+    client.provider.initGuild(client, guild, async () => {
         /* Create a new battle system object. */
         guild.battleSystem = new BattleSystem(guild.settings);
 
@@ -51,5 +49,9 @@ module.exports = function(client, guild) {
 
         /* Game manager for managing game keys and settings. */
         guild.gameManager = new GameManager(guild.settings);
+
+        /* AWBW tracker and poller. */
+        let AdvanceWarsByWeb = (await import('../../core/games/AdvanceWarsByWeb.mjs')).default;
+        guild.AWBW = new AdvanceWarsByWeb(guild.settings);
     });
 }

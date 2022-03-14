@@ -76,3 +76,5 @@ Object.keys(callbacks).forEach(event => {
 /* Startup */
 
 client.login(process.env.TOKEN);
+
+console.log("Puppy-Bot connected.");
