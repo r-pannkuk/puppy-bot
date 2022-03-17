@@ -1,6 +1,5 @@
 const commando = require('discord.js-commando');
-const pyShell = require('python-shell');
-
+let {PythonShell} = require('python-shell')
 
 module.exports = class HealingCommand extends commando.Command {
     constructor(client) {
@@ -25,10 +24,10 @@ module.exports = class HealingCommand extends commando.Command {
     }
 
     async run(message, { action }) {
-        pyShell.run('sylphie.py', {
+        PythonShell.run('sylphie.py', {
             mode: 'text',
             pythonOptions: ['-u'],
-            pythonPath: 'python3',
+            pythonPath: 'python',
             scriptPath: './commands/memes/scripts/',
             args: [ action ]
         }, function (err, results) {

@@ -5,6 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Meme Test",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": false,
+            "python": "${command:python.interpreterPath}",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "args": [
+                "test"
+            ]
+        },
+        {
             "name": "Launch via NPM",
             "request": "launch",
             "runtimeArgs": [
@@ -17,9 +30,8 @@
             ],
             "type": "pwa-node"
         },
-        
         {
-            "name": "Python",
+            "name": "Sim",
             "type": "python",
             "request": "launch",
             "stopOnEntry": false,

@@ -1,5 +1,5 @@
 const commando = require('discord.js-commando');
-const pyShell = require('python-shell');
+let {PythonShell} = require('python-shell');
 const fs = require('fs');
 
 const Reminder = require('../../core/reminders/Reminder.js');

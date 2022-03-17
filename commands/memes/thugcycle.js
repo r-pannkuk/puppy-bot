@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 
 const commando = require('discord.js-commando');
-const pyShell = require('python-shell');
+let {PythonShell} = require('python-shell');
 
 THUGS_ID = '304354673647812608'
 
