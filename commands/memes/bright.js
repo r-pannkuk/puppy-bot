@@ -1,5 +1,5 @@
 const commando = require('discord.js-commando');
-const pyShell = require('python-shell');
+let {PythonShell} = require('python-shell');
 
 
 module.exports = class BrightCommand extends commando.Command {
@@ -24,7 +24,7 @@ module.exports = class BrightCommand extends commando.Command {
     }
 
     async run(message, { target }) {
-        pyShell.run('bright.py', {
+        PythonShell.run('bright.py', {
             mode: 'text',
             pythonOptions: ['-u'],
             pythonPath: 'python3',

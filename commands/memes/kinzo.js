@@ -1,5 +1,5 @@
 const commando = require('discord.js-commando');
-const pyShell = require('python-shell');
+let {PythonShell} = require('python-shell');
 
 DISCORD_LINK_REGEX = /(https?:\/\/)?(www\.)?(discord(app)?\.com\/channels\/([0-9]+|\@me)\/[0-9]+\/[0-9]+)/
 
@@ -85,7 +85,7 @@ module.exports = class KinzoCommand extends commando.Command {
         var user = whineObject.user;
         var content = whineObject.content;
 
-        pyShell.run('kinzo.py', {
+        PythonShell.run('kinzo.py', {
             mode: 'text',
             pythonOptions: ['-u'],
             pythonPath: 'python3',

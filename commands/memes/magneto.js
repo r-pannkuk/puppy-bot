@@ -1,5 +1,5 @@
 const commando = require('discord.js-commando');
-const pyShell = require('python-shell');
+let {PythonShell} = require('python-shell');
 
 
 module.exports = class MagnetoCommand extends commando.Command {
@@ -57,7 +57,7 @@ module.exports = class MagnetoCommand extends commando.Command {
             return;
         }
 
-        pyShell.run('magneto.py', {
+        PythonShell.run('magneto.py', {
             mode: 'text',
             pythonOptions: ['-u'],
             pythonPath: 'python3',

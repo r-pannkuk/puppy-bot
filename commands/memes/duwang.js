@@ -1,5 +1,5 @@
 const commando = require('discord.js-commando');
-const pyShell = require('python-shell');
+let {PythonShell} = require('python-shell');
 
 
 module.exports = class DuwangCommands extends commando.Command {
@@ -37,7 +37,7 @@ module.exports = class DuwangCommands extends commando.Command {
             }
         }
 
-        pyShell.run('duwang.py', {
+        PythonShell.run('duwang.py', {
             mode: 'text',
             pythonOptions: ['-u'],
             pythonPath: 'python3',
