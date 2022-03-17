@@ -27,7 +27,7 @@ module.exports = class HealingCommand extends commando.Command {
         PythonShell.run('sylphie.py', {
             mode: 'text',
             pythonOptions: ['-u'],
-            pythonPath: 'python',
+            pythonPath: 'python3',
             scriptPath: './commands/memes/scripts/',
             args: [ action ]
         }, function (err, results) {
