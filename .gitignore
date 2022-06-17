@@ -5,3 +5,6 @@ commands/memes/saves/*
 checkpoint/*
 .env
 /prod/
+/dist/
+/saves/
+/old/

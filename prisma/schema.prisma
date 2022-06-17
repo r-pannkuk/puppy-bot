@@ -1,0 +1,337 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGO_URL")
+}
+
+model Reminder {
+  id         String             @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt  DateTime           @default(now())
+  ownerId    String
+  target     ReminderTarget
+  content    String
+  isDisabled Boolean            @default(false)
+  schedules  ReminderSchedule[]
+  events     ReminderEvent[]
+}
+
+type ReminderTarget {
+  type           ReminderTargetType
+  mentionableIds String[]
+  channelId      String?
+  guildId        String?
+}
+
+enum ReminderTargetType {
+  User
+  Role
+  Channel
+}
+
+model ReminderSchedule {
+  id           String                 @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt    DateTime               @default(now())
+  lastEditedAt DateTime               @default(now())
+  reminderTime DateTime
+  isDisabled   Boolean                @default(false)
+  repeat       ReminderRepeatSchedule
+  reminder     Reminder               @relation(fields: [reminderId], references: [id])
+  reminderId   String                 @db.ObjectId
+}
+
+type ReminderRepeatSchedule {
+  isRepeating Boolean
+  isInfinite  Boolean?
+  interval    BigInt?
+}
+
+model ReminderEvent {
+  id         String            @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt  DateTime          @default(now())
+  eventType  ReminderEventType
+  location   DiscordLocation
+  reminder   Reminder          @relation(fields: [reminderId], references: [id])
+  reminderId String            @db.ObjectId
+  payload    Json
+}
+
+enum ReminderEventType {
+  Create
+  Fire
+  Reschedule
+  Stop
+  Subscribe
+  Unsubscribe
+}
+
+type DiscordLocation {
+  guildId   String?
+  channelId String
+  messageId String
+}
+
+model BattleConfig {
+  id             String                @id @default(auto()) @map("_id") @db.ObjectId
+  guildId        String
+  version        String
+  levelConfigs   BattleLevelConfig[]
+  trapConfig     BattleTrapConfig
+  abilityConfigs BattleAbilityConfig[]
+
+  @@unique([guildId, version])
+}
+
+type BattleLevelConfig {
+  levelNum        Int
+  reqExperience   Int
+  maxTraps        Int
+  maxHealth       Int
+  maxEnergy       Int
+  baseHealthRegen Float
+  baseEnergyRegen Float
+}
+
+type BattleTrapConfig {
+  trapExplodeIconSourceURL    String
+  trapArmedIconSourceURL      String
+  trapSelfIconSourceURL       String
+  trapChannelId               String?
+  removeTrapExperienceScalar  Int
+  timeSecsToDeleteTrapMessage Float
+  damage                      BattleTrapDamageConfig
+}
+
+type BattleTrapDamageConfig {
+  formulaType        BattleTrapDamageFormulaType
+  numCharacterScalar Float
+  wordScalar         Float
+  timeIntervals      BattleTrapConfigTimeIncremental[]
+  exponentialScalar  Float?
+  linearScalar       Float?
+}
+
+enum BattleTrapDamageFormulaType {
+  Base
+  Linear
+  Exponential
+  Interval
+}
+
+type BattleAbilityConfig {
+  type          BattleAbilityType
+  reqEnergy     Int
+  reqExperience Int
+}
+
+enum BattleAbilityType {
+  Gulag
+  Trap
+}
+
+type BattleTrapConfigTimeIncremental {
+  intervalSecs Int
+  damageScalar Float
+}
+
+model BattleUser {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String
+  guildId     String
+  stats       BattleUserStats
+  info        BattleUserInfo
+  battleTraps BattleTrap[]
+
+  @@unique([userId, guildId])
+}
+
+type BattleUserInfo {
+  createdAt    DateTime @default(now())
+  lastEditedAt DateTime @default(now())
+}
+
+type BattleUserStats {
+  experience Float
+  health     Float
+  energy     Float
+}
+
+model BattleTrap {
+  id           String             @id @default(auto()) @map("_id") @db.ObjectId
+  phrase       String
+  createdAt    DateTime           @default(now())
+  state        BattleTrapState
+  battleUser   BattleUser         @relation(fields: [battleUserId], references: [id])
+  battleUserId String             @db.ObjectId
+  records      BattleTrapRecord[]
+}
+
+model BattleTrapRecord {
+  id      String               @id @default(auto()) @map("_id") @db.ObjectId
+  type    BattleTrapRecordType
+  trapId  String               @db.ObjectId
+  trap    BattleTrap           @relation(fields: [trapId], references: [id])
+  guildId String
+  payload Json
+
+  @@unique([trapId, type])
+}
+
+enum BattleTrapState {
+  Armed
+  Fired
+  Disarmed
+  Removed
+}
+
+enum BattleTrapRecordType {
+  Create
+  Trigger
+  Disarm
+  Remove
+}
+
+model ModerationEvent {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String
+  moderatorId    String
+  roleIds        String[]
+  startTime      DateTime
+  lastEditedTime DateTime
+  endTime        DateTime?
+  active         Boolean
+}
+
+model CustomCommand {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  guildId    String
+  name       String
+  aliases    String[]
+  ownerId    String
+  content    String
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  useCount   Int
+}
+
+model Note {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  authorId   String
+  guildId    String
+  key        String
+  full       String
+  createdAt  DateTime @default(now())
+  modifiedAt DateTime
+}
+
+model GameScanConfig {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  guildId         String
+  gameType        GameScanGameType
+  outputChannelId String?
+
+  @@unique([guildId, gameType])
+}
+
+enum GameScanGameType {
+  AdvanceWarsByWeb
+}
+
+model GameScanUserRecord {
+  id            String           @id @default(auto()) @map("_id") @db.ObjectId
+  userDiscordId String
+  userGameId    String
+  gameType      GameScanGameType
+}
+
+model GameScanGuildRegisterGameRecord {
+  id                   String             @id @default(auto()) @map("_id") @db.ObjectId
+  guildId              String
+  registeringUserId    String
+  gameRecord           GameScanGameRecord @relation(fields: [gameScanGameRecordId], references: [id])
+  gameScanGameRecordId String             @db.ObjectId
+
+  @@unique([guildId, gameScanGameRecordId])
+}
+
+model GameScanGameRecord {
+  id                              String                            @id @default(auto()) @map("_id") @db.ObjectId
+  gameId                          String
+  gameType                        GameScanGameType
+  isActive                        Boolean
+  GameScanGuildRegisterGameRecord GameScanGuildRegisterGameRecord[]
+}
+
+model GameScanEvent {
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  gameType  GameScanGameType
+  gameId    String
+  createdAt DateTime          @default(now())
+  eventType GameScanEventType
+  payload   Json
+}
+
+enum GameScanEventType {
+  CurrentTurn
+  EndGame
+}
+
+model GuildSettings {
+  guildId          String  @id @map("_id")
+  prefix           String?
+  timezone         String?
+  accountChannelId String?
+}
+
+model RoleAssignConfig {
+  guildId       String  @id @map("_id")
+  roleChannelId String?
+  fetchOnLoad   Boolean @default(true)
+}
+
+model MessageEchoConfig {
+  guildId         String  @id @map("_id")
+  outputChannelId String?
+  echoDeletes     Boolean @default(true)
+  echoEdits       Boolean @default(true)
+}
+
+model GulagConfig {
+  guildId               String  @id @map("_id")
+  moderationChannelId   String?
+  moderationRoleId      String?
+  allowGulagUnmoderated Boolean @default(false)
+}
+
+model GuildScanRegistryRecord {
+  id                   String                @id @default(auto()) @map("_id") @db.ObjectId
+  guildId              String
+  channelId            String
+  type                 GuildScanRegistryType
+  lastMessageScannedId String?
+
+  @@unique([guildId, channelId, type])
+}
+
+enum GuildScanRegistryType {
+  EmojiUsage
+  RoleAssign
+}
+
+model GuildEmojiUsage {
+  guildId      String        @id @map("_id")
+  emojiRecords EmojiRecord[]
+}
+
+type EmojiRecord {
+  emojiId     String
+  userRecords EmojiUserRecord[]
+}
+
+type EmojiUserRecord {
+  userId        String
+  messageCount  Int
+  reactionCount Int
+}

@@ -1,0 +1,19 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "lib": [
+            "ESNext",
+            "DOM"
+        ],
+        "target": "ESNext",
+        "module": "ESNext"
+    },
+    "include": [
+        "src",
+        "scripts",
+        "tests",
+        "babel.config.js",
+        "jest.config.ts",
+        "tsup.config.ts"
+    ]
+}

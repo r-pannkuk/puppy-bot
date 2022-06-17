@@ -1,0 +1,25 @@
+{
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "CommonJS",
+        "rootDir": ".",
+        "outDir": "../dist",
+        "moduleResolution": "node",
+        "noImplicitAny": false,
+        "noEmitOnError": true,
+        "esModuleInterop": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "removeComments": false,
+        "sourceMap": true,
+        "allowJs": true,
+        "skipLibCheck": true
+    },
+    "exclude": [
+        "./tsconfig.json"
+    ],
+    "include": [
+        "."
+, "../old/commands-old/Thugcycle.ts", "../old/commands-old/ListTopFails.ts"    ]
+}

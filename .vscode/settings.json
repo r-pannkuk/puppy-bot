@@ -1,5 +1,16 @@
 {
-    "python.jediEnabled": false,
-    "python.pythonPath": "C:\\Users\\rpann\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
-    "python.languageServer": "Default"
+    "eslint.validate": ["typescript"],
+	"editor.tabSize": 4,
+	"editor.useTabStops": true,
+	"editor.insertSpaces": false,
+	"editor.detectIndentation": true,
+	"files.eol": "\n",
+	"search.exclude": {
+		"**/node_modules": true,
+		"**/bower_components": true,
+		"**/*.code-search": true,
+		"**/.yarn": true,
+		"**/dist/": true,
+		"**/.git/": true
+	}
 }

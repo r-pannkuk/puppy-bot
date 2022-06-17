@@ -1,0 +1,26 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "${workspaceRoot}/node_modules/typescript/bin/tsc",
+            "args": [
+                "--watch"
+            ],
+            "isBackground": true,
+            "problemMatcher": [
+                "$tsc-watch"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

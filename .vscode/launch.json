@@ -7,10 +7,37 @@
         {
             "type": "pwa-node",
             "request": "launch",
-            "name": "NPM: Launch",
+            "runtimeArgs": [
+                "run-script",
+                "dev"
+            ],
+            "smartStep": true,
+            "name": "Debugger",
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**",
+                "node_modules/tslib/**"
+            ],
+            "internalConsoleOptions": "openOnSessionStart",
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "internalConsole",
+            "outputCapture": "std",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ],
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Delete Slash Commands",
             "console": "integratedTerminal",
-            "program": "${workspaceFolder}/src/index.ts",
-            "preLaunchTask": "tsc: build - tsconfig.json",
+            "program": "${workspaceFolder}/src/deleteCommands.ts",
             "sourceMaps": true,
             "smartStep": true,
             "internalConsoleOptions": "openOnSessionStart",
@@ -35,7 +62,7 @@
             "resolveSourceMapLocations": [
                 "${workspaceFolder}/**",
                 "!**/node_modules/**"
-            ],
+            ]
         },
         {
             "name": "Python: Meme Test",
@@ -48,7 +75,8 @@
             "cwd": "${workspaceFolder}",
             "env": {},
             "args": [
-                "test"
+                "test_name",
+                "test_text"
             ]
         }
     ]

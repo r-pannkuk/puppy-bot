@@ -1,0 +1,189 @@
+{
+	"version": "1.0.2",
+	"trapConfig": {
+		"trapExplodeIconSourceURL": "http://puppy-bot.com/puppy-bot-discord/media/battle/traps/trigger.png",
+		"trapArmedIconSourceURL": "http://puppy-bot.com/puppy-bot-discord/media/battle/traps/trap-icon.png",
+		"trapSelfIconSourceURL": "http://puppy-bot.com/puppy-bot-discord/media/battle/traps/trap-self.png",
+		"removeTrapExperienceScalar": 10,
+		"timeSecsToDeleteTrapMessage": 10,
+		"damage": {
+			"formulaType": "Interval",
+			"wordScalar": 1.25,
+			"numCharacterScalar": 1.05,
+			"timeIntervals": [
+				{
+					"intervalSecs": 0,
+					"damageScalar": 0.00000010000000000000000000000000000000
+				},
+				{
+					"intervalSecs": 28800000,
+					"damageScalar": 0.00000027777777777777777777777777777778
+				},
+				{
+					"intervalSecs": 86400000,
+					"damageScalar": 0.00000055555555555555555555555555555556
+				},
+				{
+					"intervalSecs": 259200000,
+					"damageScalar": 0.000000833333333333333333333333333333343
+				},
+				{
+					"intervalSecs": 604800000,
+					"damageScalar": 0.00000111111111111111111111111111111112
+				},
+				{
+					"intervalSecs": 1209600000,
+					"damageScalar": 0.0000013888888888888888888888888888889
+				},
+				{
+					"intervalSecs": 1814400000,
+					"damageScalar": 0.00000166666666666666666666666666666668
+				},
+				{
+					"intervalSecs": 2419200000,
+					"damageScalar": 0.00000194444444444444444444444444444446
+				}
+			]
+		}
+	},
+	"levelConfigs": [
+		{
+            "levelNum": 1,
+            "reqExperience": 0,
+            "maxTraps": 1,
+            "maxHealth": 10,
+            "maxEnergy": 100,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 2,
+            "reqExperience": 30,
+            "maxTraps": 1,
+            "maxHealth": 40,
+            "maxEnergy": 200,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 3,
+            "reqExperience": 100,
+            "maxTraps": 1,
+            "maxHealth": 75,
+            "maxEnergy": 300,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 4,
+            "reqExperience": 200,
+            "maxTraps": 1,
+            "maxHealth": 110,
+            "maxEnergy": 400,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 5,
+            "reqExperience": 350,
+            "maxTraps": 2,
+            "maxHealth": 150,
+            "maxEnergy": 500,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 6,
+            "reqExperience": 600,
+            "maxTraps": 2,
+            "maxHealth": 200,
+            "maxEnergy": 600,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 7,
+            "reqExperience": 1000,
+            "maxTraps": 2,
+            "maxHealth": 250,
+            "maxEnergy": 700,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 8,
+            "reqExperience": 1500,
+            "maxTraps": 3,
+            "maxHealth": 300,
+            "maxEnergy": 800,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 9,
+            "reqExperience": 2250,
+            "maxTraps": 3,
+            "maxHealth": 350,
+            "maxEnergy": 900,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 10,
+            "reqExperience": 3500,
+            "maxTraps": 3,
+            "maxHealth": 400,
+            "maxEnergy": 1000,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 11,
+            "reqExperience": 5500,
+            "maxTraps": 3,
+            "maxHealth": 450,
+            "maxEnergy": 1100,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 12,
+            "reqExperience": 8000,
+            "maxTraps": 4,
+            "maxHealth": 500,
+            "maxEnergy": 1200,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 13,
+            "reqExperience": 11500,
+            "maxTraps": 4,
+            "maxHealth": 666,
+            "maxEnergy": 1300,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		},
+		{
+            "levelNum": 15,
+            "reqExperience": 25000,
+            "maxTraps": 5,
+            "maxHealth": 800,
+            "maxEnergy": 1500,
+			"baseHealthRegen": 1,
+			"baseEnergyRegen": 1
+		}
+	],
+	"abilityConfigs": [
+		{
+			"type": "Trap",
+			"reqEnergy": 100,
+			"reqExperience": 0
+		},
+		{
+			"type": "Gulag",
+			"reqEnergy": 100,
+			"reqExperience": 500
+		}
+	]
+}
