@@ -32,6 +32,7 @@ export interface EnvTypes {
     REDIS_PASSWORD: string;
     REDIS_PORT: IntegerString;
     REDIS_URL: string;
+    REDIS_DB: IntegerString;
 
     SENTRY_URL: string;
 

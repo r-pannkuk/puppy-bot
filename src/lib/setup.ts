@@ -53,7 +53,8 @@ export const CLIENT_OPTIONS: ClientOptions = {
                 redis: {
                     password: envParseString('REDIS_PASSWORD'),
                     port: envParseInteger('REDIS_PORT'),
-                    host: envParseString('REDIS_URL')
+                    host: envParseString('REDIS_URL'),
+                    db: envParseInteger('REDIS_DB'),
                 }
             }
         })
