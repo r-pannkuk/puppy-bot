@@ -2,7 +2,7 @@ import { PaginatedMessage, PaginatedMessageAction, PaginatedMessageMessageOption
 import { container } from "@sapphire/framework";
 import { ButtonInteraction, CacheType, Constants, MessageEmbed } from "discord.js";
 import prettyMilliseconds from "pretty-ms";
-import { Emojis } from "../../../utils/constants";
+import { Emojis, SELECT_MENU_OPTION_LIMIT } from "../../../utils/constants";
 import { ReminderEmbed } from "./ReminderEmbed";
 
 export enum _InteractionIds {
@@ -154,7 +154,7 @@ export class ListReminderPaginatedMessage extends PaginatedMessage {
 
 			return {
 				emoji,
-				label: `${reminder.content}${reminder.content.length > 20 ? `...` : ``}`,
+				label: reminder.content.length > 20 ? `${reminder.content.slice(0, 20)}...` : reminder.content,
 				description,
 			};
 
@@ -163,7 +163,7 @@ export class ListReminderPaginatedMessage extends PaginatedMessage {
 
 	public generatePages() {
 		if (this.reminders.size > 0) {
-			for (var [_, reminder] of this.reminders) {
+			for (var [_, reminder] of Array.from(this.reminders.entries()).slice(0, SELECT_MENU_OPTION_LIMIT)) {
 				this.addPageEmbed(new ReminderEmbed({
 					reminder
 				}));

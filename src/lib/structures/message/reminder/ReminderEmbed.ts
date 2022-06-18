@@ -104,12 +104,14 @@ export class ReminderEmbed extends PuppyBotEmbed {
 					reminder = container.client.reminders.cache.get(reminder.id)!;
 					const duration = new Duration(message.content);
 					const currentSchedule = reminder.getActiveSchedule() ?? reminder.schedules.last()!;
+					const test = duration.dateFrom(currentSchedule.reminderTime);
+					console.log(test);
 					const updatedReminder = await container.client.reminders.rescheduleReminder(reminder, {
 						...currentSchedule,
 						repeat: {
 							isRepeating: true,
 							isInfinite: true,
-							interval: BigInt(duration.offset),
+							interval: BigInt(duration.fromNow.getTime() - Date.now()),
 						}
 					}, {
 						guildId: interaction.guildId,
@@ -117,7 +119,7 @@ export class ReminderEmbed extends PuppyBotEmbed {
 						messageId: interaction.message.id,
 					});
 
-					await interaction.followUp(`Set to fire at \`${new Date(updatedReminder!.getActiveSchedule()!.getNextInstance().getTime())}\` and repeat every \`${prettyMilliseconds(duration.offset)}\``);
+					await interaction.followUp(`Set to fire at \`${new Date(updatedReminder!.getActiveSchedule()!.getNextInstance().getTime())}\` and repeat every \`${prettyMilliseconds(duration.fromNow.getTime() - Date.now())}\``);
 
 					const originalMessage = message.channel.messages.cache.get(interaction.message.id)!
 					await originalMessage.edit({

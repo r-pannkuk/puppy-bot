@@ -52,11 +52,12 @@ export class ReminderManager {
 	private _instantiateSchedule(schedule: _ReminderSchedule) {
 		const getNextInstance = () => {
 			if (schedule.repeat.isRepeating) {
+				var timestamp = schedule.reminderTime.getTime();
 				if (schedule.repeat.isInfinite) {
-					var timestamp = schedule.reminderTime.getTime();
 					while (timestamp <= Date.now()) timestamp += Number(schedule.repeat.interval);
 					return new Date(timestamp);
 				} else {
+					if(timestamp <= Date.now()) return new Date(timestamp);
 					return new Date(schedule.reminderTime.getTime() + Number(schedule.repeat.interval));
 				}
 			} else {
