@@ -89,12 +89,12 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
                 categoryChannel = await this.guild!.channels.create(categoryName, {
                     type: 'GUILD_CATEGORY',
                     permissionOverwrites: overwrites
-                } as GuildChannelCreateOptions) as CategoryChannel
+                } as GuildChannelCreateOptions) as unknown as CategoryChannel;
             } else {
-                categoryChannel = categoryResolver.value
+                categoryChannel = categoryResolver.value;
             }
         } else {
-            categoryName
+            categoryName;
         }
 
         if (channelName) {

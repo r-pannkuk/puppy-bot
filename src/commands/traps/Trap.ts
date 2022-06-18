@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { BattleTrapRecordType, BattleTrapState } from "@prisma/client";
 import { ApplyOptions } from "@sapphire/decorators";
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from "@sapphire/framework";
-import { ButtonInteraction, CommandInteraction, Guild, InteractionReplyOptions, Message, MessageActionRow, MessageButton, MessageEmbed, MessagePayload, User } from "discord.js";
+import { ButtonInteraction, CommandInteraction, Guild, InteractionReplyOptions, Message, MessageActionRow, MessageButton, MessageEmbed, MessagePayload, ReplyMessageOptions, User } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import type { BattleSystem } from "../../lib/structures/managers/BattleSystem";
 import { ClearPaginatedMessage } from "../../lib/structures/message/battleSystem/traps/clear/ClearPaginatedMessage";
@@ -338,12 +338,14 @@ export class TrapCommand extends PuppyBotCommand {
                 content: `Generating embed...`
             })
 
-            followUp = async (options) => (messageOrInteraction as Message).edit(options);
+            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as Message).reply(options);
         } else {
-            await messageOrInteraction.deferReply({
-                ephemeral: true
-            });
-            followUp = async (options) => (messageOrInteraction as CommandInteraction).editReply(options);
+            if (!messageOrInteraction.replied) {
+                await messageOrInteraction.deferReply({
+                    ephemeral: true,
+                });
+            }
+            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
         }
 
         const abilityAttempt = await guild.battleSystem.checkAttemptTrap(user)
@@ -388,16 +390,18 @@ export class TrapCommand extends PuppyBotCommand {
 
         let followUp: (options: string | MessagePayload | InteractionReplyOptions) => Promise<any>;
         if (messageOrInteraction instanceof Message) {
-            messageOrInteraction = await messageOrInteraction.author.send({
-                content: `Generating embed...`,
+            messageOrInteraction = await user.send({
+                content: `Generating embed...`
             })
-            followUp = async (options) => (messageOrInteraction as Message).edit(options);
+
+            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as Message).reply(options);
         } else {
-            // Sending to a user here instead of ephemeral since ephemeral breaks.
-            await messageOrInteraction.deferReply({
-                ephemeral: true,
-            })
-            followUp = async (options) => (messageOrInteraction as CommandInteraction).editReply(options);
+            if (!messageOrInteraction.replied) {
+                await messageOrInteraction.deferReply({
+                    ephemeral: true,
+                });
+            }
+            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
         }
 
         if (battleUser.getActiveTraps().size === 1) {
@@ -461,17 +465,18 @@ export class TrapCommand extends PuppyBotCommand {
     public async handleDisarm(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User, phrase: string) {
         let followUp: (options: string | MessagePayload | InteractionReplyOptions) => Promise<any>;
         if (messageOrInteraction instanceof Message) {
-            messageOrInteraction = await messageOrInteraction.channel.send({
+            messageOrInteraction = await messageOrInteraction.reply({
                 content: `Generating embed...`
             })
 
-            followUp = async (options) => (messageOrInteraction as Message).reply(options);
+            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as Message).reply(options);
         } else {
-            await messageOrInteraction.deferReply({
-            });
-            followUp = async (options) => (messageOrInteraction as CommandInteraction).editReply(options);
+            if (!messageOrInteraction.replied) {
+                await messageOrInteraction.deferReply({
+                });
+            }
+            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
         }
-
         const matchedTraps = guild.battleSystem.traps.filter((trap) => trap.state === BattleTrapState.Armed && trap.phrase === phrase.toLowerCase())
 
         if (matchedTraps.size > 0) {
