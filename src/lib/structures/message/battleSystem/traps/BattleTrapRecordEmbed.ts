@@ -1,7 +1,7 @@
 import { BattleTrapRecordType } from "@prisma/client";
 import { container } from "@sapphire/framework";
 import type { GuildTextBasedChannel, MessageEmbedOptions } from "discord.js";
-import { default as durationStringDetailed } from "pretty-ms";
+import prettyMs from "pretty-ms";
 import type { BattleSystem } from "../../../managers/BattleSystem";
 import { BattleTrap as BT } from "./BattleTrapEmbed";
 
@@ -23,7 +23,7 @@ export class RecordEmbed extends BT.Embed {
 				damage: `**Damage Yield**: ${payload.damage.total}`,
 				date: `**Disarm Date**: ${new Date(payload.disarmedAt)}`,
 				disarmer: `**Disarmer**: ${container.client.users.cache.get(payload.disarmer.userId)}`,
-				duration: `**Time Alive**: ${durationStringDetailed(payload.duration)}`,
+				duration: `**Time Alive**: ${prettyMs(payload.duration)}`,
 				experience: `**Experience**: ${payload.experience.total}`,
 				URL: `${(this.guild?.channels.cache.get(payload.invocation.channelId) as GuildTextBasedChannel)?.messages.cache.get(payload.invocation.messageId)?.url}`,
 			}
@@ -33,7 +33,7 @@ export class RecordEmbed extends BT.Embed {
 			return {
 				damage: `**Damage Yield**: ${payload.damage.total}`,
 				date: `**Removed Date**: ${new Date(payload.removedAt)}`,
-				duration: `**Time Alive**: ${durationStringDetailed(payload.duration)}`,
+				duration: `**Time Alive**: ${prettyMs(payload.duration)}`,
 				experience: `**Experience**: ${payload.experience.total}`,
 				URL: `${(this.guild?.channels.cache.get(payload.invocation.channelId) as GuildTextBasedChannel)?.messages.cache.get(payload.invocation.messageId)?.url}`,
 			}
@@ -45,7 +45,7 @@ export class RecordEmbed extends BT.Embed {
 				damage: `**Damage Yield**: ${payload.damage.total}`,
 				date: `**Trigger Date**: ${new Date(payload.firedAt)}`,
 				victim: `**Victim**: ${container.client.users.cache.get(payload.victim.userId)}`,
-				duration: `**Time Alive**: ${durationStringDetailed(payload.duration)}`,
+				duration: `**Time Alive**: ${prettyMs(payload.duration)}`,
 				experience: `**Experience**: ${payload.experience.total}`,
 				URL: `${(this.guild?.channels.cache.get(payload.trigger.channelId) as GuildTextBasedChannel)?.messages.cache.get(payload.trigger.messageId)?.url}`,
 			}

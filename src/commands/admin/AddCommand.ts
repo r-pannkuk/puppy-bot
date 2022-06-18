@@ -50,7 +50,7 @@ export class AddCommand extends PuppyBotCommand {
                     .addChannelOption((option) =>
                         option
                             .setName("category")
-                            .addChannelType(Constants.ChannelTypes.GUILD_CATEGORY.valueOf())
+                            .addChannelTypes(Constants.ChannelTypes.GUILD_CATEGORY.valueOf())
                             .setDescription("The category to place this channel into.")
                     )
                     .addStringOption((option) =>

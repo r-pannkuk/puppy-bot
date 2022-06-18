@@ -35,7 +35,7 @@ export class AddCommand extends PuppyBotCommand {
                         option
                             .setName("channel")
                             .setDescription("What channel should store message audit logs?")
-                            .addChannelType(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+                            .addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
                     )
                     .addBooleanOption((option) =>
                         option
@@ -56,7 +56,7 @@ export class AddCommand extends PuppyBotCommand {
                         option
                             .setName("channel")
                             .setDescription("What channel should moderated users be limited to?")
-                            .addChannelType(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+                            .addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
                     )
                     .addRoleOption((option) =>
                         option
@@ -73,7 +73,7 @@ export class AddCommand extends PuppyBotCommand {
                             .setName("channel")
                             .setDescription("What channel should role assignment messages be sent to?")
                             .setRequired(true)
-                            .addChannelType(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+                            .addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
                     )
             )
             .addSubcommand((builder) =>
@@ -85,7 +85,7 @@ export class AddCommand extends PuppyBotCommand {
                             .setName("channel")
                             .setDescription("What channel should trap messages be sent to?")
                             .setRequired(true)
-                            .addChannelType(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+                            .addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
                     )
             )
         )

@@ -1,6 +1,6 @@
 import { container } from "@sapphire/framework";
 import { Guild, MessageEmbedOptions } from "discord.js";
-import { default as durationStringDetailed } from "pretty-ms";
+import prettyMs from "pretty-ms";
 import type { BattleSystem } from "../../../managers/BattleSystem";
 import { PuppyBotEmbed } from "../../PuppyBotEmbed";
 
@@ -17,7 +17,7 @@ export namespace BattleTrap {
 		public get stringifyStatus() { return `**Status**: ${this.trap?.state}` }
 		public get stringifyOwner() { return `**Owner**: ${this.trap?.getBattleUser().getUser()}` }
 		public get stringifyDamage() { return `**Damage**: ${this.trap?.damage()}` }
-		public get stringifyDuration() { return `**Duration**: ${durationStringDetailed(this.trap?.duration() ?? 0)}` }
+		public get stringifyDuration() { return `**Duration**: ${prettyMs(this.trap?.duration() ?? 0)}` }
 		public get stringifyCreatedAt() { return `**Created At**: ${new Date(this.trap?.createdAt ?? 0)}` }
 		public get stringifyAbilityCost() { return `**Energy Cost**: ${this.guild?.battleSystem.config.abilityConfigs.get('Trap')?.reqEnergy}`}
 

@@ -136,7 +136,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 								option
 									.setName('output-channel')
 									.setDescription(`The channel notifications will be sent to.`)
-									.addChannelType(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+									.addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
 							)
 					)
 			)

@@ -74,11 +74,11 @@ export abstract class RandomMediaCommand extends PuppyBotCommand {
 					.setName("type")
 					.setDescription("Select one of the image templates to use.")
 					.setChoices(
-						Object.entries(this.typeDict)
-							.map(t => [t[1].description, t[0]]) as [
-								name: string,
-								value: string
-							][]
+						...Object.entries(this.typeDict)
+							.map(t => ({
+								name: t[1].description,
+								value: t[0],
+							}))
 					)
 					.setRequired(false)
 			)

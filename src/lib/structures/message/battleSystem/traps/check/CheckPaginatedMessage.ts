@@ -1,6 +1,6 @@
 import { BattleTrapState } from "@prisma/client";
 import { Constants, MessageEmbed } from "discord.js";
-import { default as durationStringDetailed } from "pretty-ms";
+import prettyMs from "pretty-ms";
 import type { BattleSystem } from "../../../../managers/BattleSystem";
 import { BattleTrap } from "../BattleTrapPaginatedMessage";
 import { CheckEmbed } from "./CheckEmbed";
@@ -65,7 +65,7 @@ export class CheckPaginatedMessage extends BattleTrap.TrapPaginatedMessage {
 
 				return {
 					label: trap.phrase,
-					description: durationStringDetailed(trap.duration()),
+					description: prettyMs(trap.duration()),
 				}
 			})
 		}

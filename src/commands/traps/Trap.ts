@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { BattleTrapRecordType, BattleTrapState } from "@prisma/client";
 import { ApplyOptions } from "@sapphire/decorators";
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from "@sapphire/framework";
-import { ButtonInteraction, CommandInteraction, Guild, InteractionReplyOptions, Message, MessageActionRow, MessageButton, MessageEmbed, MessagePayload, ReplyMessageOptions, User } from "discord.js";
+import { ButtonInteraction, CommandInteraction, Guild, Message, MessageActionRow, MessageButton, MessageEmbed, MessagePayload, ReplyMessageOptions, User } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import type { BattleSystem } from "../../lib/structures/managers/BattleSystem";
 import { ClearPaginatedMessage } from "../../lib/structures/message/battleSystem/traps/clear/ClearPaginatedMessage";
@@ -332,7 +332,7 @@ export class TrapCommand extends PuppyBotCommand {
     }
 
     public async handleCreate(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User, phrase: string) {
-        let followUp: (options: string | MessagePayload | InteractionReplyOptions) => Promise<any>;
+        let followUp: (options: string | MessagePayload | ReplyMessageOptions) => Promise<any>;
         if (messageOrInteraction instanceof Message) {
             messageOrInteraction = await user.send({
                 content: `Generating embed...`
@@ -352,7 +352,6 @@ export class TrapCommand extends PuppyBotCommand {
 
         if (abilityAttempt.error) {
             await followUp({
-                ephemeral: true,
                 content: abilityAttempt.error
             })
             return;
@@ -388,7 +387,7 @@ export class TrapCommand extends PuppyBotCommand {
             return;
         }
 
-        let followUp: (options: string | MessagePayload | InteractionReplyOptions) => Promise<any>;
+        let followUp: (options: string | MessagePayload | ReplyMessageOptions) => Promise<any>;
         if (messageOrInteraction instanceof Message) {
             messageOrInteraction = await user.send({
                 content: `Generating embed...`
@@ -463,7 +462,7 @@ export class TrapCommand extends PuppyBotCommand {
     }
 
     public async handleDisarm(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User, phrase: string) {
-        let followUp: (options: string | MessagePayload | InteractionReplyOptions) => Promise<any>;
+        let followUp: (options: string | MessagePayload | ReplyMessageOptions) => Promise<any>;
         if (messageOrInteraction instanceof Message) {
             messageOrInteraction = await messageOrInteraction.reply({
                 content: `Generating embed...`

@@ -76,7 +76,7 @@ export class ReminderCommand extends PuppyBotCommand {
 						option
 							.setName('location')
 							.setDescription('Where the reminder should go off.  Defaults to DMing the user or the channel.')
-							.addChannelType(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+							.addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
 					)
 			)
 			.addSubcommand((builder) =>
