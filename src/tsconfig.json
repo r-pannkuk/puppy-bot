@@ -20,6 +20,6 @@
         "./tsconfig.json"
     ],
     "include": [
-        "."
-, "../old/commands-old/Thugcycle.ts", "../old/commands-old/ListTopFails.ts"    ]
+        ".",
+    ]
 }

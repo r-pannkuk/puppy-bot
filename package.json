@@ -38,6 +38,7 @@
     "distube": "^3.3.4",
     "dotenv": "^16.0.0",
     "ffmpeg-static": "^4.4.1",
+    "formidable": "^2.0.1",
     "inversify": "^6.0.1",
     "jsdom": "^19.0.0",
     "libsodium-wrappers": "^0.7.10",
@@ -46,6 +47,7 @@
     "pretty-ms": "^7.0.1",
     "python-shell": "^3.0.1",
     "reflect-metadata": "^0.1.13",
+    "superagent": "^7.1.6",
     "tsc-watch": "^5.0.3",
     "typescript": "^4.6.2"
   },
