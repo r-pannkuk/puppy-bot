@@ -9,6 +9,11 @@ import { BattleSystem } from "../../lib/structures/managers/BattleSystem";
 export class RegenerateUsersTask extends ScheduledTask {
 	public override async run({ guildId }) {
 		const guild = container.client.guilds.cache.get(guildId)!;
+		if(!guild) {
+			container.logger.error(`No guild found for guild ID: ${guildId}`);
+			return;
+		}
+
 		var writeRequired = false;
 
 		guild.battleSystem.battleUsers.forEach((battleUser, id) => {

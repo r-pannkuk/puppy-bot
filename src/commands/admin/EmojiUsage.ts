@@ -1,10 +1,12 @@
 import { ContextMenuCommandBuilder, SlashCommandBuilder } from "@discordjs/builders";
 import { ApplyOptions } from "@sapphire/decorators";
-import type { ApplicationCommandRegistry, ChatInputCommandContext, ContextMenuCommandContext } from "@sapphire/framework";
+import { ApplicationCommandRegistry, ChatInputCommandContext, container, ContextMenuCommandContext } from "@sapphire/framework";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import { Collection, CommandInteraction, ContextMenuInteraction, Guild, GuildEmoji, Message, User } from "discord.js";
+import { Collection, CommandInteraction, ContextMenuInteraction, Guild, GuildEmoji, Message, MessagePayload, ReplyMessageOptions, User } from "discord.js";
 import { EmojiUsagePaginatedMessage } from "../../lib/structures/message/admin/EmojiUsagePaginatedMessage";
 import { Stopwatch } from '@sapphire/stopwatch';
+import { GuildMessageScanner } from "../../lib/structures/managers/GuildMessageScanner";
+import { Time } from "@sapphire/time-utilities";
 
 const SHORT_DESCRIPTION = `Provides statistics about emoji utilization in the server.`;
 const REGEX_CUSTOM_EMOJI = /<a:.+?:\d+>|<:.+?:\d+>/g
@@ -95,6 +97,24 @@ export class EmojiUsageCommand extends PuppyBotCommand {
         }
     }
 
+    protected async generateFollowUp(messageOrInteraction: Message | CommandInteraction | ContextMenuInteraction):
+        Promise<(options: string | MessagePayload | ReplyMessageOptions) => Promise<Message<boolean>>> {
+        if (messageOrInteraction instanceof Message) {
+            messageOrInteraction = await messageOrInteraction.channel.send({
+                content: `Scanning...`
+            })
+
+            return async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as Message).reply(options);
+        } else {
+            if(!messageOrInteraction.replied) {
+                await messageOrInteraction.reply({
+                    content: `Scanning...`,
+                });
+            }
+            return async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
+        }
+    }
+
     public async run(args: {
         messageOrInteraction: Message | CommandInteraction | ContextMenuInteraction,
         guild: Guild,
@@ -105,14 +125,33 @@ export class EmojiUsageCommand extends PuppyBotCommand {
 
         const followUp = await this.generateFollowUp(messageOrInteraction);
 
-        const stopwatch = new Stopwatch();
+        const replyInterval = Time.Second * 5;
+
+        let messageUpdateStopwatch : Stopwatch = new Stopwatch();
+
+        const listener = async (channel, messages) => {
+            if(!messageUpdateStopwatch || messageUpdateStopwatch.duration > replyInterval) {
+                await followUp({
+                    content: `Scanned ${(messages as Collection<string, Message>).size} in ${channel}...`
+                });
+                messageUpdateStopwatch.restart();
+            }
+        };
+
+        container.client.on(GuildMessageScanner.Events.Chunk.Finished, listener);
+
+        const newReplyStopwatch = new Stopwatch();
         var { records } = await guild.emojiUsage.startCollecting();
-        stopwatch.stop();
+        newReplyStopwatch.stop();
+
+        messageUpdateStopwatch.stop();
+
+        container.client.removeListener(GuildMessageScanner.Events.Chunk.Finished, listener);
 
         const message = await followUp(`Scanning finished: `);
         
         let response : Message;
-        if (stopwatch.duration > WAIT_DURATION_FOR_FOLLOWUP) {
+        if (newReplyStopwatch.duration > WAIT_DURATION_FOR_FOLLOWUP) {
             response = await message.reply(`Generating embed...`);
             await message.edit(`${message.content}${response.url}`);
         } else {
