@@ -28,7 +28,8 @@ export const CLIENT_OPTIONS: ClientOptions = {
         'GUILD_MESSAGES',
         'GUILD_MESSAGE_REACTIONS',
         'DIRECT_MESSAGES',
-        'DIRECT_MESSAGE_REACTIONS'
+        'DIRECT_MESSAGE_REACTIONS',
+        
     ],
     defaultPrefix: envParseString('CLIENT_PREFIX', '!'),
     caseInsensitiveCommands: true,

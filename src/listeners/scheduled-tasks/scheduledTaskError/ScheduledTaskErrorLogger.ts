@@ -7,6 +7,6 @@ import { ScheduledTaskEvents } from "@sapphire/plugin-scheduled-tasks";
 })
 export class ScheduledTaskErrorLogger extends Listener<typeof ScheduledTaskEvents.ScheduledTaskError> {
 	public async run(_error: Error, _task: string, _duration: number, _payload: any) {
-		container.logger.info(`In: ${this.event.toString()}`);
+		container.logger.info(`In: ${this.event.toString()} - ${_error}`);
 	}
 }

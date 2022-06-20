@@ -35,12 +35,18 @@ const Credentials: Credential[] = [
             ]
         }]
     },
-    // {
-    //     Name: 'Puppy-Bot',
-    //     ApplicationId: '331669086813814784',
-    //     ApplicationSecret: '',
-    //     Commands: []
-    // }
+    {
+        Name: 'Puppy-Bot',
+        ApplicationId: '331669086813814784',
+        ApplicationSecret: 'J8V9Y2vFXAyfSo8nAS1aoZaA1dSAGyl_',
+        globalCommands: [
+        ],
+        Guilds: [{
+            id: "319291359376703488",
+            commands: [
+            ]
+        }]
+    },
 ]
 
 /**
@@ -181,7 +187,7 @@ const Main = async () => {
             commandIds = guild.commands;
 
             if (commandIds.length === 0) {
-                const usedIds = Object.values(SLASH_ID_HINTS).concat(Object.values(CONTEXT_MENU_ID_HINTS));
+                const usedIds = Object.values(SLASH_ID_HINTS).concat(Object.values(CONTEXT_MENU_ID_HINTS)).flat();
                 commandIds = (await getGuildCommands(credential, token, guild.id) ?? []).filter((value) => !usedIds.includes(value));
             }
             for (var k in commandIds) {
@@ -197,8 +203,8 @@ const Main = async () => {
         commandIds = credential.globalCommands;
 
         if (commandIds.length === 0) {
-            const usedIds = Object.values(SLASH_ID_HINTS).concat(Object.values(CONTEXT_MENU_ID_HINTS));;
-            commandIds = (await getGlobalCommands(credential, token) ?? []).filter((value) => !usedIds.includes(value))
+            const usedIds = Object.values(SLASH_ID_HINTS).concat(Object.values(CONTEXT_MENU_ID_HINTS)).flat();
+            commandIds = (await getGlobalCommands(credential, token) ?? []).filter((value) => !usedIds.includes(value));
         }
 
         for (var j in commandIds) {
