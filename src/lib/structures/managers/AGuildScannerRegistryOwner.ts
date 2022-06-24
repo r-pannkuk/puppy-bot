@@ -1,12 +1,13 @@
 import type { GuildScanRegistryType, GuildScanRegistryRecord as _GuildScanRegistryRecord } from "@prisma/client";
 import { container } from "@sapphire/framework";
-import { Collection, Guild, GuildTextBasedChannel } from "discord.js";
+import { Collection, Guild, GuildTextBasedChannel, Message } from "discord.js";
 import type { ChannelId, LastMessageStore } from "./GuildMessageScanner";
 import type { IGuildManager } from "./IGuildManager";
 
 export type GuildScanRegistryRecord<T extends GuildScanRegistryType> = Omit<Omit<_GuildScanRegistryRecord, 'type'>, 'id'> & {
 	id?: string,
 	type: T,
+	createdTimestamp?: number,
 }
 
 export abstract class AGuildScannerRegistryOwner<T extends GuildScanRegistryType> implements IGuildManager {
@@ -27,8 +28,8 @@ export abstract class AGuildScannerRegistryOwner<T extends GuildScanRegistryType
 
 	protected scanType: T;
 
-	protected _registry: Collection<ChannelId, GuildScanRegistryRecord<T>>;
-	public get registry(): Collection<ChannelId, GuildScanRegistryRecord<T>> {
+	protected _registry: Collection<ChannelId, AGuildScannerRegistryOwner.GuildScanRegistryRecord<T>>;
+	public get registry(): Collection<ChannelId, AGuildScannerRegistryOwner.GuildScanRegistryRecord<T>> {
 		return this._registry;
 	}
 
@@ -48,6 +49,17 @@ export abstract class AGuildScannerRegistryOwner<T extends GuildScanRegistryType
 		// 	await this.loadRegistry();
 		// 	await this.generateLastMessageStore();
 		// })()
+	}
+
+	protected async _instantiateRecord(record: _GuildScanRegistryRecord | Omit<_GuildScanRegistryRecord, 'id'>) {
+		const fetchChannel = async () => this.guild?.channels.fetch(record.channelId);
+		const fetchMessage = async () => (record.lastMessageScannedId) ? await ((await fetchChannel()) as GuildTextBasedChannel).messages.fetch(record.lastMessageScannedId) : null;
+		return {
+			...record,
+			fetchChannel,
+			fetchMessage,
+			createdTimestamp: (await fetchMessage())?.createdTimestamp,
+		} as AGuildScannerRegistryOwner.GuildScanRegistryRecord<typeof this.scanType>;
 	}
 
 	public async loadRegistry() {
@@ -85,16 +97,23 @@ export abstract class AGuildScannerRegistryOwner<T extends GuildScanRegistryType
 				}
 			});
 		}
-		this._registry = new Collection(Array.from(loadedRegistry.map(record => [record.channelId, record as GuildScanRegistryRecord<typeof scanType>])));
+
+		this._registry = new Collection(
+			Array.from(
+				await Promise.all(loadedRegistry.map(async (record) =>
+					[record.channelId, await this._instantiateRecord(record)]
+				)) as [string, AGuildScannerRegistryOwner.GuildScanRegistryRecord<typeof scanType>][]
+			)
+		);
 
 		for (var [id] of this.channels) {
 			if (!this._registry.has(id)) {
-				this._registry.set(id, {
+				this._registry.set(id, await this._instantiateRecord({
 					channelId: id,
 					guildId: this.guildId,
 					lastMessageScannedId: null,
 					type: this.scanType,
-				})
+				}))
 			}
 		}
 	}
@@ -102,8 +121,6 @@ export abstract class AGuildScannerRegistryOwner<T extends GuildScanRegistryType
 	public async writeRegistry() {
 		await container.database.$transaction([
 			...this._registry.map((record) => {
-				var purgedRecordId = record;
-				delete purgedRecordId.id;
 				return container.database.guildScanRegistryRecord.upsert({
 					where: {
 						guildId_channelId_type: {
@@ -112,8 +129,19 @@ export abstract class AGuildScannerRegistryOwner<T extends GuildScanRegistryType
 							type: this.scanType
 						}
 					},
-					create: purgedRecordId,
-					update: purgedRecordId,
+					create: {
+						id: record.id,
+						channelId: record.channelId,
+						guildId: record.guildId,
+						lastMessageScannedId: record.lastMessageScannedId,
+						type: record.type,
+					},
+					update: {
+						channelId: record.channelId,
+						guildId: record.guildId,
+						lastMessageScannedId: record.lastMessageScannedId,
+						type: record.type,
+					},
 				})
 			})
 		])
@@ -132,5 +160,15 @@ export abstract class AGuildScannerRegistryOwner<T extends GuildScanRegistryType
 				}
 			}
 		}
+	}
+}
+
+export namespace AGuildScannerRegistryOwner {
+	export interface GuildScanRegistryRecord<T extends GuildScanRegistryType> extends Omit<Omit<_GuildScanRegistryRecord, 'type'>, 'id'> {
+		id?: string,
+		type: T,
+		fetchChannel(): Promise<GuildTextBasedChannel>,
+		fetchMessage(): Promise<Message> | null,
+		createdTimestamp?: number,
 	}
 }

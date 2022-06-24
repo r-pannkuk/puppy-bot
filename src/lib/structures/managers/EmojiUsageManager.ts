@@ -4,7 +4,7 @@ import {
 	GuildScanRegistryType
 } from "@prisma/client";
 import { container, UserError } from "@sapphire/framework";
-import { Collection, Guild, GuildTextBasedChannel, Message } from "discord.js";
+import { Collection, Guild, GuildEmoji, GuildTextBasedChannel, Message } from "discord.js";
 import { AGuildScannerRegistryOwner } from "./AGuildScannerRegistryOwner";
 
 export type EmojiRecords = Collection<string, EmojiUsageManager.EmojiRecord.Instance>
@@ -62,13 +62,17 @@ export class EmojiUsageManager extends AGuildScannerRegistryOwner<typeof GuildSc
 		if (!this.guild) throw new UserError({ identifier: `Guild wasn't found.`, context: this.guildId });
 		if (this.isWorking) throw new UserError({ identifier: `Already running query.`, context: this.lastMessageStore.map((c) => c.createdAt) });
 
-		this.beginCollection();
-
-		const count = await this.guild.scanner.fetchAllMessages(this.lastMessageStore);
-		await this.writeCollection();
-		await this.generateLastMessageStore();
-		this.isWorking = false;
-		return { records: this.records, count };
+		try {
+			this.beginCollection();
+	
+			const count = await this.guild.scanner.fetchAllMessages(this.lastMessageStore);
+			await this.writeCollection();
+			await this.generateLastMessageStore();
+			this.isWorking = false;
+			return { records: this.records, count };
+		} finally {
+			this.isWorking = false;
+		}
 	}
 
 	public beginCollection() {
@@ -76,7 +80,7 @@ export class EmojiUsageManager extends AGuildScannerRegistryOwner<typeof GuildSc
 		this.isWorking = true;
 	}
 
-	public collectChunk(messages: Collection<string, Message>) {
+	public async collectChunk(messages: Collection<string, Message>) {
 		for (var [_, message] of messages) {
 			if (message.author.id === container.client.user?.id || message.author.bot) continue;
 
@@ -85,11 +89,11 @@ export class EmojiUsageManager extends AGuildScannerRegistryOwner<typeof GuildSc
 				return (message.content.match(regex) || []).length > 0;
 			})
 
-			for (var [_, emoji] of matchedEmojis) {
-				let record = this._working.get(emoji.id) || this._working.set(emoji.id, {
-					emojiId: emoji.id,
+			for (var [id, _emoji] of matchedEmojis) {
+				let record = this._working.get(id) || this._working.set(id, {
+					emojiId: id,
 					userRecords: new Collection<string, EmojiUsageManager.EmojiUserRecord.Instance>()
-				}).get(emoji.id)!;
+				}).get(id)!;
 
 				let userRecord = record.userRecords.get(message.author.id) || {
 					userId: message.author.id,
@@ -97,24 +101,28 @@ export class EmojiUsageManager extends AGuildScannerRegistryOwner<typeof GuildSc
 					reactionCount: 0
 				};
 
-				const regex = new RegExp(emoji.id.toString(), 'gi');
+				const regex = new RegExp(id.toString(), 'gi');
 
 				userRecord.messageCount += (message.content.match(regex) || []).length
 
 				record.userRecords.set(message.author.id, userRecord)
-				this._working.set(emoji.id, record);
+				this._working.set(id, record);
 			}
 
 			for (var [_, reaction] of message.reactions.cache) {
-				if (!reaction.emoji.id) continue;
+				if (!reaction.emoji.id || !this.guild!.emojis.cache.has(reaction.emoji.id)) continue;
 
-				let record = this._working.get(emoji.id) || this._working.set(emoji.id, {
+				const emoji = reaction.emoji as GuildEmoji;
+
+				let record = this._working.get(emoji.id) ?? this._working.set(emoji.id, {
 					emojiId: emoji.id,
 					userRecords: new Collection<string, EmojiUsageManager.EmojiUserRecord.Instance>()
 				}).get(emoji.id)!;
 
-				for (var [_, user] of reaction.users.cache) {
-					let userRecord = record.userRecords.get(user.id) || {
+				const users = await reaction.users.fetch();
+
+				for (var [_, user] of users) {
+					let userRecord = record.userRecords.get(user.id) ?? {
 						userId: user.id,
 						messageCount: 0,
 						reactionCount: 0
@@ -131,12 +139,16 @@ export class EmojiUsageManager extends AGuildScannerRegistryOwner<typeof GuildSc
 		const lastMessage = messages.last();
 
 		if (lastMessage) {
-			this._registry.set(lastMessage.channel.id, {
-				channelId: lastMessage.channel.id,
-				guildId: this.guildId,
-				lastMessageScannedId: lastMessage.id,
-				type: this.scanType,
-			});
+			const existing = this._registry.get(lastMessage.channel.id);
+
+			if(!existing || (existing.createdTimestamp ?? 0 < lastMessage.createdTimestamp)) {
+				this._registry.set(lastMessage.channel.id, await this._instantiateRecord({
+					channelId: lastMessage.channel.id,
+					guildId: this.guildId,
+					lastMessageScannedId: lastMessage.id,
+					type: this.scanType,
+				}));
+			}
 		}
 	}
 

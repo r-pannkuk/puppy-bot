@@ -166,11 +166,17 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 					return embed
 						.setTitle(`All Emoji Usage`)
 						.setDescription(this.generateDefaultEmbedDescription())
+						.setFooter({
+							text: `Counting Emojis${(this.countReactions) ? `and Reactions` : ``}`
+						})
 				} else {
 					const emoji = this.guild.emojis.cache.get(key);
 					return embed
 						.setTitle(`${emoji} Usage`)
 						.setDescription(this.generateSpecificEmojiDescription(key))
+						.setFooter({
+							text: `Counting Emojis${(this.countReactions) ? `and Reactions` : ``}`
+						})
 				}
 			});
 		}
