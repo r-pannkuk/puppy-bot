@@ -11,11 +11,11 @@ export class GuildMessageScannerChunkFinished_EmojiUsageTrackStats extends Liste
 	public async run(channel: GuildTextBasedChannel, messages: Collection<string, Message>) {
 		if(messages.size === 0) return;
 
-		const lastMessage = channel.guild.emojiUsage.lastMessageStore.get(channel.id);
+		const previousLastMessage = channel.guild.emojiUsage.lastMessageStore.get(channel.id);
 
-		if(!lastMessage || messages.last()!.createdAt > lastMessage.createdAt) {
-			if(lastMessage) {
-				messages = messages.filter((message) => message.createdAt > lastMessage.createdAt);
+		if(!previousLastMessage || messages.last()!.createdAt > previousLastMessage.createdAt) {
+			if(previousLastMessage) {
+				messages = messages.filter((message) => message.createdAt > previousLastMessage.createdAt);
 			}
 
 			channel.guild.emojiUsage.collectChunk(messages);

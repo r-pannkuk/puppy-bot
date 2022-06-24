@@ -59,6 +59,8 @@ export class GuildMessageScanner implements IGuildManager {
 		const count = await recursiveSearch(lastMessageId);
 
 		async function recursiveSearch(lastMessageId?: string) : Promise<number> {
+			if(lastMessageId === textChannel.lastMessageId) return 0;
+
 			const MAX_FETCH = 100;
 
 			var messages: Collection<string, Message<boolean>>
@@ -66,7 +68,7 @@ export class GuildMessageScanner implements IGuildManager {
 			try {
 				messages = await textChannel.messages.fetch({
 					limit: MAX_FETCH,
-					before: lastMessageId,
+					after: lastMessageId,
 				});
 
 				messages.sort()
@@ -79,7 +81,7 @@ export class GuildMessageScanner implements IGuildManager {
 					return messagesRetrieved;
 				} else {
 					// Continue scanning messages, starting after the last message scanned
-					const lastMessage = messages.first();
+					const lastMessage = messages.last();
 					return await recursiveSearch(lastMessage!.id);
 				}
 			} catch (e) {
