@@ -35,7 +35,7 @@ export class GuildMessageScanner implements IGuildManager {
 
 		const counts = await Promise.all(channels.map(async (channel) => await this.fetchAllMessagesInChannel({
 			channel,
-			lastMessageId: lastMessageStore.get(channel.id)?.id
+			lastStoredMessage: lastMessageStore.get(channel.id)?.id
 		})));
 
 		const count = counts.reduce((sum, number) => sum + number, 0);
@@ -46,20 +46,26 @@ export class GuildMessageScanner implements IGuildManager {
 
 	public async fetchAllMessagesInChannel(args: {
 		channel: GuildBasedChannel,
-		lastMessageId?: string
+		lastStoredMessage?: string
 	}): Promise<number> {
-		const { channel, lastMessageId } = args;
+		const { channel, lastStoredMessage } = args;
 		var textChannel = channel as GuildTextBasedChannel;
 		if (!textChannel) return 0;
+
+		if (!textChannel.lastMessageId) return 0;
 
 		container.client.emit(GuildMessageScanner.Events.Channel.ScanBegun, channel);
 
 		var messagesRetrieved = 0;
 
-		const count = await recursiveSearch(lastMessageId);
+		const count = await recursiveSearch({
+			after: (lastStoredMessage) ? (await textChannel.messages.fetch(lastStoredMessage) ?? { id: "0", url: undefined }) : { id: "0", url: undefined },
+		});
 
-		async function recursiveSearch(lastMessageId?: string) : Promise<number> {
-			if(lastMessageId === textChannel.lastMessageId) return 0;
+		async function recursiveSearch(query: {
+			after: Message | { id: string, url: undefined },
+		}): Promise<number> {
+			if (!textChannel.lastMessageId || query.after?.id === textChannel.lastMessageId) return messagesRetrieved;
 
 			const MAX_FETCH = 100;
 
@@ -68,10 +74,10 @@ export class GuildMessageScanner implements IGuildManager {
 			try {
 				messages = await textChannel.messages.fetch({
 					limit: MAX_FETCH,
-					after: lastMessageId,
+					after: query.after.id,
 				});
 
-				messages.sort()
+				messages.sort();
 				messagesRetrieved += messages.size;
 
 				container.client.emit(GuildMessageScanner.Events.Chunk.Finished, channel, messages);
@@ -80,13 +86,22 @@ export class GuildMessageScanner implements IGuildManager {
 					container.logger.info(`Finished scanning ${messagesRetrieved} messages in "#${textChannel.name}".`);
 					return messagesRetrieved;
 				} else {
+					container.logger.info(`Query: ${textChannel.name}: ${query.after?.url}`)
+					// if(!query.after || messages.last()!.createdAt > query.after.createdAt) {
+					// 	query.after = messages.last()!;
+					// }
+					// if(!query.before || messages.first()!.createdAt < query.before.createdAt) {
+					// 	query.before = messages.first()!;
+					// }
+
 					// Continue scanning messages, starting after the last message scanned
-					const lastMessage = messages.last();
-					return await recursiveSearch(lastMessage!.id);
+					return await recursiveSearch({
+						after: messages.last()!,
+					});
 				}
 			} catch (e) {
 				await new Promise(r => setTimeout(r, REQUEST_DELAY))
-				return await recursiveSearch(lastMessageId);
+				return await recursiveSearch(query);
 			}
 		}
 

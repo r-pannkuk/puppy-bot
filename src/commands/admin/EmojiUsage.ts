@@ -7,6 +7,7 @@ import { EmojiUsagePaginatedMessage } from "../../lib/structures/message/admin/E
 import { Stopwatch } from '@sapphire/stopwatch';
 import { GuildMessageScanner } from "../../lib/structures/managers/GuildMessageScanner";
 import { Time } from "@sapphire/time-utilities";
+import { PuppyBotEmbed } from "../../lib/structures/message/PuppyBotEmbed";
 
 const SHORT_DESCRIPTION = `Provides statistics about emoji utilization in the server.`;
 const REGEX_CUSTOM_EMOJI = /<a:.+?:\d+>|<:.+?:\d+>/g
@@ -106,7 +107,7 @@ export class EmojiUsageCommand extends PuppyBotCommand {
 
             return async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as Message).reply(options);
         } else {
-            if(!messageOrInteraction.replied) {
+            if (!messageOrInteraction.replied) {
                 await messageOrInteraction.reply({
                     content: `Scanning...`,
                 });
@@ -127,30 +128,79 @@ export class EmojiUsageCommand extends PuppyBotCommand {
 
         const replyInterval = Time.Second * 5;
 
-        let messageUpdateStopwatch : Stopwatch = new Stopwatch();
+        const output: Record<string, {
+            number: number,
+            finished: boolean,
+        }> = {};
 
-        const listener = async (channel, messages) => {
-            if(!messageUpdateStopwatch || messageUpdateStopwatch.duration > replyInterval) {
-                await followUp({
-                    content: `Scanned ${(messages as Collection<string, Message>).size} in ${channel}...`
-                });
-                messageUpdateStopwatch.restart();
+        const bulkListener = async (channel, messages) => {
+            if (!output[channel.id]) {
+                output[channel.id] = {
+                    number: 0,
+                    finished: false
+                };
             }
+            output[channel.id].number += messages.count;
+        };
+        const channelListener = async (channel) => {
+            if (!output[channel.id]) {
+                output[channel.id] = {
+                    number: 0,
+                    finished: false
+                };
+            }
+            output[channel.id].finished = true;
         };
 
-        container.client.on(GuildMessageScanner.Events.Chunk.Finished, listener);
+        container.client.on(GuildMessageScanner.Events.Chunk.Finished, bulkListener);
+        container.client.on(GuildMessageScanner.Events.Channel.ScanEnded, channelListener);
+
+        let previous: Record<string, {
+            number: number,
+            finished: boolean,
+        }> = {};
+
+        const RETRY_COUNT = 1;
+        var remainingRetries = RETRY_COUNT;
+
+        const interval = setInterval(async () => {
+            if (remainingRetries === 0) {
+                followUp(`Timed out.`);
+                clearInterval(interval);
+                return;
+            }
+
+            if (JSON.stringify(previous) === JSON.stringify(output)) {
+                --remainingRetries;
+            } else {
+                remainingRetries = RETRY_COUNT;
+                const embed = new PuppyBotEmbed({
+                    title: `Scanned Messages:`
+                }).splitFields({
+                    content: Object.entries(output).map((value) => `Scanned ${value[1].number} message(s) in ${guild.channels.cache.get(value[0])}...${(value[1].finished ? `Finished!` : ``)}`)
+                })
+                await followUp({
+                    embeds: [embed]
+                });
+            }
+
+            previous = {
+                ...output
+            };
+        }, replyInterval);
 
         const newReplyStopwatch = new Stopwatch();
         var { records } = await guild.emojiUsage.startCollecting();
         newReplyStopwatch.stop();
 
-        messageUpdateStopwatch.stop();
+        clearInterval(interval);
+        container.client.removeListener(GuildMessageScanner.Events.Chunk.Finished, bulkListener);
+        container.client.removeListener(GuildMessageScanner.Events.Channel.ScanEnded, channelListener);
 
-        container.client.removeListener(GuildMessageScanner.Events.Chunk.Finished, listener);
 
         const message = await followUp(`Scanning finished: `);
-        
-        let response : Message;
+
+        let response: Message;
         if (newReplyStopwatch.duration > WAIT_DURATION_FOR_FOLLOWUP) {
             response = await message.reply(`Generating embed...`);
             await message.edit(`${message.content}${response.url}`);
