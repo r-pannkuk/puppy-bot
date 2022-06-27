@@ -36,6 +36,9 @@ export interface EnvTypes {
 
     SENTRY_URL: string;
 
+    GOOGLE_ACCOUNT_EMAIL: string;
+    GOOGLE_PRIVATE_KEY: string;
+
     AWBW_SCAN_INTERVAL_SECS: IntegerString;
     BATTLESYSTEM_INTERVAL_SECS: IntegerString;
 

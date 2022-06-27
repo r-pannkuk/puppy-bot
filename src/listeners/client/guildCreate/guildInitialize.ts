@@ -9,6 +9,7 @@ import { GuildMessageScanner } from '../../../lib/structures/managers/GuildMessa
 import { EmojiUsageManager } from '../../../lib/structures/managers/EmojiUsageManager';
 import { RoleAssignmentManager } from '../../../lib/structures/managers/RoleAssignmentManager';
 import { MessageEchoManager } from '../../../lib/structures/managers/MessageEchoManager';
+import { PathfinderSheetLinker } from '../../../lib/structures/managers/games/PathfinderSheetLinker';
 
 @ApplyOptions<Listener.Options>({
     once: true,
@@ -36,12 +37,17 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         guild.games = {
 
             /* Advance Wars By Web */
-            awbw: new AWBWScanner(guild)
+            awbw: new AWBWScanner(guild),
+
+            /* Pathfinder Character Sheets */
+            pathfinder: new PathfinderSheetLinker(guild),
 
         };
 
         await guild.games.awbw.loadConfig();
         await guild.games.awbw.loadRegistry();
+
+        await guild.games.pathfinder.loadConfig();
 
         /* Message scanner for stat tracking */
         guild.scanner = new GuildMessageScanner(guild);
@@ -99,6 +105,8 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         // let AdvanceWarsByWeb = (await import('../../core/games/AdvanceWarsByWeb.mjs')).default;
         // guild.AWBW = new AdvanceWarsByWeb(guild.settings);
 
+        await guild.members.fetch();
+
         const { username, id } = client.user as ClientUser
         container.logger.info(`Successfully logged in as ${username} (${id}) in ${guild}`);
     }
@@ -110,7 +118,8 @@ declare module 'discord.js' {
         battleSystem: BattleSystem,
         customCommandSystem: CustomCommandSystem,
         games: {
-            awbw: AWBWScanner
+            awbw: AWBWScanner,
+            pathfinder: PathfinderSheetLinker,
         },
         scanner: GuildMessageScanner,
         messageEchoer: MessageEchoManager,

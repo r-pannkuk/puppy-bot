@@ -2,7 +2,7 @@ import { ContextMenuCommandBuilder, SlashCommandBuilder } from "@discordjs/build
 import { ApplyOptions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, ChatInputCommandContext, container, ContextMenuCommandContext } from "@sapphire/framework";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import { Collection, CommandInteraction, ContextMenuInteraction, Guild, GuildEmoji, Message, MessagePayload, ReplyMessageOptions, User } from "discord.js";
+import { Collection, CommandInteraction, ContextMenuInteraction, Guild, GuildEmoji, GuildTextBasedChannel, Message, MessagePayload, ReplyMessageOptions, User } from "discord.js";
 import { EmojiUsagePaginatedMessage } from "../../lib/structures/message/admin/EmojiUsagePaginatedMessage";
 import { Stopwatch } from '@sapphire/stopwatch';
 import { GuildMessageScanner } from "../../lib/structures/managers/GuildMessageScanner";
@@ -177,7 +177,10 @@ export class EmojiUsageCommand extends PuppyBotCommand {
                 const embed = new PuppyBotEmbed({
                     title: `Scanned Messages:`
                 }).splitFields({
-                    content: Object.entries(output).map((value) => `Scanned ${value[1].number} message(s) in ${guild.channels.cache.get(value[0])}...${(value[1].finished ? `Finished!` : ``)}`)
+                    content: Object.entries(output).map((value) => {
+                        const channel = guild.channels.cache.get(value[0]) as GuildTextBasedChannel;
+                        return `${channel}: ${value[1].number}...${value[1].finished ? `**Done**!` : ``}`
+                    })
                 })
                 await followUp({
                     embeds: [embed]

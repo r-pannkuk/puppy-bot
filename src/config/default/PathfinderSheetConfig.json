@@ -1,0 +1,127 @@
+{
+	"version": "1.0.0",
+	"sheetName": "Main Sheet",
+	"schema": {
+		"name": "B2",
+		"totals": {
+			"bab": "BaseAttack",
+			"level": "Level"
+		},
+		"health": "S9",
+		"skills": {
+			"Acrobatics": "AJ9",
+			"Appraise": "AJ10",
+			"Bluff": "AJ11",
+			"Climb": "AJ12",
+			"Diplomacy": "AJ13",
+			"Disable Device": "AJ14",
+			"Disguise": "AJ15",
+			"Escape Artist": "AJ16",
+			"Fly": "AJ17",
+			"Handle Animal": "AJ18",
+			"Heal": "AJ19",
+			"Intimidate": "AJ20",
+			"Kn. Spheric": "AJ21",
+			"Kn. Dungeoneering": "AJ22",
+			"Kn. Engineering": "AJ23",
+			"Kn. Geography": "AJ24",
+			"Kn. History": "AJ25",
+			"Kn. Local": "AJ26",
+			"Kn. Nature": "AJ27",
+			"Kn. Nobility": "AJ28",
+			"Kn. Religion": "AJ29",
+			"Linguistics": "AJ30",
+			"Perception": "AJ31",
+			"Piloting": "AJ32",
+			"Ride": "AJ33",
+			"Sense Motive": "AJ34",
+			"Sleight of Hand": "AJ35",
+			"Spheric Combat": "AJ36",
+			"Stealth": "AJ37",
+			"Survival": "AJ38",
+			"Swim": "AJ39",
+			"Craft:": "AJ40",
+			"Artistry:": "AJ41",
+			"Lore:": "AJ42",
+			"Perform:": "AJ43",
+			"Prof:": "AJ44"
+		},
+		"abilities": {
+			"strength": "Strength",
+			"dexterity": "Dexterity",
+			"constitution": "Constitution",
+			"intelligence": "Intelligence",
+			"wisdom": "Wisdom",
+			"charisma": "Charisma"
+		},
+		"saves": {
+			"fortitude": "F17",
+			"reflex": "F18",
+			"will": "F19"
+		},
+		"defenses": {
+			"ac": "R17",
+			"flat-footed": "R18",
+			"touch": "R19",
+			"cmd": "R20"
+		},
+		"offenses": [
+			{
+				"name": "E26",
+				"attack": "O26",
+				"damage": "V26",
+				"crit": "Y26",
+				"multiplier": "Z26",
+				"range": "AA26",
+				"type": "AB26"
+			},
+			{
+				"name": "E27",
+				"attack": "O27",
+				"damage": "V27",
+				"crit": "Y27",
+				"multiplier": "Z27",
+				"range": "AA27",
+				"type": "AB27"
+			},
+			{
+				"name": "E28",
+				"attack": "O28",
+				"damage": "V28",
+				"crit": "Y28",
+				"multiplier": "Z28",
+				"range": "AA28",
+				"type": "AB28"
+			},
+			{
+				"name": "E29",
+				"attack": "O29",
+				"damage": "V29",
+				"crit": "Y29",
+				"multiplier": "Z29",
+				"range": "AA29",
+				"type": "AB29"
+			},
+			{
+				"name": "E30",
+				"attack": "O30",
+				"damage": "V30",
+				"crit": "Y30",
+				"multiplier": "Z30",
+				"range": "AA30",
+				"type": "AB30"
+			},
+			{
+				"name": "E31",
+				"attack": "O31",
+				"damage": "V31",
+				"crit": "Y31",
+				"multiplier": "Z31",
+				"range": "AA31",
+				"type": "AB31"
+			}
+		],
+		"cmb": "B34",
+		"initiative": "O38"
+	}
+}

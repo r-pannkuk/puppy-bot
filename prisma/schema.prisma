@@ -335,3 +335,21 @@ type EmojiUserRecord {
   messageCount  Int
   reactionCount Int
 }
+
+model PathfinderSheetConfig {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  guildId   String
+  version   String
+  sheetName String
+  schema    Json
+
+  @@unique([guildId, version])
+}
+
+model PathfinderCharacterConfig {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  sheetUrl    String
+  name        String
+  ownerId     String
+  lastUpdated DateTime
+}
