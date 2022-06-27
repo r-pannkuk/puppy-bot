@@ -140,7 +140,7 @@ export class EmojiUsageCommand extends PuppyBotCommand {
                     finished: false
                 };
             }
-            output[channel.id].number += messages.count;
+            output[channel.id].number += messages.size;
         };
         const channelListener = async (channel) => {
             if (!output[channel.id]) {
@@ -160,7 +160,7 @@ export class EmojiUsageCommand extends PuppyBotCommand {
             finished: boolean,
         }> = {};
 
-        const RETRY_COUNT = 1;
+        const RETRY_COUNT = 5;
         var remainingRetries = RETRY_COUNT;
 
         const interval = setInterval(async () => {
