@@ -160,7 +160,7 @@ export class EmojiUsageCommand extends PuppyBotCommand {
             finished: boolean,
         }> = {};
 
-        const RETRY_COUNT = 5;
+        const RETRY_COUNT = 15;
         var remainingRetries = RETRY_COUNT;
 
         const interval = setInterval(async () => {
