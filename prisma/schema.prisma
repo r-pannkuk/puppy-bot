@@ -347,7 +347,7 @@ model PathfinderSheetConfig {
 }
 
 model PathfinderCharacterConfig {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId 
   sheetUrl    String
   name        String
   ownerId     String
