@@ -36,6 +36,14 @@ export const CLIENT_OPTIONS: ClientOptions = {
     caseInsensitivePrefixes: true,
     loadDefaultErrorListeners: true,
     loadMessageCommandListeners: true,
+    partials: [
+        'CHANNEL',
+        'GUILD_MEMBER',
+        'GUILD_SCHEDULED_EVENT',
+        'MESSAGE',
+        'REACTION',
+        'USER'
+    ],
     defaultCooldown: {
         delay: Time.Second * 10,
         limit: 10,
