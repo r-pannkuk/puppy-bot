@@ -35,7 +35,7 @@ export class GuildMessageScanner implements IGuildManager {
 
 		const counts = await Promise.all(channels.map(async (channel) => await this.fetchAllMessagesInChannel({
 			channel,
-			lastStoredMessage: lastMessageStore.get(channel.id)?.id
+			lastStoredMessageId: lastMessageStore.get(channel.id)?.id
 		})));
 
 		const count = counts.reduce((sum, number) => sum + number, 0);
@@ -46,9 +46,9 @@ export class GuildMessageScanner implements IGuildManager {
 
 	public async fetchAllMessagesInChannel(args: {
 		channel: GuildBasedChannel,
-		lastStoredMessage?: string
+		lastStoredMessageId?: string
 	}): Promise<number> {
-		const { channel, lastStoredMessage } = args;
+		const { channel, lastStoredMessageId } = args;
 		var textChannel = channel as GuildTextBasedChannel;
 		if (!textChannel) return 0;
 
@@ -59,7 +59,7 @@ export class GuildMessageScanner implements IGuildManager {
 		var messagesRetrieved = 0;
 
 		const count = await recursiveSearch({
-			after: (lastStoredMessage) ? (await textChannel.messages.fetch(lastStoredMessage) ?? { id: "0", url: undefined }) : { id: "0", url: undefined },
+			after: (lastStoredMessageId) ? (await textChannel.messages.fetch(lastStoredMessageId) ?? { id: "0", url: undefined }) : { id: "0", url: undefined },
 		});
 
 		async function recursiveSearch(query: {

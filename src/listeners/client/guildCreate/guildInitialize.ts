@@ -66,8 +66,7 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         await guild.emojiUsage.generateLastMessageStore();
 
         await guild.roleAssigner.loadConfig();
-        await guild.roleAssigner.loadRegistry();
-        await guild.roleAssigner.generateLastMessageStore();
+        await guild.roleAssigner.generateMessageCollectors();
 
         /* Message Echoer for deletions and edits */
         guild.messageEchoer = new MessageEchoManager(guild);

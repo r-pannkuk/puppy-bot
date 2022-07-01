@@ -194,9 +194,10 @@ export class AddCommand extends PuppyBotCommand {
         const oldChannel = guild.channels.cache.get(guild.roleAssigner.config?.roleChannelId ?? 'null');
 
         if (options.channel) {
-            guild.roleAssigner.setConfig({
+            await guild.roleAssigner.setConfig({
                 roleChannelId: options.channel.id,
             });
+            await guild.roleAssigner.generateMessageCollectors();
         }
 
         var embed = new PuppyBotEmbed()

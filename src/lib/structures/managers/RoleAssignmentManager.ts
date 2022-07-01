@@ -1,16 +1,18 @@
-import { GuildScanRegistryType, RoleAssignConfig } from "@prisma/client";
+import type { RoleAssignConfig } from "@prisma/client";
 import { container, UserError } from "@sapphire/framework";
-import type { Guild, GuildTextBasedChannel, Message, MessageReaction, Role, User } from "discord.js";
+import { Collection, Guild, GuildTextBasedChannel, Message, MessageReaction, ReactionCollector, Role, User } from "discord.js";
 import { Emojis } from "../../utils/constants";
-import { AGuildScannerRegistryOwner } from "./AGuildScannerRegistryOwner";
 import type { IConfigLoader } from "./IConfigLoader";
 import type { IGuildManager } from "./IGuildManager";
 
-export class RoleAssignmentManager extends AGuildScannerRegistryOwner<typeof GuildScanRegistryType.RoleAssign> implements IGuildManager, IConfigLoader<RoleAssignConfig> {
+export class RoleAssignmentManager implements IGuildManager, IConfigLoader<RoleAssignConfig> {
 	protected guildId: string;
 	public get guild(): Guild | undefined {
 		return container.client.guilds.cache.get(this.guildId);
 	}
+
+	protected _collectors: Collection<string, ReactionCollector> = new Collection();
+	public get collectors() { return this._collectors; }
 
 	protected _config: RoleAssignConfig | undefined = undefined;
 	public get config() { return this._config; }
@@ -21,8 +23,6 @@ export class RoleAssignmentManager extends AGuildScannerRegistryOwner<typeof Gui
 	}
 
 	public constructor(guild: Guild) {
-		super(guild, GuildScanRegistryType.RoleAssign, (channel) => channel.id === null);
-
 		this.guildId = guild.id;
 
 		// (async () => {
@@ -61,14 +61,26 @@ export class RoleAssignmentManager extends AGuildScannerRegistryOwner<typeof Gui
 		this._config = loadedConfig;
 	}
 
+	public async generateMessageCollectors() {
+		for (var [_, collector] of this.collectors) {
+			collector.stop();
+		}
+
+		this.collectors.clear();
+
+		if (this.config!.fetchOnLoad && this.config!.roleChannelId) {
+			await this.guild?.scanner.fetchAllMessagesInChannel({
+				channel: this.roleAssignmentChannel!,
+			});
+			this.collectAllRoleChannelMessages();
+		}
+	}
+
 	public collectAllRoleChannelMessages() {
 		if (!this.roleAssignmentChannel) throw new UserError({ identifier: `Role channel was not found.`, context: this._config?.roleChannelId })
 
-		this.collectAllMessagesInChannel(this.roleAssignmentChannel);
-	}
 
-	private collectAllMessagesInChannel(channel: GuildTextBasedChannel) {
-		for (var [_, message] of channel.messages.cache) {
+		for (var [_, message] of this.roleAssignmentChannel.messages.cache) {
 			const role = message.mentions.roles.first();
 
 			if (role) {
@@ -78,7 +90,7 @@ export class RoleAssignmentManager extends AGuildScannerRegistryOwner<typeof Gui
 	}
 
 	public collectOnMessage(message: Message, role: Role) {
-		message.createReactionCollector({
+		const collector = message.createReactionCollector({
 			filter: (reaction) => reaction.emoji.name === Emojis.GreenTick,
 			dispose: true,
 		}).addListener('collect', async (_reaction: MessageReaction, user: User) => {
@@ -93,7 +105,9 @@ export class RoleAssignmentManager extends AGuildScannerRegistryOwner<typeof Gui
 				await member?.roles.remove(role);
 				await member?.send(`You've been removed from the role *_${role.name}_* in **${this.guild!.name}**.`)
 			}
-		})
+		});
+
+		this.collectors.set(message.id, collector);
 	}
 
 	public async setConfig(args: {
