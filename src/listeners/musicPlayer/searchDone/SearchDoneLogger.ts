@@ -1,6 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { container, Listener } from "@sapphire/framework";
 import type { Message } from "discord.js";
+import { debugLog } from "../../../lib/utils/logging";
 
 @ApplyOptions<Listener.Options>({
 	name: 'searchDoneLogger',
@@ -9,6 +10,6 @@ import type { Message } from "discord.js";
 })
 export class SearchDoneLogger extends Listener {
 	public async run(_message: Message, _answer: Message, _query: string) {
-		container.logger.info(`In: ${this.event.toString()}`);
+		debugLog('debug',`In: ${this.event.toString()}`);
 	}
 }

@@ -2,6 +2,7 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { container } from "@sapphire/framework";
 import { ScheduledTask, ScheduledTaskOptions } from "@sapphire/plugin-scheduled-tasks";
 import { BattleSystem } from "../../lib/structures/managers/BattleSystem";
+import { debugLog } from "../../lib/utils/logging";
 
 @ApplyOptions<ScheduledTaskOptions>({
 	name: BattleSystem.ScheduledTasks.Events.RegenerateUsers
@@ -10,7 +11,7 @@ export class RegenerateUsersTask extends ScheduledTask {
 	public override async run({ guildId }) {
 		const guild = container.client.guilds.cache.get(guildId)!;
 		if(!guild) {
-			container.logger.error(`No guild found for guild ID: ${guildId}`);
+			debugLog('error', `No guild found for guild ID: ${guildId}`);
 			return;
 		}
 

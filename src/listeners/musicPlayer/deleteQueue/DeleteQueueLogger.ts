@@ -1,6 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { container, Listener } from "@sapphire/framework";
 import type { Queue, Song } from "distube";
+import { debugLog } from "../../../lib/utils/logging";
 
 @ApplyOptions<Listener.Options>({
 	name: 'deleteQueueLogger',
@@ -9,6 +10,6 @@ import type { Queue, Song } from "distube";
 })
 export class DeleteQueueLogger extends Listener {
 	public async run(_queue: Queue, _song : Song) {
-		container.logger.info(`In: ${this.event.toString()}`);
+		debugLog('debug', `In: ${this.event.toString()}`);
 	}
 }

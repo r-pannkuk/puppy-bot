@@ -2,6 +2,7 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { container, Listener } from "@sapphire/framework";
 import type { Job } from "bull";
 import type { Queue, Song } from "distube";
+import { debugLog } from "../../../lib/utils/logging";
 import type { SongProgressPayload } from "../../../scheduled-tasks/musicPlayer/UpdateProgress";
 
 @ApplyOptions<Listener.Options>({
@@ -11,7 +12,7 @@ import type { SongProgressPayload } from "../../../scheduled-tasks/musicPlayer/U
 })
 export class FinishSongStartNext extends Listener {
 	public async run(queue: Queue, song: Song) {
-		container.logger.info(`In: ${this.event.toString()}`);
+		debugLog('debug',`In: ${this.event.toString()}`);
 
 		await this.container.tasks.run('updateProgress', {
 			guildId: queue.clientMember.guild.id,

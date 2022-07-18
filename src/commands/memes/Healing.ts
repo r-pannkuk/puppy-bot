@@ -4,7 +4,7 @@ import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '
 import type { CommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
-const SHORT_DESCRIPTION = 'You really don\'t want to do something.'
+const SHORT_DESCRIPTION = 'You really don\'t want to do anything else.'
 
 @ApplyOptions<PyScriptCommand.Options>({
     name: 'sylphie',
@@ -26,7 +26,7 @@ export class SylphieCommand extends PyScriptCommand {
             .addStringOption((option) =>
                 option
                     .setName("activity")
-                    .setDescription("What activity do you not want to participate in.")
+                    .setDescription("What's the one thing you only ever want to do.")
             )
         )
     }

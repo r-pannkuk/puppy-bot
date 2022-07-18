@@ -9,6 +9,6 @@ import type { Queue, Song } from "distube";
 })
 export class FinishSongLogger extends Listener {
 	public async run(_queue: Queue, _song: Song) {
-		// container.logger.info(`In: ${this.event.toString()}`);
+		// debugLog('debug',`In: ${this.event.toString()}`);
 	}
 }

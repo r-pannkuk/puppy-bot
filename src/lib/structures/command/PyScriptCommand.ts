@@ -1,6 +1,7 @@
-import { Command, container } from '@sapphire/framework';
+import type { Command } from '@sapphire/framework';
 import { PuppyBotCommand } from './PuppyBotCommand';
 import { PythonShell, Options, PythonShellError } from 'python-shell';
+import { debugLog } from '../../utils/logging';
 
 const BASE_SCRIPT_PATH = './src/scripts/';
 
@@ -32,7 +33,7 @@ export abstract class PyScriptCommand extends PuppyBotCommand {
                 PythonShell.run(
                     this.scriptName, options, function (err, results) {
                         if (err) {
-                            container.logger.error(err);
+                            debugLog('error', err.message);
                             reject(err);
                         }
                         // Trim white space and carriage return from the call

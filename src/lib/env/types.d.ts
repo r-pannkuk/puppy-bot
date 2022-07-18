@@ -15,6 +15,9 @@ export type EnvInteger = {
 export interface EnvTypes {
     NODE_ENV: 'test' | 'development' | 'production';
     DOTENV_DEBUG_ENABLED: BooleanString;
+    LOG_DEBUG: BooleanString;
+    LOG_INFO: BooleanString;
+    LOG_WARN: BooleanString;
 
     CLIENT_NAME: string;
     CLIENT_VERSION: string;

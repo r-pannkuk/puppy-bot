@@ -1,6 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { container, Listener } from "@sapphire/framework";
 import type { Playlist, Queue } from "distube";
+import { debugLog } from "../../../lib/utils/logging";
 
 @ApplyOptions<Listener.Options>({
 	name: 'addListLogger',
@@ -9,6 +10,6 @@ import type { Playlist, Queue } from "distube";
 })
 export class AddListLogger extends Listener {
 	public async run(_queue: Queue, _playlist: Playlist) {
-		container.logger.info(`In: ${this.event.toString()}`);
+		debugLog('debug', `In: ${this.event.toString()}`);
 	}
 }

@@ -1,6 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { container, Listener } from "@sapphire/framework";
 import type { Queue } from "distube";
+import { debugLog } from "../../../lib/utils/logging";
 
 @ApplyOptions<Listener.Options>({
 	name: 'disconnectLogger',
@@ -9,6 +10,6 @@ import type { Queue } from "distube";
 })
 export class DisconnectLogger extends Listener {
 	public async run(_queue: Queue) {
-		container.logger.info(`In: ${this.event.toString()}`);
+		debugLog('debug',`In: ${this.event.toString()}`);
 	}
 }

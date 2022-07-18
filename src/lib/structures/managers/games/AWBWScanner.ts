@@ -15,6 +15,7 @@ import { Collection, User } from "discord.js";
 import { default as got } from 'got';
 import { JSDOM } from 'jsdom';
 import { envParseInteger } from "../../../env/utils";
+import { debugLog } from "../../../utils/logging";
 import type { IConfigLoader as IGuildConfigLoader } from "../IConfigLoader";
 import type { IGuildManager } from "../IGuildManager";
 
@@ -526,7 +527,7 @@ export class AWBWScanner implements IGuildConfigLoader<GameScanConfig>, IGuildMa
 
 			return event;
 		}).catch(err => {
-			container.logger.error(`ERROR: ${err}`);
+			debugLog('error', `${err}`);
 			throw err;
 		});
 	}

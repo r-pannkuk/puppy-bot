@@ -1,10 +1,10 @@
-import { container } from '@sapphire/framework';
 import 'dotenv/config';
 import { PuppyBotClient } from './lib/structures/client/PuppyBotClient';
 import { getRootData } from '@sapphire/pieces';
 import * as Sentry from '@sentry/node'
 import { RewriteFrames } from '@sentry/integrations'
 import { join } from 'node:path';
+import { debugLog } from './lib/utils/logging';
 
 // Load in Sentry for error logging
 if (process.env.SENTRY_URL) {
@@ -33,5 +33,5 @@ const client = new PuppyBotClient();
 client.login(process.env.TOKEN);
 
 client.on('ready', async () => {
-    container.logger.info("Puppy-Bot connected.");
+    debugLog('info', "Puppy-Bot connected.");
 })

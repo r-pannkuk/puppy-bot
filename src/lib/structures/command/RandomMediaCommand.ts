@@ -1,9 +1,10 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ApplicationCommandRegistry, Args, ChatInputCommandContext, Command, container } from '@sapphire/framework';
+import type { ApplicationCommandRegistry, Args, ChatInputCommandContext, Command } from '@sapphire/framework';
 import type { CommandInteraction, Message } from 'discord.js';
 import { readdirSync } from 'fs';
 import { join, parse } from 'path';
 import { CHAT_INPUT_OPTION_CHOICE_LIMIT } from '../../utils/constants';
+import { debugLog } from '../../utils/logging';
 import { PuppyBotCommand } from './PuppyBotCommand';
 
 const BASE_MEDIA_FOLDER = './src/assets/media/';
@@ -45,7 +46,7 @@ export abstract class RandomMediaCommand extends PuppyBotCommand {
 		var filenames = readdirSync(join(this.mediaDir, this.folder));
 
 		if(filenames.length > CHAT_INPUT_OPTION_CHOICE_LIMIT) {
-			container.logger.error(`Too many files to process for option limits.  Truncating list to ${CHAT_INPUT_OPTION_CHOICE_LIMIT}.`);
+			debugLog('error', `Too many files to process for option limits.  Truncating list to ${CHAT_INPUT_OPTION_CHOICE_LIMIT}.`);
 			filenames = filenames.slice(0, CHAT_INPUT_OPTION_CHOICE_LIMIT);
 		}
 

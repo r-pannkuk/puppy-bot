@@ -1,5 +1,6 @@
 import { container } from "@sapphire/framework";
 import type { Collection, Guild, GuildBasedChannel, GuildTextBasedChannel, Message } from "discord.js";
+import { debugLog } from "../../utils/logging";
 import type { IGuildManager } from "./IGuildManager";
 
 const REQUEST_DELAY = 20000
@@ -83,10 +84,10 @@ export class GuildMessageScanner implements IGuildManager {
 				container.client.emit(GuildMessageScanner.Events.Chunk.Finished, channel, messages);
 
 				if (messages.size < MAX_FETCH) {
-					container.logger.info(`Finished scanning ${messagesRetrieved} messages in "#${textChannel.name}".`);
+					debugLog('info', `Finished scanning ${messagesRetrieved} messages in "#${textChannel.name}".`);
 					return messagesRetrieved;
 				} else {
-					container.logger.info(`Query: ${textChannel.name}: ${query.after?.url}`)
+					debugLog('info', `Query: ${textChannel.name}: ${query.after?.url}`)
 					// if(!query.after || messages.last()!.createdAt > query.after.createdAt) {
 					// 	query.after = messages.last()!;
 					// }

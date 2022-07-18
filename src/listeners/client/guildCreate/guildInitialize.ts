@@ -10,6 +10,7 @@ import { EmojiUsageManager } from '../../../lib/structures/managers/EmojiUsageMa
 import { RoleAssignmentManager } from '../../../lib/structures/managers/RoleAssignmentManager';
 import { MessageEchoManager } from '../../../lib/structures/managers/MessageEchoManager';
 import { PathfinderSheetLinker } from '../../../lib/structures/managers/games/PathfinderSheetLinker';
+import { debugLog } from '../../../lib/utils/logging';
 
 @ApplyOptions<Listener.Options>({
     once: true,
@@ -107,7 +108,7 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         await guild.members.fetch();
 
         const { username, id } = client.user as ClientUser
-        container.logger.info(`Successfully logged in as ${username} (${id}) in ${guild}`);
+        debugLog('info', `Successfully logged in as ${username} (${id}) in ${guild}`);
     }
 }
 
