@@ -11,7 +11,7 @@ import { CustomCommandListPaginatedMessage } from "../../lib/structures/message/
 const SHORT_DESCRIPTION = `Manage server custom commands.`
 
 @ApplyOptions<PuppyBotCommand.Options>({
-	aliases: ['cc', 'custom', 'custom-command'],
+	aliases: ['cc', 'custom', 'custom-command', 'meme'],
 	name: 'customcommand',
 	description: SHORT_DESCRIPTION,
 	requiredClientPermissions: [PermissionFlagsBits.ManageMessages],
@@ -55,8 +55,7 @@ const SHORT_DESCRIPTION = `Manage server custom commands.`
 		{
 			input: 'info',
 			output: 'messageRunInfo',
-			type: 'method',
-			default: true
+			type: 'method'
 		}
 	]
 })
@@ -205,8 +204,8 @@ export class CustomCommandCommand extends PuppyBotCommand {
 			guild: message.guild!,
 			user: message.author,
 			options: {
-				name: args.getOption('name') ?? this.error('No name given.'),
-				output: args.getOption('output') ?? this.error('No output given.'),
+				name: args.getOption('command') ?? args.next() ?? this.error(`No name provided.`),
+				output: args.getOption('output') ?? args.next() ?? message.attachments.first()?.url ?? this.error('No output given.'),
 			},
 		})
 	}
