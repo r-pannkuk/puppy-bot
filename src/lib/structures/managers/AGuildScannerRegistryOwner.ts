@@ -52,8 +52,8 @@ export abstract class AGuildScannerRegistryOwner<T extends GuildScanRegistryType
 	}
 
 	protected async _instantiateRecord(record: _GuildScanRegistryRecord | Omit<_GuildScanRegistryRecord, 'id'>) {
-		const fetchChannel = async () => this.guild?.channels.fetch(record.channelId);
-		const fetchMessage = async () => (record.lastMessageScannedId) ? await ((await fetchChannel()) as GuildTextBasedChannel).messages.fetch(record.lastMessageScannedId) : null;
+		const fetchChannel = async () => this.guild?.channels.cache.get(record.channelId);
+		const fetchMessage = async () => (record.lastMessageScannedId) ? await ((await fetchChannel()) as GuildTextBasedChannel)?.messages.fetch(record.lastMessageScannedId) : null;
 		return {
 			...record,
 			fetchChannel,
@@ -153,6 +153,8 @@ export abstract class AGuildScannerRegistryOwner<T extends GuildScanRegistryType
 		for (var [_, record] of this._registry) {
 			if (record.lastMessageScannedId) {
 				const channel = (this.guild.channels.cache.get(record.channelId)) as GuildTextBasedChannel;
+				if(!channel) continue;
+
 				const message = await channel.messages.fetch(record.lastMessageScannedId);
 
 				if (!this.lastMessageStore.has(channel.id) || (this.lastMessageStore.get(channel.id)!.createdAt < message.createdAt)) {
