@@ -23,42 +23,44 @@ export class SkipCommand extends PuppyBotCommand {
         this.registerSlashCommand(registry, new SlashCommandBuilder()
             .setName(this.name)
             .setDescription(this.description)
-)
+        )
     }
 
-	public skip(guild : Guild) {
-		const queue = this.container.client.musicPlayer.getQueue(guild.id);
+    public skip(guild: Guild) {
+        const queue = this.container.client.musicPlayer.getQueue(guild.id);
 
-		if(!queue) {
-			return null;
-		}
+        if (!queue) {
+            return null;
+        }
 
-        if(queue.songs.length > 1 || queue.autoplay) {
+        if (queue.songs.length > 1 || queue.autoplay) {
             queue.skip();
         } else {
             queue.stop();
         }
 
-		return queue;
-	}
+        return queue;
+    }
 
     public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
-		const queue = this.skip(interaction.guild!);
+        const queue = this.skip(interaction.guild!);
+        var song = queue?.songs[1];
 
         await interaction.reply({
             content: (!queue) ?
                 `${Emojis.NoSign} | There is no music currently playing.` :
-                `${Emojis.Skip} | Skipping Track...`
+                `${Emojis.Skip} | Skipping Track...${song ? `` : `End of queue.`}`
         });
     }
 
     public override async messageRun(message: Message, _input: Args) {
         const queue = this.skip(message.guild!);
+        var song = queue?.songs[1];
 
-		await message.channel.send({
-			content: (!queue) ?
+        await message.channel.send({
+            content: (!queue) ?
                 `${Emojis.NoSign} | There is no music currently playing.` :
-                `${Emojis.Skip} | Skipping Track...`
+                `${Emojis.Skip} | Skipping Track...${song ? `` : `End of queue.`}`
         });
     }
 }
