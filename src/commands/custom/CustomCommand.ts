@@ -198,7 +198,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 	}
 
 	public async messageRunAdd(message: Message, args: Args) {
-		this.run({
+		await this.run({
 			subCommand: 'add',
 			messageOrInteraction: message,
 			guild: message.guild!,
@@ -211,58 +211,58 @@ export class CustomCommandCommand extends PuppyBotCommand {
 	}
 
 	public async messageRunAlias(message: Message, args: Args) {
-		this.run({
+		await this.run({
 			subCommand: 'alias',
 			messageOrInteraction: message,
 			guild: message.guild!,
 			user: message.author,
 			options: {
-				command: args.getOption('command') ?? this.error('No command name given.'),
-				alias: args.getOption('alias') ?? this.error('No alias given.'),
+				command: args.getOption('command') ?? args.next() ?? this.error('No command name given.'),
+				alias: args.getOption('alias') ?? args.next() ?? this.error('No alias given.'),
 			},
 		})
 	}
 
 	public async messageRunRemove(message: Message, args: Args) {
-		this.run({
+		await this.run({
 			subCommand: 'remove',
 			messageOrInteraction: message,
 			guild: message.guild!,
 			user: message.author,
 			options: {
-				command: args.getOption('command') ?? this.error('No command name given.'),
+				command: args.getOption('command') ?? args.next() ?? this.error('No command name given.'),
 			},
 		})
 	}
 
 	public async messageRunEdit(message: Message, args: Args) {
-		this.run({
+		await this.run({
 			subCommand: 'edit',
 			messageOrInteraction: message,
 			guild: message.guild!,
 			user: message.author,
 			options: {
-				command: args.getOption('command') ?? this.error('No command name given.'),
-				output: args.getOption('output') ?? this.error('No output given.'),
+				command: args.getOption('command') ?? args.next() ?? this.error('No command name given.'),
+				output: args.getOption('output') ?? args.next() ?? this.error('No output given.'),
 			},
 		})
 	}
 
 	public async messageRunRename(message: Message, args: Args) {
-		this.run({
+		await this.run({
 			subCommand: 'rename',
 			messageOrInteraction: message,
 			guild: message.guild!,
 			user: message.author,
 			options: {
-				command: args.getOption('command') ?? this.error('No command name given.'),
-				name: args.getOption('name') ?? this.error('No new name given.'),
+				command: args.getOption('command') ?? args.next() ?? this.error('No command name given.'),
+				name: args.getOption('name') ?? args.next() ?? this.error('No new name given.'),
 			},
 		})
 	}
 
 	public async messageRunReset(message: Message, _args: Args) {
-		this.run({
+		await this.run({
 			subCommand: 'reset',
 			messageOrInteraction: message,
 			guild: message.guild!,
@@ -273,7 +273,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 	}
 
 	public async messageRunList(message: Message, _args: Args) {
-		this.run({
+		await this.run({
 			subCommand: 'list',
 			messageOrInteraction: message,
 			guild: message.guild!,
@@ -284,13 +284,13 @@ export class CustomCommandCommand extends PuppyBotCommand {
 	}
 
 	public async messageRunInfo(message: Message, args: Args) {
-		this.run({
+		await this.run({
 			subCommand: 'info',
 			messageOrInteraction: message,
 			guild: message.guild!,
 			user: message.author,
 			options: {
-				command: args.getOption('command') ?? this.error('No command name given.'),
+				command: args.getOption('command') ?? args.next() ?? this.error('No command name given.'),
 			},
 		})
 	}
@@ -440,11 +440,11 @@ export class CustomCommandCommand extends PuppyBotCommand {
 	}
 
 	public async handleList(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User) {
-		await this.generateFollowUp(messageOrInteraction);
-
 		if(guild.customCommandSystem.customCommands.size === 0) {
-			this.error(`No custom commands found on this server.`)
+			this.error(`No custom commands found on this server.`);
 		}
+
+		await this.generateFollowUp(messageOrInteraction);
 
 		const paginatedMessage = new CustomCommandListPaginatedMessage({
 			guild

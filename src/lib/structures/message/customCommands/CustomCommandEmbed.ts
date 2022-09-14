@@ -72,6 +72,7 @@ export class CustomCommandEmbed extends PuppyBotEmbed {
 			style: Constants.MessageButtonStyles.DANGER as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
 			run: async (interaction, command) => {
 				await interaction.guild?.customCommandSystem.remove(command);
+				await interaction.channel?.messages.cache.get(interaction.message.id)?.delete();
 				return null;
 			}
 		},

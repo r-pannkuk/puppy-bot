@@ -99,9 +99,13 @@ export abstract class PuppyBotCommand extends SubCommandPluginCommand {
                 content: `Generating embed...`
             })
 
-            return async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as Message).reply(options);
+            return async (options: string | MessagePayload | ReplyMessageOptions) => {
+                const reply = await (messageOrInteraction as Message).reply(options);
+                await messageOrInteraction.channel?.messages.cache.get(messageOrInteraction.id)?.delete();
+                return reply;
+            };
         } else {
-            if(!messageOrInteraction.replied) {
+            if (!messageOrInteraction.replied) {
                 await messageOrInteraction.deferReply({
                 });
             }
