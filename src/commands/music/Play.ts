@@ -38,7 +38,7 @@ export class PlayCommand extends PuppyBotCommand {
         const player = this.container.client.musicPlayer;
 
         if (!voiceChannel) {
-            voiceChannel = searcher.guild.channels.cache.filter(c => c.isVoice()).first() as VoiceBasedChannel;
+            voiceChannel = searcher.guild!.channels.cache.filter(c => c.type === 'GUILD_VOICE').first() as VoiceBasedChannel;
 
             if (!voiceChannel) {
                 this.error("There are no voice channels for me to play music from!");
@@ -58,11 +58,11 @@ export class PlayCommand extends PuppyBotCommand {
 
     public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
         var source = interaction.options.getString('source', true);
-        const member = interaction.member as GuildMember;
+        const member = interaction.guild!.members.cache.get(interaction.user.id)!;
 
         await interaction.deferReply();
 
-        var queue = await this.enqueue(member, source, interaction.channel as GuildTextBasedChannel, member.voice.channel as VoiceBasedChannel);
+        var queue = await this.enqueue(member, source, interaction.channel as GuildTextBasedChannel, (member.voice.channel) as VoiceBasedChannel);
         var song = queue?.songs[queue.songs.length - 1];
 
         await interaction.editReply({
@@ -73,10 +73,10 @@ export class PlayCommand extends PuppyBotCommand {
     }
 
     public override async messageRun(message: Message, input: Args) {
-        var source = input.getOption('source') as string;
-        const member = message.author as unknown as GuildMember;
+        var source = input.getOption('source') ?? input.next() as string;
+        const member = message.guild!.members.cache.get(message.author.id)!;
 
-        var queue = await this.enqueue(member, source, message.channel as GuildTextBasedChannel, member.voice.channel as VoiceBasedChannel);
+        var queue = await this.enqueue(member, source, message.channel as GuildTextBasedChannel, (member.voice.channel) as VoiceBasedChannel);
         var song = queue?.songs[0];
 
         await message.channel.send({
