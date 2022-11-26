@@ -14910,7 +14910,7 @@ const global = {
 					interval: (schedule.repeat.interval) ? BigInt(schedule.repeat.interval) : null,
 				}
 			})),
-			jobId: "",
+			jobId: "", 
 			events: reminderOutput.events.map((event) => ({
 				...event,
 				eventType: (event.eventType ?? 'Create') as ReminderEventType,
