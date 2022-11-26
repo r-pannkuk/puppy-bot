@@ -110,11 +110,3 @@ export class UpdateProgressTask extends ScheduledTask {
 		}
 	}
 }
-
-
-
-declare module '@sapphire/plugin-scheduled-tasks' {
-	interface ScheduledTasks {
-		MusicPlayer_UpdateProgress: never;
-	}
-}

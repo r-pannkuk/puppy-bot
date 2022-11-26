@@ -23,9 +23,3 @@ export class CheckGameStatus_AdvanceWarsByWeb extends ScheduledTask {
 		return await container.client.reminders.fireReminder(reminder);
 	}
 }
-
-declare module '@sapphire/plugin-scheduled-tasks' {
-	interface ScheduledTasks {
-		Reminder_FireReminder: never;
-	}
-}

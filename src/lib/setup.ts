@@ -78,3 +78,13 @@ export const CLIENT_OPTIONS: ClientOptions = {
         ]
     }
 }
+
+
+declare module '@sapphire/plugin-scheduled-tasks' {
+	interface ScheduledTasks {
+		BattleSystem_RegenerateUsers: never;
+		CheckGameStatus_AdvanceWarsByWeb: never;
+		MusicPlayer_UpdateProgress: never;
+		Reminder_FireReminder: never;
+	}
+}

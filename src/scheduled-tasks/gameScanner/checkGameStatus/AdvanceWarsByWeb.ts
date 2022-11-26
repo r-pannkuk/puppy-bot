@@ -16,9 +16,3 @@ export class CheckGameStatus_AdvanceWarsByWeb extends ScheduledTask {
 		await AWBWScanner.checkActiveGames();
 	}
 }
-
-declare module '@sapphire/plugin-scheduled-tasks' {
-	interface ScheduledTasks {
-		CheckGameStatus_AdvanceWarsByWeb: never;
-	}
-}
