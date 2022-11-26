@@ -184,7 +184,8 @@ export class BattleSystem implements IGuildManager, IConfigLoader<BattleConfig> 
 				type: "repeated",
 				interval: BattleSystem.regenIntervalSecs * 1000,
 				bullJobOptions: {
-					jobId: `${BattleSystem.ScheduledTasks.Events.RegenerateUsers}:${this.guildId}`
+					jobId: `${BattleSystem.ScheduledTasks.Events.RegenerateUsers}:${this.guildId}`,
+					removeOnComplete: true,
 				} as JobOptions
 			})
 	}

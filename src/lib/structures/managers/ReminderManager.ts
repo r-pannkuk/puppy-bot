@@ -11,7 +11,7 @@ import { container, UserError } from "@sapphire/framework";
 import type { ScheduledTasksTaskOptions } from "@sapphire/plugin-scheduled-tasks";
 import type { ScheduledTaskRedisStrategy } from "@sapphire/plugin-scheduled-tasks/register-redis";
 import type Bull from "bull";
-import type { JobOptions } from "bull";
+import type { Job, JobOptions } from "bull";
 import { Collection, DMChannel, GuildMember, GuildTextBasedChannel, MessageOptions, MessagePayload, Role, User } from "discord.js";
 import { ReminderCommand } from "../../../commands/reminders/Reminder";
 
@@ -91,6 +91,8 @@ export class ReminderManager {
 		const getExecutionNumber = () => events.filter((value) => value.eventType === ReminderEventType.Fire).size;
 		const getIsPending = () => (getActiveSchedule()) ? (getActiveSchedule()!.getNextInstance().getTime() > Date.now() || getActiveSchedule()!.repeat.isInfinite) : false;
 		const getOwner = () => container.client.users.cache.get(reminder.ownerId)!;
+		//TODO: This doesn't resolve with a bullJob that clears on finish
+		const getJob = () => container.tasks.get(reminder.jobId);
 
 		return {
 			...reminder,
@@ -102,6 +104,7 @@ export class ReminderManager {
 			getExecutionNumber,
 			getIsPending,
 			getOwner,
+			getJob,
 		} as ReminderManager.Reminder.Instance;
 	}
 
@@ -132,7 +135,7 @@ export class ReminderManager {
 		}
 	}
 
-	private async scheduleReminder(reminder: ReminderManager.Reminder.Instance) {
+	private async scheduleReminder(reminder: ReminderManager.Reminder.Instance) : Promise<Job | null> {
 		const strategy = container.tasks.strategy as ScheduledTaskRedisStrategy;
 		const inactiveTasks = (await strategy.list({
 			types: ["waiting", "active", "delayed", "paused", "failed", "completed"],
@@ -148,7 +151,7 @@ export class ReminderManager {
 
 		const schedule = reminder.getActiveSchedule();
 
-		if (!schedule) return;
+		if (!schedule) return null;
 
 		const delay = schedule.getNextInstance().getTime() - Date.now();
 		const nextInstance = schedule.getNextInstance();
@@ -159,6 +162,7 @@ export class ReminderManager {
 				delay,
 				startDate: nextInstance,
 				jobId: schedule.id,
+				removeOnComplete: true,
 			} as JobOptions
 		} as ScheduledTasksTaskOptions;
 
@@ -179,7 +183,7 @@ export class ReminderManager {
 				reminderId: reminder.id,
 			} as ReminderManager.ScheduledTask.Payload,
 			duration
-		)
+		) as Job;
 	}
 
 	public async createReminder(reminder: {
@@ -224,7 +228,22 @@ export class ReminderManager {
 
 		const instantiatedReminder = this._instantiateReminder(createdReminder);
 
-		await this.scheduleReminder(instantiatedReminder);
+		const returnedJob = await this.scheduleReminder(instantiatedReminder);
+
+		if(!returnedJob) {
+			throw new UserError({identifier: 'Invalid Schedule', context: returnedJob});
+		}
+
+		instantiatedReminder.jobId = returnedJob.id.toString();
+
+		await container.database.reminder.update({
+			where: {
+				id: createdReminder.id
+			},
+			data: {
+				jobId: instantiatedReminder.jobId
+			}
+		});
 
 		this._cache.set(instantiatedReminder.id, instantiatedReminder);
 		return this._cache.get(instantiatedReminder.id)!;
@@ -391,7 +410,22 @@ export class ReminderManager {
 
 		const instantiatedReminder = this._instantiateReminder(updatedReminder);
 
-		await this.scheduleReminder(instantiatedReminder);
+		const returnedJob = await this.scheduleReminder(instantiatedReminder);
+
+		if(!returnedJob) {
+			throw new UserError({identifier: 'Invalid Schedule', context: returnedJob});
+		}
+
+		instantiatedReminder.jobId = returnedJob.id.toString().split(':')[1];
+
+		await container.database.reminder.update({
+			where: {
+				id: instantiatedReminder.id
+			},
+			data: {
+				jobId: instantiatedReminder.jobId
+			}
+		});
 
 		this._cache.set(updatedReminder.id, instantiatedReminder);
 		return this._cache.get(updatedReminder.id);
@@ -449,7 +483,8 @@ export namespace ReminderManager {
 			getActiveSchedule(): Schedule.Instance | undefined,
 			getCreatedEvent(): Event.Instance<'Create'>,
 			getLastFireEvent(): Event.Instance<'Fire'> | undefined,
-			getOwner(): User
+			getOwner(): User,
+			getJob(): Promise<Job>,
 		}
 	}
 

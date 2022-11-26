@@ -13,6 +13,7 @@ model Reminder {
   ownerId    String
   target     ReminderTarget
   content    String
+  jobId      String?
   isDisabled Boolean            @default(false)
   schedules  ReminderSchedule[]
   events     ReminderEvent[]

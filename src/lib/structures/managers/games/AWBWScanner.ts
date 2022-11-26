@@ -200,7 +200,8 @@ export class AWBWScanner implements IGuildConfigLoader<GameScanConfig>, IGuildMa
 				type: 'repeated',
 				interval: AWBWScanner.intervalSecs * 1000,
 				bullJobOptions: {
-					jobId: AdvanceWarsByWeb.ScheduledTask.CheckGameStatus
+					jobId: AdvanceWarsByWeb.ScheduledTask.CheckGameStatus,
+					removeOnComplete: true,
 				} as JobOptions
 			}
 		)

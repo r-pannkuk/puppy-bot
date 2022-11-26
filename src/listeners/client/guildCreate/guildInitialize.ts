@@ -9,7 +9,6 @@ import { GuildMessageScanner } from '../../../lib/structures/managers/GuildMessa
 import { EmojiUsageManager } from '../../../lib/structures/managers/EmojiUsageManager';
 import { RoleAssignmentManager } from '../../../lib/structures/managers/RoleAssignmentManager';
 import { MessageEchoManager } from '../../../lib/structures/managers/MessageEchoManager';
-import { PathfinderSheetLinker } from '../../../lib/structures/managers/games/PathfinderSheetLinker';
 import { debugLog } from '../../../lib/utils/logging';
 
 @ApplyOptions<Listener.Options>({
@@ -40,15 +39,10 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
             /* Advance Wars By Web */
             awbw: new AWBWScanner(guild),
 
-            /* Pathfinder Character Sheets */
-            pathfinder: new PathfinderSheetLinker(guild),
-
         };
 
         await guild.games.awbw.loadConfig();
         await guild.games.awbw.loadRegistry();
-
-        await guild.games.pathfinder.loadConfig();
 
         /* Message scanner for stat tracking */
         guild.scanner = new GuildMessageScanner(guild);
@@ -119,7 +113,6 @@ declare module 'discord.js' {
         customCommandSystem: CustomCommandSystem,
         games: {
             awbw: AWBWScanner,
-            pathfinder: PathfinderSheetLinker,
         },
         scanner: GuildMessageScanner,
         messageEchoer: MessageEchoManager,

@@ -34,7 +34,8 @@ export class PlaySongCreateProgress extends Listener {
 					repeat: {
 						limit: Math.floor(song.duration * 1000 / UPDATE_INTERVAL)
 					},
-					jobId: this.name
+					jobId: this.name,
+					removeOnComplete: true,
 				} as JobOptions,
 				type: 'repeated',
 				interval: UPDATE_INTERVAL
