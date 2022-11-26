@@ -4,7 +4,7 @@ import { ScheduledTask } from '@sapphire/plugin-scheduled-tasks';
 import { AdvanceWarsByWeb, AWBWScanner } from '../../../lib/structures/managers/games/AWBWScanner';
 
 @ApplyOptions<ScheduledTask.Options>({
-	name: AdvanceWarsByWeb.ScheduledTask.CheckGameStatus,
+	name: 'CheckGameStatus_AdvanceWarsByWeb',
 
 })
 export class CheckGameStatus_AdvanceWarsByWeb extends ScheduledTask {
@@ -17,8 +17,8 @@ export class CheckGameStatus_AdvanceWarsByWeb extends ScheduledTask {
 	}
 }
 
-declare module '@sapphire/framework' {
+declare module '@sapphire/plugin-scheduled-tasks' {
 	interface ScheduledTasks {
-		CheckGameStatus_AWBW: never;
+		CheckGameStatus_AdvanceWarsByWeb: never;
 	}
 }

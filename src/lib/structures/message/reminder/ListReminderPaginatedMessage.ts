@@ -1,8 +1,9 @@
 import { PaginatedMessage, PaginatedMessageAction, PaginatedMessageMessageOptionsUnion, PaginatedMessageOptions } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
-import { ButtonInteraction, CacheType, Constants, MessageEmbed } from "discord.js";
+import { ButtonInteraction, CacheType, Collection, Constants, MessageEmbed } from "discord.js";
 import prettyMilliseconds from "pretty-ms";
 import { Emojis, SELECT_MENU_OPTION_LIMIT } from "../../../utils/constants";
+import type { ReminderManager } from "../../managers/ReminderManager";
 import { ReminderEmbed } from "./ReminderEmbed";
 
 export enum _InteractionIds {
@@ -19,10 +20,10 @@ export class ListReminderPaginatedMessage extends PaginatedMessage {
 	public get owner() {
 		return container.client.users.cache.get(this.ownerId!)!;
 	}
-	public readonly cachedReminderIds : string[];
-	public get reminders() {
+	public readonly cachedReminderIds: string[];
+	public get reminders(): Collection<string, ReminderManager.Reminder.Instance> {
 		var reminders = container.client.reminders.cache.filter((reminder) =>
-			(this.cachedReminderIds && this.cachedReminderIds.includes(reminder.id)) || 
+			(this.cachedReminderIds && this.cachedReminderIds.includes(reminder.id)) ||
 			!reminder.isDisabled && (
 				reminder.target.mentionableIds.includes(this.ownerId ?? `null`) ||
 				reminder.ownerId === this.ownerId

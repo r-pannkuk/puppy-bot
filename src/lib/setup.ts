@@ -29,7 +29,7 @@ export const CLIENT_OPTIONS: ClientOptions = {
         'GUILD_MESSAGE_REACTIONS',
         'DIRECT_MESSAGES',
         'DIRECT_MESSAGE_REACTIONS',
-        
+
     ],
     defaultPrefix: envParseString('CLIENT_PREFIX', '!'),
     caseInsensitiveCommands: true,
@@ -59,7 +59,7 @@ export const CLIENT_OPTIONS: ClientOptions = {
     tasks: {
         strategy: new ScheduledTaskRedisStrategy({
             bull: {
-                redis: {
+                connection: {
                     password: envParseString('REDIS_PASSWORD'),
                     port: envParseInteger('REDIS_PORT'),
                     host: envParseString('REDIS_URL'),

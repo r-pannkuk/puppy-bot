@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
 import type { CommandInteraction, Message } from 'discord.js';
@@ -20,7 +19,7 @@ const SHORT_DESCRIPTION = 'You really don\'t want to do anything else.'
 })
 export class SylphieCommand extends PyScriptCommand {
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
             .setName(this.name)
             .setDescription(this.description)
             .addStringOption((option) =>
@@ -28,6 +27,8 @@ export class SylphieCommand extends PyScriptCommand {
                     .setName("activity")
                     .setDescription("What's the one thing you only ever want to do.")
             )
+            ,
+            this.slashCommandOptions
         )
     }
 

@@ -1,4 +1,3 @@
-import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext, ContextMenuCommandContext } from '@sapphire/framework';
 import type { CommandInteraction, ContextMenuInteraction, Message } from 'discord.js';
@@ -19,7 +18,7 @@ const SHORT_DESCRIPTION = 'Someone is whining again.'
 })
 export class KinzoCommand extends PyScriptCommand {
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
             .setName(this.name)
             .setDescription(this.description)
             .addUserOption((option) =>
@@ -34,11 +33,15 @@ export class KinzoCommand extends PyScriptCommand {
                     .setDescription("Enter what you want the user to whine about.")
                     .setRequired(true)
             )
+            ,
+            this.slashCommandOptions
         )
 
-        this.registerContextMenuCommand(registry, new ContextMenuCommandBuilder()
+        registry.registerContextMenuCommand((builder) => builder
             .setName('Meme - Kinzo Whining')
             .setType(3 /* Message */)
+            ,
+            this.contextCommandOptions
         )
     }
 

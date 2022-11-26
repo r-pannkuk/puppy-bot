@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
 import type { CommandInteraction, Message } from 'discord.js';
@@ -20,7 +19,7 @@ const SHORT_DESCRIPTION = 'Magneto\'s been thwarted again.'
 })
 export class MagnetoCommand extends PyScriptCommand {
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
             .setName(this.name)
             .setDescription(this.description)
             .addStringOption((option) =>
@@ -28,7 +27,8 @@ export class MagnetoCommand extends PyScriptCommand {
                     .setName("image")
                     .setDescription("Provide the image that is thwarting magneto.")
                     .setRequired(true)
-            )
+            ),
+            this.slashCommandOptions
         )
     }
 

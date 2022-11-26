@@ -1,5 +1,5 @@
 import { PaginatedMessage, PaginatedMessageOptions } from "@sapphire/discord.js-utilities";
-import { Constants, Guild } from "discord.js";
+import { Collection, Constants, Guild, GuildEmoji } from "discord.js";
 import { Emojis, SELECT_MENU_OPTION_LIMIT } from "../../../utils/constants";
 import type { EmojiRecords } from "../../managers/EmojiUsageManager";
 import { PuppyBotEmbed } from "../PuppyBotEmbed";
@@ -23,7 +23,7 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 		return ['All'].concat(keys);
 	}
 
-	public get Emojis() {
+	public get Emojis() : Collection<string, GuildEmoji | undefined> {
 		return this.records.mapValues((_value, key) => this.guild.emojis.cache.get(key.toString()));
 	}
 

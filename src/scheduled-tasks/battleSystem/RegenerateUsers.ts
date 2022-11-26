@@ -1,11 +1,10 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { container } from "@sapphire/framework";
 import { ScheduledTask, ScheduledTaskOptions } from "@sapphire/plugin-scheduled-tasks";
-import { BattleSystem } from "../../lib/structures/managers/BattleSystem";
 import { debugLog } from "../../lib/utils/logging";
 
 @ApplyOptions<ScheduledTaskOptions>({
-	name: BattleSystem.ScheduledTasks.Events.RegenerateUsers
+	name: 'BattleSystem_RegenerateUsers'
 })
 export class RegenerateUsersTask extends ScheduledTask {
 	public override async run({ guildId }) {
@@ -36,5 +35,11 @@ export class RegenerateUsersTask extends ScheduledTask {
 		if(writeRequired) {
 			await guild.battleSystem.writeToDB(undefined, [], [])
 		}
+	}
+}
+
+declare module '@sapphire/plugin-scheduled-tasks' {
+	interface ScheduledTasks {
+		BattleSystem_RegenerateUsers: never;
 	}
 }

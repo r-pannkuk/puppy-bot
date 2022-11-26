@@ -20,7 +20,7 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
     get timezone() { return this.settings.timezone; };
     get accountChannelId() { return this.settings.accountChannelId; }
     get accountChannel() {
-        return this.accountChannelId ? Resolvers.resolveGuildTextChannel(this.accountChannelId, this.guild!).value : null
+        return this.accountChannelId ? Resolvers.resolveGuildTextChannel(this.accountChannelId, this.guild!).unwrap() : null
     }
 
     public constructor(guild: Guild) {
@@ -85,13 +85,13 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
 
         if (categoryName) {
             var categoryResolver = await Resolvers.resolveGuildCategoryChannel(categoryName, this.guild!)
-            if (isNullishOrEmpty(categoryResolver.value)) {
+            if (isNullishOrEmpty(categoryResolver.unwrap())) {
                 categoryChannel = await this.guild!.channels.create(categoryName, {
                     type: 'GUILD_CATEGORY',
                     permissionOverwrites: overwrites
                 } as GuildChannelCreateOptions) as unknown as CategoryChannel;
             } else {
-                categoryChannel = categoryResolver.value;
+                categoryChannel = categoryResolver.unwrap();
             }
         } else {
             categoryName;
@@ -99,7 +99,7 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
 
         if (channelName) {
             var channelResolver = await Resolvers.resolveGuildTextChannel(channelName, this.guild!);
-            if (isNullishOrEmpty(channelResolver.value)) {
+            if (isNullishOrEmpty(channelResolver.unwrap())) {
 
                 if (!categoryChannel) {
                     channel = await this.guild!.channels.create(channelName, {
@@ -111,7 +111,7 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
                     } as CategoryCreateChannelOptions)
                 }
             } else {
-                channel = channelResolver.value
+                channel = channelResolver.unwrap()
             }
         }
 
@@ -129,7 +129,7 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
         /* Role Validator */
         if (roleName) {
             var roleResolver = await Resolvers.resolveRole(roleName, this.guild!);
-            if (isNullishOrEmpty(roleResolver.value)) {
+            if (isNullishOrEmpty(roleResolver.unwrap())) {
                 role = await this.guild!.roles.create({
                     name: roleName,
                     color: 'DEFAULT',
@@ -137,7 +137,7 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
                     mentionable: true,
                 })
             } else {
-                role = roleResolver.value;
+                role = roleResolver.unwrap();
             }
         }
 

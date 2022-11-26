@@ -9,7 +9,6 @@ import {
 } from "@prisma/client";
 import { container, UserError } from "@sapphire/framework";
 import type { ScheduledTasksTaskOptions } from "@sapphire/plugin-scheduled-tasks";
-import type { ScheduledTaskRedisStrategy } from "@sapphire/plugin-scheduled-tasks/register-redis";
 import type Bull from "bull";
 import type { Job, JobOptions } from "bull";
 import { Collection, DMChannel, GuildMember, GuildTextBasedChannel, MessageOptions, MessagePayload, Role, User } from "discord.js";
@@ -119,66 +118,36 @@ export class ReminderManager {
 		for (var reminder of loadedReminders) {
 			this._cache.set(reminder.id, this._instantiateReminder(reminder));
 		}
-
-		const ids = loadedReminders.map((reminder) => reminder.id);
-		const strategy = container.tasks.strategy as ScheduledTaskRedisStrategy;
-		const inactiveTasks = (await strategy.list({
-			types: ["waiting", "active", "delayed", "paused", "failed", "completed"],
-		}))?.filter((task) =>
-			task.name === ReminderManager.ScheduledTask.Events.FireReminder &&
-			!ids.includes((task.data! as ReminderManager.ScheduledTask.Payload).reminderId)
-		) ?? [];
-
-		for (var task of inactiveTasks) {
-			await task.discard();
-			await task.remove();
-		}
 	}
 
 	private async scheduleReminder(reminder: ReminderManager.Reminder.Instance) : Promise<Job | null> {
-		const strategy = container.tasks.strategy as ScheduledTaskRedisStrategy;
-		const inactiveTasks = (await strategy.list({
-			types: ["waiting", "active", "delayed", "paused", "failed", "completed"],
-		}))?.filter((task) =>
-			task.name === ReminderManager.ScheduledTask.Events.FireReminder &&
-			(task.data! as ReminderManager.ScheduledTask.Payload).reminderId === reminder.id
-		) ?? [];
-
-		for (var task of inactiveTasks) {
-			await task.discard();
-			await task.remove();
-		}
-
 		const schedule = reminder.getActiveSchedule();
 
 		if (!schedule) return null;
 
 		const delay = schedule.getNextInstance().getTime() - Date.now();
-		const nextInstance = schedule.getNextInstance();
 
 		let duration = {
-			type: 'default',
-			bullJobOptions: {
-				delay,
-				startDate: nextInstance,
-				jobId: schedule.id,
+			repeated: false,
+			delay,
+			customJobOptions: {
 				removeOnComplete: true,
 			} as JobOptions
 		} as ScheduledTasksTaskOptions;
 
 		if (schedule.repeat.isRepeating) {
 			const interval = Number(schedule.repeat.interval);
-			duration.bullJobOptions.repeat = {
+			duration.customJobOptions.repeat = {
 				every: interval,
 			} as Bull.RepeatOptions
 
 			if (!schedule.repeat.isInfinite) {
-				(duration.bullJobOptions as JobOptions).repeat!.limit = 1;
+				(duration.customJobOptions as JobOptions).repeat!.limit = 1;
 			}
 		}
 
 		return await container.tasks.create(
-			ReminderManager.ScheduledTask.Events.FireReminder,
+			"Reminder_FireReminder",
 			{
 				reminderId: reminder.id,
 			} as ReminderManager.ScheduledTask.Payload,

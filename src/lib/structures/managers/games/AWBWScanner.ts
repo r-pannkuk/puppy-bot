@@ -192,15 +192,14 @@ export class AWBWScanner implements IGuildConfigLoader<GameScanConfig>, IGuildMa
 
 	private static async scheduleTasks() {
 		container.tasks.create(
-			AdvanceWarsByWeb.ScheduledTask.CheckGameStatus,
+			"CheckGameStatus_AdvanceWarsByWeb",
 			{
 
 			} as AdvanceWarsByWeb.ScheduledTaskPayload,
 			{
-				type: 'repeated',
+				repeated: true,
 				interval: AWBWScanner.intervalSecs * 1000,
-				bullJobOptions: {
-					jobId: AdvanceWarsByWeb.ScheduledTask.CheckGameStatus,
+				customJobOptions: {
 					removeOnComplete: true,
 				} as JobOptions
 			}

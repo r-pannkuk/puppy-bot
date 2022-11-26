@@ -1,4 +1,3 @@
-import { ContextMenuCommandBuilder, SlashCommandBuilder } from "@discordjs/builders";
 import { ApplyOptions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, ChatInputCommandContext, container, ContextMenuCommandContext } from "@sapphire/framework";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
@@ -31,7 +30,7 @@ const WAIT_DURATION_FOR_FOLLOWUP = 600000;
 })
 export class EmojiUsageCommand extends PuppyBotCommand {
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
             .setName(this.name)
             .setDescription(this.description)
             .addStringOption((option) =>
@@ -49,11 +48,15 @@ export class EmojiUsageCommand extends PuppyBotCommand {
                     .setName('count-reactions')
                     .setDescription('Whether or not to count reactions in usage.  Defaults to True.')
             )
+            ,
+            this.slashCommandOptions
         )
 
-        this.registerContextMenuCommand(registry, new ContextMenuCommandBuilder()
+        registry.registerContextMenuCommand((builder) => builder
             .setName(`Track Emoji Usage`)
             .setType(2 /* User */)
+            ,
+            this.contextCommandOptions
         )
     }
 

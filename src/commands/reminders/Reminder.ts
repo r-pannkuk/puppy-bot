@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
 import { ApplyOptions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, container, UserError } from "@sapphire/framework";
 import { PermissionFlagsBits } from "discord-api-types/v9";
@@ -18,16 +17,16 @@ const SHORT_DESCRIPTION = `Set a reminder to go off later.`
 	name: 'reminder',
 	description: SHORT_DESCRIPTION,
 	requiredClientPermissions: [PermissionFlagsBits.ManageMessages],
-	subCommands: [
+	subcommands: [
 		{
-			input: 'create',
-			output: 'messageRunCreate',
+			name: 'create',
+			messageRun: 'messageRunCreate',
 			type: 'method',
 			default: true,
 		},
 		{
-			input: 'list',
-			output: 'messageRunList',
+			name: 'list',
+			messageRun: 'messageRunList',
 			type: 'method'
 		},
 	]
@@ -48,7 +47,7 @@ export class ReminderCommand extends PuppyBotCommand {
 	}
 
 	public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-		this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
 			.setName(this.name)
 			.setDescription(this.description)
 			.addSubcommand((builder) =>
@@ -88,7 +87,8 @@ export class ReminderCommand extends PuppyBotCommand {
 							.setName('show-all')
 							.setDescription('Show all reminders across all users you can see.  Defaults to false.')
 					)
-			)
+			),
+			this.slashCommandOptions
 		)
 	}
 

@@ -1,10 +1,10 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { container, PieceContext } from '@sapphire/framework';
 import { ScheduledTask } from '@sapphire/plugin-scheduled-tasks';
-import { ReminderManager } from '../../lib/structures/managers/ReminderManager';
+import type { ReminderManager } from '../../lib/structures/managers/ReminderManager';
 
 @ApplyOptions<ScheduledTask.Options>({
-	name: ReminderManager.ScheduledTask.Events.FireReminder,
+	name: 'Reminder_FireReminder',
 })
 export class CheckGameStatus_AdvanceWarsByWeb extends ScheduledTask {
 	public constructor(context: PieceContext, options: ScheduledTask.Options) {
@@ -16,12 +16,16 @@ export class CheckGameStatus_AdvanceWarsByWeb extends ScheduledTask {
 
 		if (!reminder || reminder?.isDisabled) return;
 
+		const foundJob = await reminder.getJob();
+
+		console.log(foundJob);
+
 		return await container.client.reminders.fireReminder(reminder);
 	}
 }
 
-declare module '@sapphire/framework' {
+declare module '@sapphire/plugin-scheduled-tasks' {
 	interface ScheduledTasks {
-		FireReminder: never;
+		Reminder_FireReminder: never;
 	}
 }

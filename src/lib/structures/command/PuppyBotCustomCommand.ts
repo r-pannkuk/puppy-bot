@@ -1,6 +1,5 @@
 /* OBSOLETE - Not valid with limitations on slash commands. */
 
-import { SlashCommandBuilder } from "@discordjs/builders";
 import type { CustomCommand } from "@prisma/client";
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, Command, container, RegisterBehavior } from "@sapphire/framework";
 import { Message, CommandInteraction } from "discord.js";
@@ -18,7 +17,7 @@ export class PuppyBotCustomCommand extends PuppyBotCommand {
 		} as Command.Context, {
 			...options,
 			name: `${options.schema.guildId}-${options.schema.name}`,
-			aliases:  [options.schema.name].concat(options.schema.aliases),
+			aliases: [options.schema.name].concat(options.schema.aliases),
 			description: `Custom command created by ${container.client.users.cache.get(options.schema.ownerId)}.`,
 			runIn: "GUILD_ANY"
 		})
@@ -27,19 +26,13 @@ export class PuppyBotCustomCommand extends PuppyBotCommand {
 	}
 
 	public override async registerApplicationCommands(registry: ApplicationCommandRegistry) {
-		const names : string[] =  [this.schema.name].concat(this.schema.aliases);
+		const names: string[] = [this.schema.name].concat(this.schema.aliases);
 
-		for(const name of names) {
-			const builder = new SlashCommandBuilder()
+		for (const name of names) {
+			registry.registerChatInputCommand((builder) => builder
 				.setName(name)
-			
-			if(name === this.schema.name) {
-				builder.setDescription(this.description);
-			} else {
-				builder.setDescription(this.description + `  (Alias of ${this.schema.name}).`);
-			}
-
-			registry.registerChatInputCommand(builder, {
+				// Add alias to the description.
+				.setDescription(this.description + (name === this.schema.name) ? "" : `  (Alias of ${this.schema.name}).`), {
 				behaviorWhenNotIdentical: RegisterBehavior.Overwrite,
 				guildIds: [this.schema.guildId]
 			})
@@ -47,10 +40,10 @@ export class PuppyBotCustomCommand extends PuppyBotCommand {
 	}
 
 	public async unregisterApplicationCommands() {
-		const names : string[] = [this.schema.name].concat(this.schema.aliases);
+		const names: string[] = [this.schema.name].concat(this.schema.aliases);
 		const guild = container.client.guilds.cache.get(this.schema.guildId);
 
-		for(const name of names) {
+		for (const name of names) {
 			await guild?.commands.delete(name);
 		}
 	}
@@ -67,7 +60,7 @@ export class PuppyBotCustomCommand extends PuppyBotCommand {
 		if (messageOrInteraction instanceof Message) {
 			await messageOrInteraction.edit(this.schema.content);
 		} else {
-			if(messageOrInteraction.replied || messageOrInteraction.deferred) {
+			if (messageOrInteraction.replied || messageOrInteraction.deferred) {
 				await messageOrInteraction.editReply(this.schema.content);
 			} else {
 				await messageOrInteraction.reply(this.schema.content);

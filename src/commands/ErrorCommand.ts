@@ -10,7 +10,13 @@ import { PuppyBotCommand } from '../lib/structures/command/PuppyBotCommand';
 })
 export class ErrorCommand extends PuppyBotCommand {
 	public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-		this.registerSlashCommand(registry);
+		registry.registerChatInputCommand((builder) =>
+			builder
+				.setName(this.name)
+				.setDescription(this.description)
+			,
+			this.slashCommandOptions
+		)
 	}
 
 	public async messageRun(message: Message) {

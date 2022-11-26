@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
 import { BattleTrapRecordType, BattleTrapState } from "@prisma/client";
 import { ApplyOptions } from "@sapphire/decorators";
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from "@sapphire/framework";
@@ -24,32 +23,32 @@ const DEFAULT_LIST_SIZE = 10;
     requiredClientPermissions: ['VIEW_CHANNEL'],
     nsfw: false,
     runIn: 'GUILD_ANY',
-    subCommands: [
+    subcommands: [
         {
-            input: 'list',
-            output: 'messageRunList',
+            name: 'list',
+            messageRun: 'messageRunList',
             type: 'method'
         },
         {
-            input: 'create',
-            output: 'messageRunCreate',
+            name: 'create',
+            messageRun: 'messageRunCreate',
             type: 'method'
         },
         {
-            input: 'clear',
-            output: 'messageRunClear',
+            name: 'clear',
+            messageRun: 'messageRunClear',
             type: 'method'
         },
         {
-            input: 'disarm',
-            output: 'messageRunDisarm',
+            name: 'disarm',
+            messageRun: 'messageRunDisarm',
             type: 'method'
         }
     ]
 })
 export class TrapCommand extends PuppyBotCommand {
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
             .setName(this.name)
             .setDescription(this.description)
             .addSubcommandGroup((builder) =>
@@ -117,7 +116,8 @@ export class TrapCommand extends PuppyBotCommand {
                             .setDescription('Enter the phrase you want to trap.  Longer phrases do more damage.')
                             .setRequired(true)
                     )
-            )
+            ),
+            this.slashCommandOptions
         )
     }
 
@@ -143,7 +143,7 @@ export class TrapCommand extends PuppyBotCommand {
         const user = message.author;
         const option = args.getOption('amount');
         const rest = await args.restResult('string');
-        const subCommand = rest.success ? rest.value : 'mine';
+        const subCommand = rest.isOk() ? rest.unwrap() : 'mine';
 
         var amount: number | undefined = undefined;
         if (option !== null) {

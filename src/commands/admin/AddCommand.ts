@@ -2,7 +2,6 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, container } from "@sapphire/framework";
 import { CategoryChannel, CommandInteraction, Constants, Guild, GuildMember, GuildTextBasedChannel, Message, Role, User } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import { SlashCommandBuilder } from "@discordjs/builders";
 import type { OverwriteData } from "discord.js";
 import { Emojis } from "../../lib/utils/constants";
 
@@ -23,10 +22,10 @@ const SHORT_DESCRIPTION = 'Creates a new group and role for discussion.';
     nsfw: false,
     runIn: 'GUILD_ANY',
     options: true,
-    subCommands: [
+    subcommands: [
         {
-            input: 'group-channel',
-            output: 'messageRunGroup',
+            name: 'group-channel',
+            messageRun: 'messageRunGroup',
             type: 'method',
             default: true
         }
@@ -34,7 +33,7 @@ const SHORT_DESCRIPTION = 'Creates a new group and role for discussion.';
 })
 export class AddCommand extends PuppyBotCommand {
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        return this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
             .setName(this.name)
             .setDescription(this.description)
             .addSubcommand((builder) =>
@@ -59,6 +58,8 @@ export class AddCommand extends PuppyBotCommand {
                             .setDescription("Name of the role to create or use.")
                     )
             )
+            ,
+            this.slashCommandOptions
         )
     }
 

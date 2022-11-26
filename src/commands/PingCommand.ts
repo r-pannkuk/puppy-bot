@@ -10,15 +10,21 @@ import { PuppyBotCommand } from '../lib/structures/command/PuppyBotCommand';
 })
 export class PingCommand extends PuppyBotCommand {
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry);
+        registry.registerChatInputCommand((builder) =>
+            builder
+                .setName(this.name)
+                .setDescription(this.description)
+            ,
+            this.slashCommandOptions
+        )
     }
-    
+
     public async messageRun(message: Message) {
         const msg = await message.channel.send('Ping?');
 
         const content = `Pong! Bot Latency ${Math.round(this.container.client.ws.ping)}ms. API Latency ${msg.createdTimestamp - message.createdTimestamp}ms.`;
 
-        return msg.edit(content);
+        await msg.edit(content);
     }
 
     public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {

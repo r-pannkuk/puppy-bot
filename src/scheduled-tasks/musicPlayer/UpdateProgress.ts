@@ -74,7 +74,7 @@ export interface SongProgressPayload {
 
 
 @ApplyOptions<ScheduledTaskOptions>({
-	name: 'updateProgress'
+	name: 'MusicPlayer_UpdateProgress'
 })
 export class UpdateProgressTask extends ScheduledTask {
 	public message: Message | undefined;
@@ -108,5 +108,13 @@ export class UpdateProgressTask extends ScheduledTask {
 				content: content
 			});
 		}
+	}
+}
+
+
+
+declare module '@sapphire/plugin-scheduled-tasks' {
+	interface ScheduledTasks {
+		MusicPlayer_UpdateProgress: never;
 	}
 }

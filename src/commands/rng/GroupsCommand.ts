@@ -3,7 +3,6 @@ import { Message, CommandInteraction, MessageActionRow, MessageButton, ButtonInt
 import { MessageEmbed, Constants } from 'discord.js'
 import 'dotenv/config'
 import { ApplyOptions } from '@sapphire/decorators'
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand'
 import type { User } from '@sentry/node'
 
@@ -25,7 +24,7 @@ export class GroupsCommand extends PuppyBotCommand {
     }> = new Collection();
 
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
             .setName(this.name)
             .setDescription(this.description)
             .addIntegerOption((option) =>
@@ -37,7 +36,8 @@ export class GroupsCommand extends PuppyBotCommand {
                 option
                     .setName("entries")
                     .setDescription("Please enter the items to make up the groups with")
-            )
+            ),
+            this.slashCommandOptions
         )
     }
 

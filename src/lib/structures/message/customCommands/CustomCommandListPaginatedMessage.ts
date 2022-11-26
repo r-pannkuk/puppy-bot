@@ -1,6 +1,7 @@
+import type { CustomCommand } from "@prisma/client";
 import { PaginatedMessage, PaginatedMessageOptions } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
-import { Constants, Guild } from "discord.js";
+import { Collection, Constants, Guild } from "discord.js";
 import { Emojis } from "../../../utils/constants";
 import { PuppyBotEmbed } from "../PuppyBotEmbed";
 
@@ -21,7 +22,7 @@ export class CustomCommandListPaginatedMessage extends PaginatedMessage {
 		return container.client.guilds.cache.get(this.guildId)!;
 	}
 
-	public get customCommands() {
+	public get customCommands() : Collection<[commandId: string], CustomCommand> {
 		return this.guild.customCommandSystem.customCommands;
 	}
 

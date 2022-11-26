@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
 import type { CustomCommand } from "@prisma/client";
 import { ApplyOptions, RequiresUserPermissions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum } from "@sapphire/framework";
@@ -16,52 +15,52 @@ const SHORT_DESCRIPTION = `Manage server custom commands.`
 	description: SHORT_DESCRIPTION,
 	requiredClientPermissions: [PermissionFlagsBits.ManageMessages],
 	runIn: [CommandOptionsRunTypeEnum.GuildAny],
-	subCommands: [
+	subcommands: [
 		{
-			input: 'add',
-			output: 'messageRunAdd',
+			name: 'add',
+			messageRun: 'messageRunAdd',
 			type: 'method',
 		},
 		{
-			input: 'alias',
-			output: 'messageRunAlias',
+			name: 'alias',
+			messageRun: 'messageRunAlias',
 			type: 'method',
 		},
 		{
-			input: 'remove',
-			output: 'messageRunRemove',
+			name: 'remove',
+			messageRun: 'messageRunRemove',
 			type: 'method',
 		},
 		{
-			input: 'edit',
-			output: 'messageRunEdit',
+			name: 'edit',
+			messageRun: 'messageRunEdit',
 			type: 'method',
 		},
 		{
-			input: 'rename',
-			output: 'messageRunRename',
+			name: 'rename',
+			messageRun: 'messageRunRename',
 			type: 'method',
 		},
 		{
-			input: 'list',
-			output: 'messageRunList',
+			name: 'list',
+			messageRun: 'messageRunList',
 			type: 'method',
 		},
 		{
-			input: 'reset',
-			output: 'messageRunReset',
+			name: 'reset',
+			messageRun: 'messageRunReset',
 			type: 'method',
 		},
 		{
-			input: 'info',
-			output: 'messageRunInfo',
+			name: 'info',
+			messageRun: 'messageRunInfo',
 			type: 'method'
 		}
 	]
 })
 export class CustomCommandCommand extends PuppyBotCommand {
 	public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-		this.registerSlashCommand(registry, new SlashCommandBuilder()
+		registry.registerChatInputCommand((builder) => builder
 			.setName(this.name)
 			.setDescription(this.description)
 			.addSubcommand((builder) =>
@@ -179,6 +178,8 @@ export class CustomCommandCommand extends PuppyBotCommand {
 							.setRequired(true)
 					)
 			)
+			,
+			this.slashCommandOptions
 		)
 	}
 
@@ -296,12 +297,12 @@ export class CustomCommandCommand extends PuppyBotCommand {
 	}
 
 	public async run<S extends CustomCommandCommand.ValidSubCommand>(args: {
-        messageOrInteraction: Message | CommandInteraction,
-        subCommand: S,
-        guild: Guild,
-        user: User,
-        options: CustomCommandCommand.CommandOptions<S>
-    }) {
+		messageOrInteraction: Message | CommandInteraction,
+		subCommand: S,
+		guild: Guild,
+		user: User,
+		options: CustomCommandCommand.CommandOptions<S>
+	}) {
 		const { subCommand, messageOrInteraction, guild, user, options } = args;
 
 		if (subCommand === 'add') {
@@ -440,7 +441,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 	}
 
 	public async handleList(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User) {
-		if(guild.customCommandSystem.customCommands.size === 0) {
+		if (guild.customCommandSystem.customCommands.size === 0) {
 			this.error(`No custom commands found on this server.`);
 		}
 
@@ -470,10 +471,10 @@ export class CustomCommandCommand extends PuppyBotCommand {
 
 export namespace CustomCommandCommand {
 	export interface CommandStructure extends PuppyBotCommand.CommandStructure {
-        'add': {
-            'name': string,
-            'output': string,
-        },
+		'add': {
+			'name': string,
+			'output': string,
+		},
 		'alias': {
 			'command': string,
 			'alias': string,
@@ -494,13 +495,13 @@ export namespace CustomCommandCommand {
 		'info': {
 			'command': string,
 		}
-    }
+	}
 
-    export type ValidSubCommand = PuppyBotCommand.ValidSubCommand<CommandStructure>
-    export type ValidOption<S extends ValidSubCommand | undefined = undefined> = PuppyBotCommand.ValidOption<CommandStructure, undefined, S>
-    export type ValidOptionType<S extends ValidSubCommand | undefined = undefined, O extends ValidOption<S> | undefined = undefined> = PuppyBotCommand.ValidOptionType<CommandStructure, undefined, S, O>
+	export type ValidSubCommand = PuppyBotCommand.ValidSubCommand<CommandStructure>
+	export type ValidOption<S extends ValidSubCommand | undefined = undefined> = PuppyBotCommand.ValidOption<CommandStructure, undefined, S>
+	export type ValidOptionType<S extends ValidSubCommand | undefined = undefined, O extends ValidOption<S> | undefined = undefined> = PuppyBotCommand.ValidOptionType<CommandStructure, undefined, S, O>
 
-    export type ValidHandler = ValidSubCommand;
-    // export type CommandOptionsRecord<S extends ValidSubCommand | undefined, O extends ValidOption<S>> = Record<O, ValidOptionType<S, O>>
-    export type CommandOptions<S extends ValidSubCommand | undefined = undefined> = PuppyBotCommand.CommandOptions<CommandStructure, undefined, S>;
+	export type ValidHandler = ValidSubCommand;
+	// export type CommandOptionsRecord<S extends ValidSubCommand | undefined, O extends ValidOption<S>> = Record<O, ValidOptionType<S, O>>
+	export type CommandOptions<S extends ValidSubCommand | undefined = undefined> = PuppyBotCommand.CommandOptions<CommandStructure, undefined, S>;
 }

@@ -19,7 +19,10 @@ const SHORT_DESCRIPTION = `Stops current playback.`
 })
 export class StopCommand extends PuppyBotCommand {
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry);
+        registry.registerChatInputCommand((builder) => builder
+            .setName(this.name)
+            .setDescription(this.description)
+        );
     }
 
 	public stop(guild : Guild) {

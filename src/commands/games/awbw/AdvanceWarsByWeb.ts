@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
 import type { GameScanConfig } from "@prisma/client";
 import { ApplyOptions, RequiresUserPermissions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum, UserError } from "@sapphire/framework";
@@ -18,32 +17,32 @@ const SHORT_DESCRIPTION = `Configures settings for AdvancedWarsByWeb games.`
 	description: SHORT_DESCRIPTION,
 	requiredClientPermissions: [PermissionFlagsBits.ManageMessages],
 	runIn: [CommandOptionsRunTypeEnum.GuildAny],
-	subCommands: [
+	subcommands: [
 		{
-			input: 'add' as AdvanceWarsByWeb.ValidHandler,
-			output: 'messageRunAdd',
+			name: 'add' as AdvanceWarsByWeb.ValidHandler,
+			messageRun: 'messageRunAdd',
 			type: 'method'
 		},
 		{
-			input: 'admin' as AdvanceWarsByWeb.ValidHandler,
-			output: 'messageRunAdmin',
+			name: 'admin' as AdvanceWarsByWeb.ValidHandler,
+			messageRun: 'messageRunAdmin',
 			type: 'method'
 		},
 		{
-			input: 'list' as AdvanceWarsByWeb.ValidHandler,
-			output: 'messageRunList',
+			name: 'list' as AdvanceWarsByWeb.ValidHandler,
+			messageRun: 'messageRunList',
 			type: 'method'
 		},
 		{
-			input: 'remove' as AdvanceWarsByWeb.ValidHandler,
-			output: 'messageRunRemove',
+			name: 'remove' as AdvanceWarsByWeb.ValidHandler,
+			messageRun: 'messageRunRemove',
 			type: 'method'
 		},
 	]
 })
 export class AdvanceWarsByWeb extends PuppyBotCommand {
 	public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-		this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
 			.setName(this.name)
 			.setDescription(this.description)
 			.addSubcommandGroup((builder) =>
@@ -139,7 +138,8 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 									.addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
 							)
 					)
-			)
+			),
+			this.slashCommandOptions
 		)
 	}
 
@@ -187,7 +187,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 			});
 		} else if (args.getFlags('game')) {
 			const gameIDs = await args.restResult('string')
-			if (gameIDs.error) this.error(`game-ids were not provided.`, args)
+			if (gameIDs.isErr()) this.error(`game-ids were not provided.`, args)
 
 			await this.run({
 				messageOrInteraction: message,
@@ -196,7 +196,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 				guild: message.guild!,
 				user: message.author,
 				options: {
-					"game-ids": gameIDs.value.split(/\s+/)
+					"game-ids": gameIDs.unwrap().split(/\s+/)
 				}
 			});
 		} else {
@@ -221,7 +221,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 			});
 		} else if (args.getFlags('game')) {
 			const gameIDs = await args.restResult('string')
-			if (gameIDs.error) this.error(`game-ids were not provided.`, args)
+			if (gameIDs.isErr()) this.error(`game-ids were not provided.`, args)
 
 			await this.run({
 				messageOrInteraction: message,
@@ -230,7 +230,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 				guild: message.guild!,
 				user: message.author,
 				options: {
-					"game-ids": gameIDs.value.split(/\s+/)
+					"game-ids": gameIDs.unwrap().split(/\s+/)
 				}
 			});
 		} else {

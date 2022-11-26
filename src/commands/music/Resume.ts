@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
 import { ApplyOptions } from "@sapphire/decorators";
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from "@sapphire/framework";
 import type { Guild } from "discord.js";
@@ -20,9 +19,10 @@ const SHORT_DESCRIPTION = `Resume music that has been paused.`
 })
 export class ResumeCommand extends PuppyBotCommand {
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
             .setName(this.name)
-            .setDescription(this.description)
+            .setDescription(this.description),
+            this.slashCommandOptions
         )
     }
 

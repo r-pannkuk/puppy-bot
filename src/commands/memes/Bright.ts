@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
 import type { CommandInteraction, Message } from 'discord.js';
@@ -21,7 +20,7 @@ const SHORT_DESCRIPTION = 'Correct a user with a well-placed intention to their 
 })
 export class BrightCommand extends PyScriptCommand {
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
             .setName(this.name)
             .addUserOption((option) =>
                 option
@@ -30,6 +29,8 @@ export class BrightCommand extends PyScriptCommand {
                     .setRequired(true)
             )
             .setDescription(this.description)
+            ,
+            this.slashCommandOptions
         )
     }
 

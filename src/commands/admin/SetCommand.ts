@@ -3,7 +3,6 @@ import type { ApplicationCommandRegistry, ChatInputCommandContext } from "@sapph
 import { CommandInteraction, Constants, Guild, GuildTextBasedChannel, Message, Role, User } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import { isNullish, isNullishOrEmpty } from "@sapphire/utilities"
-import { SlashCommandBuilder } from "@discordjs/builders";
 import { PuppyBotEmbed } from "../../lib/structures/message/PuppyBotEmbed";
 
 const SHORT_DESCRIPTION = 'Sets a designated guild role or channel.';
@@ -24,7 +23,7 @@ const SHORT_DESCRIPTION = 'Sets a designated guild role or channel.';
 })
 export class AddCommand extends PuppyBotCommand {
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
             .setName(this.name)
             .setDescription(this.description)
             .addSubcommand((builder) =>
@@ -88,6 +87,8 @@ export class AddCommand extends PuppyBotCommand {
                             .addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
                     )
             )
+            ,
+            this.slashCommandOptions
         )
     }
 

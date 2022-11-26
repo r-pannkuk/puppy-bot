@@ -4,7 +4,6 @@ import { MessageEmbed } from 'discord.js'
 import 'dotenv/config'
 import { DiceRoll, Parser } from '@dice-roller/rpg-dice-roller'
 import { ApplyOptions } from '@sapphire/decorators'
-import { SlashCommandBuilder } from '@discordjs/builders'
 import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand'
 
 @ApplyOptions<PuppyBotCommand.Options>({
@@ -85,14 +84,15 @@ export class DiceRollCommand extends PuppyBotCommand {
     })
 
     public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        this.registerSlashCommand(registry, new SlashCommandBuilder()
+        registry.registerChatInputCommand((builder) => builder
             .setName(this.name)
             .setDescription(this.description)
             .addStringOption((option) =>
                 option
                     .setName("notation")
                     .setDescription("Dice notation to use.")
-            )
+            ),
+            this.slashCommandOptions
         )
     }
 
@@ -136,8 +136,12 @@ export class DiceRollCommand extends PuppyBotCommand {
     //     return output
     // }
 
-    public async generateEmbed(user: User | GuildMember, processedInput: string, rerollAmount?: number) {
-        const results = new DiceRoll(processedInput);
+    public async generateEmbed(user: User | GuildMember, results: DiceRoll, rerollAmount?: number) {
+        const exportedResults = JSON.parse(results.export()!);
+
+        console.log(exportedResults);
+
+        exportedResults.rolls[0].results
 
         var embed = new MessageEmbed()
             .setColor(14400597)
@@ -166,8 +170,10 @@ export class DiceRollCommand extends PuppyBotCommand {
         const followUp = await this.generateFollowUp(messageOrInteraction);
 
         var rerollAmount = 0;
+        const results = new DiceRoll(processedInput);
+
         const generateEmbed = async () => {
-            const embed = this.generateEmbed(user, processedInput, rerollAmount);
+            const embed = this.generateEmbed(user, results, rerollAmount);
             ++rerollAmount;
             return embed;
         }
@@ -198,15 +204,11 @@ export class DiceRollCommand extends PuppyBotCommand {
     public override async messageRun(message: Message, input: Args) {
         var results = await input.restResult(DiceRollCommand.validDiceArgCheck);
         let processedInput: string;
-        if (results.error) {
-            if (results.error.identifier === 'argsMissing') {
-                processedInput = this.cachedQuery.get(message.guildId ?? message.author.id)?.notation
-                    ?? 'd20';
-            } else {
-                throw results.error;
-            }
+        if (results.isErr()) {
+            processedInput = this.cachedQuery.get(message.guildId ?? message.author.id)?.notation
+                ?? 'd20';
         } else {
-            processedInput = results.value.replace('\W', "")
+            processedInput = results.unwrap().replace('\W', "")
         }
         await this.run(message, message.author, processedInput);
     }

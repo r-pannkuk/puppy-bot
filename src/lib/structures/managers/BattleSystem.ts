@@ -176,15 +176,14 @@ export class BattleSystem implements IGuildManager, IConfigLoader<BattleConfig> 
 		this._config = loadedConfig;
 
 		await container.tasks.create(
-			BattleSystem.ScheduledTasks.Events.RegenerateUsers,
+			"BattleSystem_RegenerateUsers",
 			{
 				guildId: this.guildId,
 			},
 			{
-				type: "repeated",
+				repeated: true,
 				interval: BattleSystem.regenIntervalSecs * 1000,
-				bullJobOptions: {
-					jobId: `${BattleSystem.ScheduledTasks.Events.RegenerateUsers}:${this.guildId}`,
+				customJobOptions: {
 					removeOnComplete: true,
 				} as JobOptions
 			})
