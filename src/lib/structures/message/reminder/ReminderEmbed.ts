@@ -273,7 +273,7 @@ export class ReminderEmbed extends PuppyBotEmbed {
 		}
 
 		content.push(`**State**: \`${state}\``);
-		content.push(`**Scheduled**: \`${this.reminder?.schedules.last()?.reminderTime}\``);
+		content.push(`**Scheduled**: \`${this.reminder?.getActiveSchedule()?.getNextInstance()}\``);
 
 		if (this.currentSchedule?.repeat.isRepeating) {
 			content.push(`**Repeat**: ${prettyMilliseconds(Number(this.currentSchedule?.repeat.interval))}`);

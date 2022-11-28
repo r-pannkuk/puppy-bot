@@ -44,14 +44,14 @@ export class ListReminderPaginatedMessage extends PaginatedMessage {
 
 			if (bSchedule.getNextInstance().getTime() > Date.now()) {
 				if (aSchedule.getNextInstance().getTime() > Date.now()) {
-					return bSchedule.getNextInstance().getTime() - aSchedule.getNextInstance().getTime();
+					return aSchedule.getNextInstance().getTime() - bSchedule.getNextInstance().getTime();
 				} else {
-					return -1 * bSchedule.getNextInstance().getTime();
+					return bSchedule.getNextInstance().getTime();
 				}
 			} else if (aSchedule.getNextInstance().getTime() > Date.now()) {
-				return -1 * aSchedule.getNextInstance().getTime();
+				return aSchedule.getNextInstance().getTime();
 			} else {
-				return bSchedule.getNextInstance().getTime() - aSchedule.getNextInstance().getTime();
+				return aSchedule.getNextInstance().getTime() - bSchedule.getNextInstance().getTime();
 			}
 		});
 	}
