@@ -139,8 +139,6 @@ export class DiceRollCommand extends PuppyBotCommand {
     public async generateEmbed(user: User | GuildMember, results: DiceRoll, rerollAmount?: number) {
         const exportedResults = JSON.parse(results.export()!);
 
-        console.log(exportedResults);
-
         exportedResults.rolls[0].results
 
         var embed = new MessageEmbed()
