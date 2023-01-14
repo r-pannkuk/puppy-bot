@@ -5,10 +5,13 @@ import 'dotenv/config'
 import { DiceRoll, Parser } from '@dice-roller/rpg-dice-roller'
 import { ApplyOptions } from '@sapphire/decorators'
 import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand'
+import { Time } from '@sapphire/time-utilities'
 
 @ApplyOptions<PuppyBotCommand.Options>({
     name: 'roll',
     aliases: ['dice'],
+    cooldownDelay: 5 * Time.Second,
+    cooldownLimit: 6,
     description: 'Rolls a combination of dice.',
     detailedDescription: `Rolls a combination of dice. Can throw up to 100 dice with up to 9999 sides. Must throw at least one die and only dice with 2 or more sides.  Examples:\n-- \`\`roll 3d6\`\`\n-- \`\`roll 4d8\`\`\n-- \`\`roll 3d6 4d8\`\``,
     requiredUserPermissions: ['SEND_MESSAGES'],
