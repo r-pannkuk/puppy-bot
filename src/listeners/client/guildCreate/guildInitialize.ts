@@ -24,14 +24,14 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         /* Admin system for server management. */
         guild.settings = new GuildSettingsManager(guild);
 
-        await guild.settings.loadSettings();
+        // await guild.settings.loadSettings();
 
         /* Trap management and user levels. */
         guild.battleSystem = new BattleSystem(guild);
 
-        await guild.battleSystem.loadConfig();
-        await guild.battleSystem.loadFromDB();
-        await guild.battleSystem.writeToDB();
+        // await guild.battleSystem.loadConfig();
+        // await guild.battleSystem.loadFromDB();
+        // await guild.battleSystem.writeToDB();
 
         // Games Trackers
         guild.games = {
@@ -41,8 +41,8 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
 
         };
 
-        await guild.games.awbw.loadConfig();
-        await guild.games.awbw.loadRegistry();
+        // await guild.games.awbw.loadConfig();
+        // await guild.games.awbw.loadRegistry();
 
         /* Message scanner for stat tracking */
         guild.scanner = new GuildMessageScanner(guild);
@@ -56,22 +56,17 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
             guild.roleAssigner = new RoleAssignmentManager(guild);
         }
 
-        await guild.emojiUsage.loadRecords();
-        await guild.emojiUsage.loadRegistry();
-        await guild.emojiUsage.generateLastMessageStore();
+        // await guild.emojiUsage.loadRecords();
+        // await guild.emojiUsage.loadRegistry();
+        // await guild.emojiUsage.generateLastMessageStore();
 
         // await guild.roleAssigner.loadConfig();
         // await guild.roleAssigner.generateMessageCollectors();
 
-        /* Custom command system unique to each guild. */
-        guild.customCommandSystem = new CustomCommandSystem(guild);
-
-        await guild.customCommandSystem.loadFromDB();
-
         /* Message Echoer for deletions and edits */
         guild.messageEchoer = new MessageEchoManager(guild);
 
-        await guild.messageEchoer.loadConfig();
+        // await guild.messageEchoer.loadConfig();
 
         // /* Betting system for awarding users. */
         // guild.pointSystem = new PointSystem(guild.settings);
@@ -84,6 +79,11 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         // /* Moderation system for managing user activity. */
         // guild.moderation = new ModerationSystem(guild.settings);
         // guild.moderation.scheduleAllModerations();
+
+        /* Custom command system unique to each guild. */
+        guild.customCommandSystem = new CustomCommandSystem(guild);
+
+        // await guild.customCommandSystem.loadFromDB();
 
         // /* Guild message cache for tracking user stats and simulations. */
         // guild.messageCache = new GuildMessageCache(guild.settings);
