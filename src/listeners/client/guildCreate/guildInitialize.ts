@@ -60,8 +60,8 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         await guild.emojiUsage.loadRegistry();
         await guild.emojiUsage.generateLastMessageStore();
 
-        await guild.roleAssigner.loadConfig();
-        await guild.roleAssigner.generateMessageCollectors();
+        // await guild.roleAssigner.loadConfig();
+        // await guild.roleAssigner.generateMessageCollectors();
 
         /* Custom command system unique to each guild. */
         guild.customCommandSystem = new CustomCommandSystem(guild);
