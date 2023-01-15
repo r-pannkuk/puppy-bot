@@ -56,17 +56,17 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
             guild.roleAssigner = new RoleAssignmentManager(guild);
         }
 
-        await guild.emojiUsage.loadRecords();
-        await guild.emojiUsage.loadRegistry();
-        await guild.emojiUsage.generateLastMessageStore();
+        // await guild.emojiUsage.loadRecords();
+        // await guild.emojiUsage.loadRegistry();
+        // await guild.emojiUsage.generateLastMessageStore();
 
-        // await guild.roleAssigner.loadConfig();
-        // await guild.roleAssigner.generateMessageCollectors();
+        await guild.roleAssigner.loadConfig();
+        await guild.roleAssigner.generateMessageCollectors();
 
         /* Message Echoer for deletions and edits */
         guild.messageEchoer = new MessageEchoManager(guild);
 
-        // await guild.messageEchoer.loadConfig();
+        await guild.messageEchoer.loadConfig();
 
         // /* Betting system for awarding users. */
         // guild.pointSystem = new PointSystem(guild.settings);
