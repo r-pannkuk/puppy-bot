@@ -24,7 +24,7 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         /* Admin system for server management. */
         guild.settings = new GuildSettingsManager(guild);
 
-        // await guild.settings.loadSettings();
+        await guild.settings.loadSettings();
 
         /* Trap management and user levels. */
         guild.battleSystem = new BattleSystem(guild);
@@ -41,8 +41,8 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
 
         };
 
-        // await guild.games.awbw.loadConfig();
-        // await guild.games.awbw.loadRegistry();
+        await guild.games.awbw.loadConfig();
+        await guild.games.awbw.loadRegistry();
 
         /* Message scanner for stat tracking */
         guild.scanner = new GuildMessageScanner(guild);
