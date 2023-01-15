@@ -29,9 +29,9 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         /* Trap management and user levels. */
         guild.battleSystem = new BattleSystem(guild);
 
-        // await guild.battleSystem.loadConfig();
-        // await guild.battleSystem.loadFromDB();
-        // await guild.battleSystem.writeToDB();
+        await guild.battleSystem.loadConfig();
+        await guild.battleSystem.loadFromDB();
+        await guild.battleSystem.writeToDB();
 
         // Games Trackers
         guild.games = {
