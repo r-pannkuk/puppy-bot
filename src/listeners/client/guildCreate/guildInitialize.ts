@@ -56,10 +56,6 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
             guild.roleAssigner = new RoleAssignmentManager(guild);
         }
 
-        await guild.emojiUsage.loadRecords();
-        await guild.emojiUsage.loadRegistry();
-        await guild.emojiUsage.generateLastMessageStore();
-
         await guild.roleAssigner.loadConfig();
         await guild.roleAssigner.generateMessageCollectors();
 
@@ -98,6 +94,11 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         /* AWBW tracker and poller. */
         // let AdvanceWarsByWeb = (await import('../../core/games/AdvanceWarsByWeb.mjs')).default;
         // guild.AWBW = new AdvanceWarsByWeb(guild.settings);
+
+        /* SOMETIMES, IF THE LASTMESSAGEID IS NULL THIS WILL FAIL */
+        await guild.emojiUsage.loadRecords();
+        await guild.emojiUsage.loadRegistry();
+        await guild.emojiUsage.generateLastMessageStore();
 
         await guild.members.fetch();
 
