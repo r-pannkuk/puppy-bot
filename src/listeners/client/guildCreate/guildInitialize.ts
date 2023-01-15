@@ -56,7 +56,7 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
             guild.roleAssigner = new RoleAssignmentManager(guild);
         }
 
-        // await guild.emojiUsage.loadRecords();
+        await guild.emojiUsage.loadRecords();
         await guild.emojiUsage.loadRegistry();
         await guild.emojiUsage.generateLastMessageStore();
 
