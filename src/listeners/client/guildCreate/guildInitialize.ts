@@ -63,6 +63,11 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         await guild.roleAssigner.loadConfig();
         await guild.roleAssigner.generateMessageCollectors();
 
+        /* Custom command system unique to each guild. */
+        guild.customCommandSystem = new CustomCommandSystem(guild);
+
+        await guild.customCommandSystem.loadFromDB();
+
         /* Message Echoer for deletions and edits */
         guild.messageEchoer = new MessageEchoManager(guild);
 
@@ -79,11 +84,6 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         // /* Moderation system for managing user activity. */
         // guild.moderation = new ModerationSystem(guild.settings);
         // guild.moderation.scheduleAllModerations();
-
-        /* Custom command system unique to each guild. */
-        guild.customCommandSystem = new CustomCommandSystem(guild);
-
-        await guild.customCommandSystem.loadFromDB();
 
         // /* Guild message cache for tracking user stats and simulations. */
         // guild.messageCache = new GuildMessageCache(guild.settings);
