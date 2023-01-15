@@ -79,7 +79,7 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         /* Custom command system unique to each guild. */
         guild.customCommandSystem = new CustomCommandSystem(guild);
 
-        // await guild.customCommandSystem.loadFromDB();
+        await guild.customCommandSystem.loadFromDB();
 
         // /* Guild message cache for tracking user stats and simulations. */
         // guild.messageCache = new GuildMessageCache(guild.settings);
