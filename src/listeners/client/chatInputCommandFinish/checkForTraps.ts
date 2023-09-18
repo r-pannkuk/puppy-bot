@@ -1,14 +1,14 @@
 import { BattleTrapRecordType, BattleTrapState } from "@prisma/client";
 import { ApplyOptions } from "@sapphire/decorators";
 import { ChatInputCommandRunPayload, Command, Events, Listener } from "@sapphire/framework";
-import type { CommandInteraction } from "discord.js";
+import type { ChatInputCommandInteraction } from "discord.js";
 import type { BattleSystem } from "../../../lib/structures/managers/BattleSystem";
 
 @ApplyOptions<Listener.Options>({
     event: Events.ChatInputCommandRun,
 })
 export class ChatInputCommandFinishCheckForTraps extends Listener {
-    public async run(interaction: CommandInteraction, command: Command, payload: ChatInputCommandRunPayload) {
+    public async run(interaction: ChatInputCommandInteraction, command: Command, payload: ChatInputCommandRunPayload) {
         if (!interaction.inGuild()) return;
         if (interaction.user.id === this.container.client.user!.id) return;
         if (interaction.user.bot) return;

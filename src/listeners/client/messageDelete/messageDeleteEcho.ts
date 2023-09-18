@@ -12,7 +12,7 @@ export class MessageDeleteEcho extends Listener<typeof Events.MessageDelete> {
     public run(message: Message) {
         if (!message.guild?.messageEchoer.echoDeletes) return;
 
-        if (!message.channel.isText()) return;
+        if (!message.channel.isTextBased()) return;
 
         if (message.author === container.client.user || message.author.bot) return;
 
@@ -30,7 +30,7 @@ export class MessageDeleteEcho extends Listener<typeof Events.MessageDelete> {
         echoChannel?.send({
             embeds: message.embeds,
             components: message.components,
-            attachments: Array.from(message.attachments.values()),
+            files: Array.from(message.attachments.values()),
             content
         })
     }

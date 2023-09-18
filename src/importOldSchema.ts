@@ -14907,7 +14907,7 @@ const global = {
 				...schedule,
 				repeat: {
 					...schedule.repeat,
-					interval: (schedule.repeat.interval) ? BigInt(schedule.repeat.interval) : null,
+					interval: (schedule.repeat.interval) ? (schedule.repeat.interval) : null,
 				}
 			})),
 			jobId: "", 

@@ -1,8 +1,9 @@
-import { PaginatedMessage, PaginatedMessageOptions } from "@sapphire/discord.js-utilities";
-import { Collection, Constants, Guild, GuildEmoji } from "discord.js";
+import { PaginatedMessage, PaginatedMessageOptions } from '@sapphire/discord.js-utilities';
+import { Collection, Colors, ComponentType, Guild, GuildEmoji } from "discord.js";
 import { Emojis, SELECT_MENU_OPTION_LIMIT } from "../../../utils/constants";
 import type { EmojiRecords } from "../../managers/EmojiUsageManager";
 import { PuppyBotEmbed } from "../PuppyBotEmbed";
+import { ButtonStyle } from 'discord.js';
 
 export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 	// protected userIdFilter: [userId: string][];
@@ -33,9 +34,9 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 			actions: options.actions ?? [
 				{
 					customId: EmojiUsagePaginatedMessage.InteractionIds.PreviousPage,
-					style: 'PRIMARY',
+					style: ButtonStyle.Primary,
 					emoji: Emojis.ArrowLeft,
-					type: Constants.MessageComponentTypes.BUTTON,
+					type: ComponentType.Button,
 					run: ({ handler }) => {
 						if (handler.index === 0) {
 							handler.index = handler.pages.length - 1;
@@ -46,9 +47,9 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 				},
 				{
 					customId: EmojiUsagePaginatedMessage.InteractionIds.NextPage,
-					style: 'PRIMARY',
+					style: ButtonStyle.Primary,
 					emoji: Emojis.ArrowRight,
-					type: Constants.MessageComponentTypes.BUTTON,
+					type: ComponentType.Button,
 					run: ({ handler }) => {
 						if (handler.index === handler.pages.length - 1) {
 							handler.index = 0;
@@ -59,16 +60,16 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 				},
 				// {
 				// 	customId: EmojiUsagePaginatedMessage.InteractionIds.UserFilter,
-				// 	style: 'SECONDARY',
+				// 	style: ButtonStyle.Secondary,
 				// 	emoji: Emojis.Asterisk,
-				// 	type: Constants.MessageComponentTypes.BUTTON,
+				// 	type: ComponentType.Button,
 				// 	run: ({ handler }) => {
 				// 		handler.
 				// 	}
 				// }
 			],
 			template: options.template ?? new PuppyBotEmbed()
-				.setColor(Constants.Colors.DARK_GREY),
+				.setColor(Colors.DarkGrey),
 		})
 
 		this.records = emojiRecords;
@@ -79,10 +80,14 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 
 		this.addAction({
 			customId: EmojiUsagePaginatedMessage.InteractionIds.GoToPage,
-			type: Constants.MessageComponentTypes.SELECT_MENU,
+			type: ComponentType.StringSelect,
+			options: [{
+				label: "Filling...",
+				value: "TBD",
+			}],
 			placeholder: "Select Custom Emoji...",
 			run: ({ handler, interaction }) => {
-				if (interaction.isSelectMenu() && interaction.customId === EmojiUsagePaginatedMessage.InteractionIds.GoToPage) {
+				if (interaction.isStringSelectMenu() && interaction.customId === EmojiUsagePaginatedMessage.InteractionIds.GoToPage) {
 					handler.index = parseInt(interaction.values[0], 10)
 				}
 			}
@@ -90,7 +95,7 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 
 		// this.addAction({
 		// 	customId: EmojiUsagePaginatedMessage.InteractionIds.CountReactions,
-		// 	type: Constants.MessageComponentTypes.SELECT_MENU,
+		// 	type: ComponentType.StringSelect,
 		// 	options: [
 		// 		{
 		// 			label: "Count reactions in totals",
@@ -104,7 +109,7 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 		// 	],
 		// 	placeholder: "Count Reactions as well?",
 		// 	run: ({ interaction }) => {
-		// 		if (interaction.isSelectMenu() && interaction.customId === EmojiUsagePaginatedMessage.InteractionIds.CountReactions) {
+		// 		if (interaction.isStringSelectMenu() && interaction.customId === EmojiUsagePaginatedMessage.InteractionIds.CountReactions) {
 		// 			this.countReactions = Boolean(interaction.values[0]);
 		// 			this.sortRecords();
 		// 			this.generatePages();
@@ -141,7 +146,7 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 	}
 
 	public generateSelectMenu() {
-		this.setSelectMenuOptions((pageIndex) => {
+		this.setSelectMenuOptions((pageIndex, _i18n) => {
 			const key = this.Keys.at(pageIndex - 1);
 
 			if (key === 'All') {
@@ -152,7 +157,7 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 				const emoji = this.guild.emojis.cache.get(this.Keys.at(pageIndex - 1)!)!;
 				return {
 					label: emoji.name!,
-					emoji: emoji,
+					emoji: emoji.id,
 				}
 			}
 		});

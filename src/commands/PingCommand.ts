@@ -1,5 +1,5 @@
 import type { ApplicationCommandRegistry, ChatInputCommandContext } from '@sapphire/framework';
-import type { CommandInteraction, Message } from 'discord.js';
+import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { ApplyOptions } from '@sapphire/decorators'
 import { PuppyBotCommand } from '../lib/structures/command/PuppyBotCommand';
 
@@ -27,7 +27,7 @@ export class PingCommand extends PuppyBotCommand {
         await msg.edit(content);
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         await interaction.reply('Ping?');
 
         const content = `Pong! Bot Latency ${Math.round(this.container.client.ws.ping)}ms. API Latency ${interaction.createdTimestamp - Date.now()}ms.`;

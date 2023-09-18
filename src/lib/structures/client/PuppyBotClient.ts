@@ -21,7 +21,6 @@ export class PuppyBotClient extends SapphireClient {
             leaveOnStop: true,
             leaveOnEmpty: true,
             leaveOnFinish: true,
-            youtubeDL: false,
             plugins: [
                 new SpotifyPlugin({
                     emitEventsAfterFetching: true,
@@ -43,7 +42,7 @@ export class PuppyBotClient extends SapphireClient {
     public override async destroy() {
         container.database = new PrismaClient();
         await container.database.$disconnect()
-        return super.destroy;
+        return super.destroy();
     }
 
     // @ts-expect-error

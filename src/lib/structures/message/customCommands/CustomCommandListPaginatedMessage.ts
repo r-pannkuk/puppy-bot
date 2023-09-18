@@ -1,7 +1,7 @@
 import type { CustomCommand } from "@prisma/client";
 import { PaginatedMessage, PaginatedMessageOptions } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
-import { Collection, Constants, Guild } from "discord.js";
+import { ButtonStyle, ComponentType, type Collection, type Guild } from "discord.js";
 import { Emojis } from "../../../utils/constants";
 import { PuppyBotEmbed } from "../PuppyBotEmbed";
 
@@ -43,9 +43,9 @@ export class CustomCommandListPaginatedMessage extends PaginatedMessage {
 			actions: options.actions ?? [
 				{
 					customId: InteractionIds.PreviousPage,
-					style: 'PRIMARY',
+					style: ButtonStyle.Primary,
 					emoji: Emojis.ArrowLeft,
-					type: Constants.MessageComponentTypes.BUTTON,
+					type: ComponentType.Button,
 					run: ({ handler }) => {
 						if (handler.index === 0) {
 							handler.index = handler.pages.length - 1;
@@ -56,9 +56,9 @@ export class CustomCommandListPaginatedMessage extends PaginatedMessage {
 				},
 				{
 					customId: InteractionIds.NextPage,
-					style: 'PRIMARY',
+					style: ButtonStyle.Primary,
 					emoji: Emojis.ArrowRight,
-					type: Constants.MessageComponentTypes.BUTTON,
+					type: ComponentType.Button,
 					run: ({ handler }) => {
 						if (handler.index === handler.pages.length - 1) {
 							handler.index = 0;
@@ -74,9 +74,13 @@ export class CustomCommandListPaginatedMessage extends PaginatedMessage {
 
 		this.addAction({
 			customId: InteractionIds.GoToPage,
-			type: Constants.MessageComponentTypes.SELECT_MENU,
+			type: ComponentType.StringSelect,
+			options: [{
+				label: "Filling...",
+				value: "TBD",
+			}],
 			run: ({ handler, interaction }) => {
-				if (interaction.isSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
+				if (interaction.isStringSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
 					handler.index = parseInt(interaction.values[0], 10)
 				}
 			}

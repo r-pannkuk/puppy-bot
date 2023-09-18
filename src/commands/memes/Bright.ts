@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import type { CommandInteraction, Message } from 'discord.js';
+import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
 const SHORT_DESCRIPTION = 'Correct a user with a well-placed intention to their face.'
@@ -12,8 +12,8 @@ const SHORT_DESCRIPTION = 'Correct a user with a well-placed intention to their 
     detailedDescription: SHORT_DESCRIPTION + ' Examples:\n' +
         '-- !correct @Dog\n' +
         '-- !bright @Dog',
-    requiredUserPermissions: ["SEND_MESSAGES"],
-    requiredClientPermissions: ["SEND_MESSAGES"],
+    requiredUserPermissions: ["SendMessages"],
+    requiredClientPermissions: ["SendMessages"],
     scriptName: 'bright.py',
     nsfw: false,
     options: ['target']
@@ -34,7 +34,7 @@ export class BrightCommand extends PyScriptCommand {
         )
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         const target = interaction.options.getUser('target', true);
         await interaction.deferReply()
         const files = await this.run([target.displayAvatarURL()]);

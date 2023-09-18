@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import type { CommandInteraction, Message } from 'discord.js';
+import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
 const SHORT_DESCRIPTION = 'Magneto\'s been thwarted again.'
@@ -11,8 +11,8 @@ const SHORT_DESCRIPTION = 'Magneto\'s been thwarted again.'
     detailedDescription: SHORT_DESCRIPTION + ' Examples:\n' +
         '-- /magneto\n' +
         '-- /magneto <image>',
-    requiredUserPermissions: ["SEND_MESSAGES"],
-    requiredClientPermissions: ["SEND_MESSAGES"],
+    requiredUserPermissions: ["SendMessages"],
+    requiredClientPermissions: ["SendMessages"],
     scriptName: 'magneto.py',
     nsfw: false,
     options: ['image']
@@ -32,7 +32,7 @@ export class MagnetoCommand extends PyScriptCommand {
         )
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         const image = interaction.options.getString('image', true);
         await interaction.deferReply()
         const files = await this.run([image]);

@@ -1,5 +1,5 @@
 import { container, UserError } from "@sapphire/framework";
-import type { MessageEmbedOptions } from "discord.js";
+import type { EmbedData } from "discord.js";
 import type { AdvanceWarsByWeb } from "../../managers/games/AWBWScanner";
 import { PuppyBotEmbed } from "../PuppyBotEmbed";
 
@@ -46,7 +46,7 @@ export class GameRegistryUserEmbed extends PuppyBotEmbed {
 }
 
 export namespace GameRegistryUserEmbed {
-	export type Options = MessageEmbedOptions & {
+	export type Options = EmbedData & {
 		userRecords: UserRecord[]
 	}
 }

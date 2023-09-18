@@ -1,4 +1,4 @@
-import type { MessageEmbedOptions } from "discord.js";
+import type { EmbedData } from "discord.js";
 import type { AdvanceWarsByWeb } from "../../managers/games/AWBWScanner";
 import { PuppyBotEmbed } from "../PuppyBotEmbed";
 
@@ -45,7 +45,7 @@ export class GameScanGameEmbed extends PuppyBotEmbed {
 }
 
 export namespace GameScanGameEmbed {
-	export type Options = MessageEmbedOptions & {
+	export type Options = EmbedData & {
 		gameRecord?: GameRecord,
 		content?: string[]
 	}

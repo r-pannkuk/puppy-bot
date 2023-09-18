@@ -1,6 +1,5 @@
 import { Args, ApplicationCommandRegistry, ChatInputCommandContext, UserError } from '@sapphire/framework'
-import { Message, User, CommandInteraction, GuildMember, ButtonInteraction, Constants, MessageActionRow, MessageButton, Collection } from 'discord.js'
-import { MessageEmbed } from 'discord.js'
+import { Message, User, GuildMember, ButtonInteraction, ActionRowBuilder, Collection, ChatInputCommandInteraction, EmbedBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageReplyOptions } from 'discord.js'
 import 'dotenv/config'
 import { DiceRoll, Parser } from '@dice-roller/rpg-dice-roller'
 import { ApplyOptions } from '@sapphire/decorators'
@@ -14,8 +13,8 @@ import { Time } from '@sapphire/time-utilities'
     cooldownLimit: 6,
     description: 'Rolls a combination of dice.',
     detailedDescription: `Rolls a combination of dice. Can throw up to 100 dice with up to 9999 sides. Must throw at least one die and only dice with 2 or more sides.  Examples:\n-- \`\`roll 3d6\`\`\n-- \`\`roll 4d8\`\`\n-- \`\`roll 3d6 4d8\`\``,
-    requiredUserPermissions: ['SEND_MESSAGES'],
-    requiredClientPermissions: ['SEND_MESSAGES'],
+    requiredUserPermissions: ["SendMessages"],
+    requiredClientPermissions: ["SendMessages"],
     nsfw: false
 })
 export class DiceRollCommand extends PuppyBotCommand {
@@ -144,7 +143,7 @@ export class DiceRollCommand extends PuppyBotCommand {
 
         exportedResults.rolls[0].results
 
-        var embed = new MessageEmbed()
+        var embed = new EmbedBuilder()
             .setColor(14400597)
             .setAuthor({
                 name: `Dice roll: ${results.notation}`,
@@ -167,7 +166,7 @@ export class DiceRollCommand extends PuppyBotCommand {
         return embed;
     }
 
-    public async run(messageOrInteraction: Message | CommandInteraction, user: User | GuildMember, processedInput: string) {
+    public async run(messageOrInteraction: Message | ChatInputCommandInteraction, user: User | GuildMember, processedInput: string) {
         const followUp = await this.generateFollowUp(messageOrInteraction);
 
         var rerollAmount = 0;
@@ -181,21 +180,24 @@ export class DiceRollCommand extends PuppyBotCommand {
 
         const customId = 'DiceRollCommand.reroll';
 
-        const row = new MessageActionRow()
+        const row = new ActionRowBuilder()
             .addComponents(
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId(customId)
                     .setLabel('Re-Roll')
-                    .setStyle(Constants.MessageButtonStyles.SECONDARY)
+                    .setStyle(ButtonStyle.Secondary)
             );
 
         // What the fuck.
-        const response = messageOrInteraction.channel?.messages.cache.get((await followUp({ embeds: [await generateEmbed()], components: [row] })).id)!;
+        const response = await followUp({ 
+            embeds: [await generateEmbed()], 
+            components: [row]
+        } as MessageReplyOptions);
         this.cachedQuery.set(messageOrInteraction.guildId ?? user.id, {
             notation: processedInput
         });
         response.createMessageComponentCollector({
-            componentType: Constants.MessageComponentTypes.BUTTON,
+            componentType: ComponentType.Button,
             filter: (interaction: ButtonInteraction) => interaction.customId === customId && interaction.user.id === user.id
         }).addListener('collect', async (interaction: ButtonInteraction) => {
             await interaction.update({ embeds: [await generateEmbed()] })
@@ -214,7 +216,7 @@ export class DiceRollCommand extends PuppyBotCommand {
         await this.run(message, message.author, processedInput);
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         var processedInput = interaction.options.get('notation')?.value?.toString().replace('\W', "")
             ?? this.cachedQuery.get(interaction.guildId ?? interaction.user.id)?.notation
             ?? 'd20';

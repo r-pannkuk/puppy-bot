@@ -57,7 +57,7 @@ def main():
 
     normal_font = ImageFont.truetype("./src/assets/fonts/calibri.ttf", 25)
     italic_font = ImageFont.truetype("./src/assets/fonts/calibrii.ttf", 25)
-    font_height = normal_font.getsize('T')[1] * 1.5
+    font_height = normal_font.getbbox('T')[1] - normal_font.getbbox('T')[3] * 1.5
 
     # original offset excludes the first "But I don't want..." in order to get italicized
     true_x_offset = 549
@@ -106,9 +106,9 @@ def main():
 
             ImageDraw.Draw(new_img).text((x_offset, y_offset), character, fill=(31,26,19,240), font=font)
 
-            x_offset += font.getsize(character)[0]
+            x_offset += normal_font.getbbox(character)[2] - normal_font.getbbox(character)[0]
 
-        y_offset += font_height
+        y_offset -= font_height
 
 
     # save

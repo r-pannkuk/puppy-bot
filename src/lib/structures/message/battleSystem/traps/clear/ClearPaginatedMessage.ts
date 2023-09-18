@@ -1,6 +1,7 @@
 import { BattleTrapState } from "@prisma/client";
-import { ButtonInteraction, Collection, Constants, ExcludeEnum, Message, MessageButton, User } from "discord.js";
+import { ButtonStyle, Collection, ComponentType, Message, User } from "discord.js";
 import { Emojis } from "../../../../../utils/constants";
+import type { PaginatedMessageActionButton, PaginatedMessageActionContext } from '@sapphire/discord.js-utilities';
 import type { BattleSystem } from "../../../../managers/BattleSystem";
 import { ListPaginatedMessage, InteractionIds as Ids } from "../list/ListPaginatedMessage";
 
@@ -27,11 +28,11 @@ export class ClearPaginatedMessage extends ListPaginatedMessage {
 		}
 	}
 
-	public static clearAction = {
+	public static clearAction : PaginatedMessageActionButton = {
 		customId: InteractionIds.Clear,
-		type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+		type: ComponentType.Button,
 		emoji: Emojis.CrossMark,
-		style: Constants.MessageButtonStyles.DANGER as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
+		style: ButtonStyle.Danger,
 	}
 
 	protected get originalTraps() {
@@ -41,12 +42,8 @@ export class ClearPaginatedMessage extends ListPaginatedMessage {
 	public constructor(options: ClearPaginatedMessage.Options) {
 		const clearAction = {
 			...ClearPaginatedMessage.clearAction,
-			run: async ({ handler }) => {
+			run: async ({ handler, interaction } : PaginatedMessageActionContext) => {
 				let paginatedMessage = handler as ClearPaginatedMessage;
-				const buttonResponse = (paginatedMessage.response as ButtonInteraction);
-				const button = (buttonResponse?.component as MessageButton);
-				button?.setDisabled(true);
-				await buttonResponse?.deferUpdate();
 
 				const trap = this.originalTraps?.at(paginatedMessage.index);
 
@@ -66,7 +63,7 @@ export class ClearPaginatedMessage extends ListPaginatedMessage {
 					paginatedMessage.setIndex(currentIndex);
 
 					paginatedMessage.generateSelectMenuOptions();
-					await paginatedMessage.run(buttonResponse);
+					await paginatedMessage.run(interaction);
 				}
 			}
 		};

@@ -1,6 +1,6 @@
 import type { Command } from '@sapphire/framework';
 import { PuppyBotCommand } from './PuppyBotCommand';
-import { PythonShell, Options, PythonShellError } from 'python-shell';
+import { PythonShell, Options } from 'python-shell';
 import { debugLog } from '../../utils/logging';
 
 const BASE_SCRIPT_PATH = './src/scripts/';
@@ -12,8 +12,8 @@ export abstract class PyScriptCommand extends PuppyBotCommand {
     public constructor(context: PyScriptCommand.Context, options: PyScriptCommand.Options) {
         super(context, {
             ...options,
-            requiredUserPermissions: ['SEND_MESSAGES'],
-            requiredClientPermissions: ['SEND_MESSAGES'],
+            requiredUserPermissions: ["SendMessages"],
+            requiredClientPermissions: ["SendMessages"],
             nsfw: false
         })
 
@@ -25,32 +25,25 @@ export abstract class PyScriptCommand extends PuppyBotCommand {
             mode: "text",
             pythonOptions: ['-u'],
             scriptPath: this.scriptDir,
-            args: pyArgs
+            args: pyArgs,
         } as Options;
 
-        try {
-            const result = new Promise<string[]>((done, reject) =>
-                PythonShell.run(
-                    this.scriptName, options, function (err, results) {
-                        if (err) {
-                            debugLog('error', err.message);
-                            reject(err);
-                        }
-                        // Trim white space and carriage return from the call
-                        if (results === undefined) {
-                            results = [];
-                        }
-                        results = results.map((value) => value.replace(/\s+/g, ''));
-                        done(results);
-                    })
-            );
-
-            return result;
-        } catch (e) {
-            if(e instanceof PythonShellError) {
-                this.error(e.message);
-            } else throw e;
-        }
+        return new Promise<string[]>((done, reject) =>
+            PythonShell.run(
+                this.scriptName, options, function (err, results) {
+                    if (err) {
+                        debugLog('error', err.message);
+                        reject(err.message);
+                        return;
+                    }
+                    // Trim white space and carriage return from the call
+                    if (results === undefined) {
+                        results = [];
+                    }
+                    results = results.map((value) => value.replace(/\s+/g, ''));
+                    done(results);
+                })
+        );
     }
 }
 

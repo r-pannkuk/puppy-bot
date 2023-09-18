@@ -2,7 +2,7 @@ import type { GameScanConfig } from "@prisma/client";
 import { ApplyOptions, RequiresUserPermissions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum, UserError } from "@sapphire/framework";
 import { PermissionFlagsBits } from "discord-api-types/v9";
-import { CommandInteraction, Constants, Guild, GuildTextBasedChannel, Message, MessageEmbed, User } from "discord.js";
+import { ChannelType, ChatInputCommandInteraction, Guild, GuildTextBasedChannel, Message, User } from "discord.js";
 import { PuppyBotCommand } from "../../../lib/structures/command/PuppyBotCommand";
 import { AWBWScanner, AdvanceWarsByWeb as AWBW } from '../../../lib/structures/managers/games/AWBWScanner'
 import { GameRegistryGameListPaginatedMessage } from "../../../lib/structures/message/games/GameRegistryGameListPaginatedMessage";
@@ -42,7 +42,7 @@ const SHORT_DESCRIPTION = `Configures settings for AdvancedWarsByWeb games.`
 })
 export class AdvanceWarsByWeb extends PuppyBotCommand {
 	public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
-        registry.registerChatInputCommand((builder) => builder
+		registry.registerChatInputCommand((builder) => builder
 			.setName(this.name)
 			.setDescription(this.description)
 			.addSubcommandGroup((builder) =>
@@ -125,7 +125,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 			)
 			.addSubcommandGroup((builder) =>
 				builder
-					.setName('admin' as AdvanceWarsByWeb.ValidSubCommandGroup)
+					.setName('admin')
 					.setDescription(`Configuration options for AWBW integration.`)
 					.addSubcommand((builder) =>
 						builder
@@ -135,7 +135,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 								option
 									.setName('output-channel')
 									.setDescription(`The channel notifications will be sent to.`)
-									.addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+									.addChannelTypes(ChannelType.GuildText)
 							)
 					)
 			),
@@ -143,7 +143,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 		)
 	}
 
-	public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
 		const subCommandGroup = interaction.options.getSubcommandGroup(true) as AdvanceWarsByWeb.ValidSubCommandGroup
 		const subCommand = interaction.options.getSubcommand(true) as AdvanceWarsByWeb.ValidSubCommand<typeof subCommandGroup>;
 
@@ -153,9 +153,9 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 			'discord-user': interaction.options.getUser('discord-user'),
 			'awbw-user-id': interaction.options.getString('awbw-user-id'),
 			'show-expired': interaction.options.getBoolean('show-expired')
-		};
+		} as AdvanceWarsByWeb.CommandOptions;
 
-		if (subCommandGroup === 'admin' && !interaction.guild!.members.cache.get(interaction.user.id)?.permissions.has('ADMINISTRATOR')) {
+		if (subCommandGroup === 'admin' && !interaction.guild!.members.cache.get(interaction.user.id)?.permissions.has('Administrator')) {
 			this.error(`You don't have sufficient permissions for this command.`, interaction.user)
 		}
 
@@ -265,7 +265,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 		}
 	}
 
-	@RequiresUserPermissions('ADMINISTRATOR')
+	@RequiresUserPermissions('Administrator')
 	public async messageRunAdmin(message: Message, args: Args) {
 		if (args.getFlags('channel')) {
 			const channel = message.guild!.channels.cache.get(args.getOption('output-channel') ?? '');
@@ -287,7 +287,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 	}
 
 	public async run<G extends AdvanceWarsByWeb.ValidSubCommandGroup, S extends AdvanceWarsByWeb.ValidSubCommand<G>>(args: {
-		messageOrInteraction: Message | CommandInteraction,
+		messageOrInteraction: Message | ChatInputCommandInteraction,
 		subCommandGroup: G,
 		subCommand: S,
 		guild: Guild,
@@ -319,7 +319,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 		} else this.error(`Invalid SubCommand group.`, args.subCommandGroup);
 	}
 
-	public async handleAddGame(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User, options: AdvanceWarsByWeb.CommandOptions<'add', 'game'>) {
+	public async handleAddGame(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, user: User, options: AdvanceWarsByWeb.CommandOptions<'add', 'game'>) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 		var caughtErrors: UserError[] = [];
 		var registryEntries: AWBW.RegistryRecord.Instance[] = [];
@@ -339,17 +339,16 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 			const paginatedMessage = new GameRegistryGameListPaginatedMessage({
 				registryEntries,
 				guild: guild,
-				template: new MessageEmbed({
-					title: `Added Game:`,
-					color: Constants.Colors.AQUA
-				})
+				// template: new EmbedBuilder()
+				// 	.setTitle(`Added Game:`)
+				// 	.setColor(Colors.Aqua)
 			});
 
 			await paginatedMessage.run(messageOrInteraction);
 		}
 	}
 
-	public async handleAddUser(messageOrInteraction: Message | CommandInteraction, _guild: Guild, user: User, options: AdvanceWarsByWeb.CommandOptions<'add', 'user'>) {
+	public async handleAddUser(messageOrInteraction: Message | ChatInputCommandInteraction, _guild: Guild, user: User, options: AdvanceWarsByWeb.CommandOptions<'add', 'user'>) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 		const userRecord = await AWBWScanner.generateUserRecord((options['discord-user'] as User ?? user).id, (options['awbw-user-id'] as string))
 		await followUp({
@@ -361,7 +360,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 		});
 	}
 
-	public async handleListGame(messageOrInteraction: Message | CommandInteraction, guild: Guild, _user: User, options: AdvanceWarsByWeb.CommandOptions<'list', 'game'>) {
+	public async handleListGame(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, _user: User, options: AdvanceWarsByWeb.CommandOptions<'list', 'game'>) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
 		if (guild.games.awbw.gameRegistryEntries.size === 0) {
@@ -376,7 +375,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 		}
 	}
 
-	public async handleListUser(messageOrInteraction: Message | CommandInteraction, guild: Guild, _user: User, _options: AdvanceWarsByWeb.CommandOptions<'list', 'user'>) {
+	public async handleListUser(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, _user: User, _options: AdvanceWarsByWeb.CommandOptions<'list', 'user'>) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 		if (guild.games.awbw.users.size === 0) {
 			await followUp(`No AWBW users are being tracked on this server.  Use the \`awbw add user\` command to add one.`);
@@ -389,7 +388,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 		}
 	}
 
-	public async handleAdminChannel(messageOrInteraction: Message | CommandInteraction, guild: Guild, _user: User, options: AdvanceWarsByWeb.CommandOptions<'admin', 'channel'>) {
+	public async handleAdminChannel(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, _user: User, options: AdvanceWarsByWeb.CommandOptions<'admin', 'channel'>) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
 		let config: GameScanConfig;
@@ -404,7 +403,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 		await followUp(`Set output channel for AWBW messages to: ${guild.channels.cache.get(config.outputChannelId ?? '')}`)
 	}
 
-	// public async handleAdminInterval(messageOrInteraction: Message | CommandInteraction, guild: Guild, _user: User, options: AdvanceWarsByWeb.CommandOptions<'admin', 'interval'>) {
+	// public async handleAdminInterval(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, _user: User, options: AdvanceWarsByWeb.CommandOptions<'admin', 'interval'>) {
 	// 	const followUp = await PuppyBotCommand.generateFollowUp(messageOrInteraction);
 
 	// 	let config: GameScanConfig;
@@ -419,7 +418,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 	// 	await followUp(`Done: ${config.intervalSecs}`)
 	// }
 
-	public async handleRemoveGame(messageOrInteraction: Message | CommandInteraction, guild: Guild, _user: User, options: AdvanceWarsByWeb.CommandOptions<'remove', 'game'>) {
+	public async handleRemoveGame(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, _user: User, options: AdvanceWarsByWeb.CommandOptions<'remove', 'game'>) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
 		for (var gameId of options["game-ids"]) {
@@ -430,7 +429,7 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 		await followUp(`No longer tracking AWBW game ID's: \`${options['game-ids'].join('\`, \`')}\``);
 	}
 
-	public async handleRemoveUser(messageOrInteraction: Message | CommandInteraction, _guild: Guild, user: User, options: AdvanceWarsByWeb.CommandOptions<'remove', 'user'>) {
+	public async handleRemoveUser(messageOrInteraction: Message | ChatInputCommandInteraction, _guild: Guild, user: User, options: AdvanceWarsByWeb.CommandOptions<'remove', 'user'>) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 		const userToRemove = options['discord-user'] as User ?? user
 		await AWBWScanner.removeUser(userToRemove.id)
@@ -458,7 +457,7 @@ export namespace AdvanceWarsByWeb {
 			'game': {
 				'show-expired': boolean
 			},
-			'user': never
+			'user': PuppyBotCommand.SubCommandNoOptions
 		},
 		'remove': {
 			'game': {

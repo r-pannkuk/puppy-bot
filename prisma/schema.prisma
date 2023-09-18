@@ -46,7 +46,7 @@ model ReminderSchedule {
 type ReminderRepeatSchedule {
   isRepeating Boolean
   isInfinite  Boolean?
-  interval    BigInt?
+  interval    Int?
 }
 
 model ReminderEvent {

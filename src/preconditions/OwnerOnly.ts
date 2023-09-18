@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { Precondition } from '@sapphire/framework'
-import type { CommandInteraction, ContextMenuInteraction, Message } from 'discord.js'
+import { Command, Precondition } from '@sapphire/framework'
+import type { ChatInputCommandInteraction, Message } from 'discord.js'
 import 'dotenv/config'
 import { envParseArray } from '../lib/env/utils';
 
@@ -12,11 +12,11 @@ export class OwnerOnlyPrecondition extends Precondition {
         return this.checkOwner(message.author.id);
     }
 
-    public override async chatInputRun(interaction: CommandInteraction) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction) {
         return this.checkOwner(interaction.user.id);
     }
 
-    public override async contextMenuRun(interaction: ContextMenuInteraction) {
+    public override async contextMenuRun(interaction: Command.ContextMenuCommandInteraction) {
         return this.checkOwner(interaction.user.id);
     }
 

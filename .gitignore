@@ -99,3 +99,8 @@ ENV/
 
 # mypy
 .mypy_cache/
+node_modules
+
+# saves
+saves/*/*.png
+saves/*/*.gif

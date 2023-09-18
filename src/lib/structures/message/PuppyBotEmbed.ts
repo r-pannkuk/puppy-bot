@@ -1,10 +1,10 @@
-import { MessageEmbed } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import { ZERO_WIDTH_SPACE } from "../../utils/constants";
 
 const EMBED_DESCRIPTION_CHARACTER_LIMIT = 4096;
 const EMBED_FIELD_CHARACTER_LIMIT = 1024;
 
-export class PuppyBotEmbed extends MessageEmbed {
+export class PuppyBotEmbed extends EmbedBuilder {
 	public splitFields(options: {
 		title?: string,
 		content?: string | string[],
@@ -16,8 +16,8 @@ export class PuppyBotEmbed extends MessageEmbed {
 
 		if (Array.isArray(content)) content = content.join('\n');
 
-		if (title === ZERO_WIDTH_SPACE && !this.description && content.length < EMBED_DESCRIPTION_CHARACTER_LIMIT) {
-			this.description = content;
+		if (title === ZERO_WIDTH_SPACE && !this.data.description && content.length < EMBED_DESCRIPTION_CHARACTER_LIMIT) {
+			this.setDescription(content);
 			return this;
 		}
 
@@ -26,7 +26,7 @@ export class PuppyBotEmbed extends MessageEmbed {
 
 		while (content.length) {
 			if (content.length < EMBED_FIELD_CHARACTER_LIMIT) {
-				this.fields.push({
+				this.addFields({
 					name: title,
 					value: content,
 					inline: false
@@ -39,7 +39,7 @@ export class PuppyBotEmbed extends MessageEmbed {
 			if (x === -1) x = slice.lastIndexOf(' ');
 			if (x === -1) x = EMBED_FIELD_CHARACTER_LIMIT;
 
-			this.fields.push({
+			this.addFields({
 				name: title,
 				value: content.trim().slice(0, x),
 				inline: false,

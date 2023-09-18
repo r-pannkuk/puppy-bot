@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from "@sapphire/framework";
-import type { GuildMember, GuildTextBasedChannel, VoiceBasedChannel } from "discord.js";
-import type { CommandInteraction, Message } from "discord.js";
+import { ChannelType, type GuildMember, type GuildTextBasedChannel, type VoiceBasedChannel } from "discord.js";
+import type { ChatInputCommandInteraction, Message } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import { Emojis } from "../../lib/utils/constants";
 
@@ -13,8 +13,8 @@ const SHORT_DESCRIPTION = `Plays music from the specified YouTube, Spotify, or A
     description: SHORT_DESCRIPTION,
     detailedDescription: SHORT_DESCRIPTION + ' Examples:\n' +
         '!play https://www.youtube.com/watch?v=BOnp3G4h7cg',
-    requiredUserPermissions: ["CONNECT"],
-    requiredClientPermissions: ["CONNECT", "SPEAK", "REQUEST_TO_SPEAK"],
+    requiredUserPermissions: ["Connect"],
+    requiredClientPermissions: ["Connect", "Speak", "RequestToSpeak"],
     nsfw: false,
     runIn: 'GUILD_ANY',
     options: true
@@ -38,7 +38,7 @@ export class PlayCommand extends PuppyBotCommand {
         const player = this.container.client.musicPlayer;
 
         if (!voiceChannel) {
-            voiceChannel = searcher.guild!.channels.cache.filter(c => c.type === 'GUILD_VOICE').first() as VoiceBasedChannel;
+            voiceChannel = searcher.guild!.channels.cache.filter(c => c.type === ChannelType.GuildVoice).first() as VoiceBasedChannel;
 
             if (!voiceChannel) {
                 this.error("There are no voice channels for me to play music from!");
@@ -56,7 +56,7 @@ export class PlayCommand extends PuppyBotCommand {
         return player.getQueue(searcher.guild.id);
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         var source = interaction.options.getString('source', true);
         const member = interaction.guild!.members.cache.get(interaction.user.id)!;
 

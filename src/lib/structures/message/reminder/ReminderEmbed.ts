@@ -1,6 +1,6 @@
 import { container, UserError } from "@sapphire/framework";
 import prettyMilliseconds from "pretty-ms";
-import { ButtonInteraction, Constants, ExcludeEnum, Message, MessageButtonOptions, MessageEmbedOptions } from "discord.js";
+import { ButtonInteraction, Message, EmbedData, ButtonStyle, Colors, ComponentType, ButtonComponentData } from "discord.js";
 import { ReminderCommand } from "../../../../commands/reminders/Reminder";
 import { Emojis } from "../../../utils/constants";
 import type { ReminderManager } from "../../managers/ReminderManager";
@@ -28,12 +28,12 @@ export class ReminderEmbed extends PuppyBotEmbed {
 		return this.reminder?.getActiveSchedule();
 	}
 
-	public static actions: (MessageButtonOptions & { customId: string, run: (interaction: ButtonInteraction, reminder: ReminderManager.Reminder.Instance) => any })[] = [
+	public static actions: (ButtonComponentData & { customId: string, run: (interaction: ButtonInteraction, reminder: ReminderManager.Reminder.Instance) => any })[] = [
 		{
 			customId: InteractionIds.Remove,
-			type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+			type: ComponentType.Button,
 			emoji: Emojis.CrossMark,
-			style: Constants.MessageButtonStyles.DANGER as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
+			style: ButtonStyle.Danger,
 			run: async (interaction, reminder) => {
 				if(!reminder) {
 					await interaction.reply(`Reminder has already been removed.`);
@@ -60,9 +60,9 @@ export class ReminderEmbed extends PuppyBotEmbed {
 		},
 		// {
 		// 	customId: InteractionIds.Edit,
-		// 	type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+		// 	type: ComponentType.Button,
 		// 	emoji: Emojis.Pencil,
-		// 	style: Constants.MessageButtonStyles.LINK as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
+		// 	style: ButtonStyle.LINK,
 		// 	run: async (interaction, reminder) => {
 		//   	reminder = container.client.reminders.cache.get(reminder.id)!;
 		// 		await interaction.deferReply();
@@ -77,9 +77,9 @@ export class ReminderEmbed extends PuppyBotEmbed {
 		// },
 		{
 			customId: InteractionIds.RepeatMany,
-			type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+			type: ComponentType.Button,
 			emoji: Emojis.RepeatInfinite,
-			style: Constants.MessageButtonStyles.PRIMARY as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
+			style: ButtonStyle.Primary,
 			run: async (interaction, reminder) => {
 				reminder = container.client.reminders.cache.get(reminder.id)!;
 
@@ -111,7 +111,7 @@ export class ReminderEmbed extends PuppyBotEmbed {
 						repeat: {
 							isRepeating: true,
 							isInfinite: true,
-							interval: BigInt(duration.fromNow.getTime() - Date.now()),
+							interval: (duration.fromNow.getTime() - Date.now()),
 						}
 					}, {
 						guildId: interaction.guildId,
@@ -135,9 +135,9 @@ export class ReminderEmbed extends PuppyBotEmbed {
 		},
 		{
 			customId: InteractionIds.Reschedule,
-			type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+			type: ComponentType.Button,
 			emoji: Emojis.Timer,
-			style: Constants.MessageButtonStyles.PRIMARY as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
+			style: ButtonStyle.Primary,
 			run: async (interaction, reminder) => {
 				reminder = container.client.reminders.cache.get(reminder.id)!;
 
@@ -187,9 +187,9 @@ export class ReminderEmbed extends PuppyBotEmbed {
 		},
 		{
 			customId: InteractionIds.Subscribe,
-			type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+			type: ComponentType.Button,
 			emoji: Emojis.PlusSign,
-			style: Constants.MessageButtonStyles.SUCCESS as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
+			style: ButtonStyle.Success,
 			run: async (interaction, reminder) => {
 				reminder = container.client.reminders.cache.get(reminder.id)!;
 
@@ -206,9 +206,9 @@ export class ReminderEmbed extends PuppyBotEmbed {
 		},
 		{
 			customId: InteractionIds.Unsubscribe,
-			type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+			type: ComponentType.Button,
 			emoji: Emojis.MinusSign,
-			style: Constants.MessageButtonStyles.SECONDARY as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
+			style: ButtonStyle.Secondary,
 			run: async (interaction, reminder) => {
 				reminder = container.client.reminders.cache.get(reminder.id)!;
 
@@ -246,7 +246,6 @@ export class ReminderEmbed extends PuppyBotEmbed {
 
 	public update(state?: ReminderEmbed.State | null) {
 		this.setFields([]);
-		this.description = ``;
 
 		if (!state) {
 			if (this.reminder?.isDisabled) {
@@ -262,13 +261,13 @@ export class ReminderEmbed extends PuppyBotEmbed {
 		var content: string[] = [];
 
 		if (state === 'REMOVED') {
-			this.setColor(Constants.Colors.DARK_RED);
+			this.setColor(Colors.DarkRed);
 			this.setTitle(`${Emojis.CrossMarkRed} Removed Reminder`);
 		} else if (state === 'PENDING') {
-			this.setColor(Constants.Colors.DARK_PURPLE);
+			this.setColor(Colors.DarkPurple);
 			this.setTitle(`${Emojis.Timer} Upcoming Reminder`);
 		} else if (state === 'FIRED') {
-			this.setColor(Constants.Colors.DARK_GREY);
+			this.setColor(Colors.DarkGrey);
 			this.setTitle(`Reminder`);
 		}
 
@@ -290,7 +289,7 @@ export class ReminderEmbed extends PuppyBotEmbed {
 }
 
 export namespace ReminderEmbed {
-	export type Options = MessageEmbedOptions & {
+	export type Options = EmbedData & {
 		reminder: ReminderManager.Reminder.Instance,
 		state?: State,
 	}

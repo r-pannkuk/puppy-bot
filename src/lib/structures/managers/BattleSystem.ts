@@ -1,7 +1,7 @@
 import { BattleAbilityConfig, BattleAbilityType, BattleConfig, BattleLevelConfig, BattleTrap, BattleTrapConfig, BattleTrapDamageFormulaType, BattleTrapRecord, BattleTrapRecordType, BattleTrapState, BattleUser } from "@prisma/client";
 import type * as Prisma from "@prisma/client";
 import { container } from "@sapphire/framework";
-import { Collection, CommandInteraction, Guild, GuildMember, GuildTextBasedChannel, Message, User } from "discord.js";
+import { ChatInputCommandInteraction, Collection, Guild, GuildMember, GuildTextBasedChannel, Message, User } from "discord.js";
 import { default as _config } from '../../../config/default/BattleConfig.json';
 import { WHITE_CIRCLE } from "../../utils/constants";
 import type { IGuildManager } from "./IGuildManager";
@@ -285,7 +285,7 @@ export class BattleSystem implements IGuildManager, IConfigLoader<BattleConfig> 
 		return { error: undefined };
 	}
 
-	private async _generateTrapRecordPayload(messageOrInteraction: Message | CommandInteraction, owner: BattleSystem.BattleUser.Instance, trap?: BattleSystem.Trap.Instance | null) {
+	private async _generateTrapRecordPayload(messageOrInteraction: Message | ChatInputCommandInteraction, owner: BattleSystem.BattleUser.Instance, trap?: BattleSystem.Trap.Instance | null) {
 		let invocation: BattleSystem.Trap.Record.Payload._InvocationPayload;
 		if (messageOrInteraction instanceof Message) {
 			invocation = {
@@ -333,7 +333,7 @@ export class BattleSystem implements IGuildManager, IConfigLoader<BattleConfig> 
 		}
 	}
 
-	public async createTrap(messageOrInteraction: Message | CommandInteraction, user: BattleSystem.BattleUser.Instance | User | string, phrase: string) {
+	public async createTrap(messageOrInteraction: Message | ChatInputCommandInteraction, user: BattleSystem.BattleUser.Instance | User | string, phrase: string) {
 		if (user instanceof User || typeof user === 'string') {
 			user = await this.generateBattleUser(user)
 		}
@@ -392,7 +392,7 @@ export class BattleSystem implements IGuildManager, IConfigLoader<BattleConfig> 
 		return this.guild.members.cache.map(async (user) => await this.generateBattleUser(user))
 	}
 
-	public async triggerTrap(messageOrInteraction: Message | CommandInteraction, trap: BattleSystem.Trap.Instance) {
+	public async triggerTrap(messageOrInteraction: Message | ChatInputCommandInteraction, trap: BattleSystem.Trap.Instance) {
 		const owner = trap.getBattleUser();
 
 		let victim: BattleSystem.BattleUser.Instance;
@@ -443,7 +443,7 @@ export class BattleSystem implements IGuildManager, IConfigLoader<BattleConfig> 
 		return record;
 	}
 
-	public async disarmTrap(messageOrInteraction: Message | CommandInteraction, trap: BattleSystem.Trap.Instance) {
+	public async disarmTrap(messageOrInteraction: Message | ChatInputCommandInteraction, trap: BattleSystem.Trap.Instance) {
 
 		const owner = trap.getBattleUser();
 
@@ -493,7 +493,7 @@ export class BattleSystem implements IGuildManager, IConfigLoader<BattleConfig> 
 		return record;
 	}
 
-	public async removeTrap(messageOrInteraction: Message | CommandInteraction, trap: BattleSystem.Trap.Instance) {
+	public async removeTrap(messageOrInteraction: Message | ChatInputCommandInteraction, trap: BattleSystem.Trap.Instance) {
 		const owner = trap.getBattleUser();
 
 		const generatedPayload = await this._generateTrapRecordPayload(messageOrInteraction, owner, trap)

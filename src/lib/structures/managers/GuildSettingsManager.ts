@@ -1,8 +1,8 @@
 import type { GuildSettings, PrismaClient } from "@prisma/client";
 import { isNullishOrEmpty } from "@sapphire/utilities"
-import { CategoryChannel, CategoryCreateChannelOptions, GuildChannelCreateOptions, GuildTextBasedChannel, OverwriteResolvable, Permissions, Role } from "discord.js";
+import type { CategoryChannel, GuildChannelCreateOptions, GuildTextBasedChannel, OverwriteResolvable, Role } from "discord.js";
 import { container, Resolvers } from "@sapphire/framework";
-import type { Guild } from "discord.js";
+import { ChannelType, Guild } from "discord.js";
 import type { IGuildManager } from "./IGuildManager";
 
 export class GuildSettingsManager implements GuildSettings, IGuildManager {
@@ -86,8 +86,9 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
         if (categoryName) {
             var categoryResolver = await Resolvers.resolveGuildCategoryChannel(categoryName, this.guild!)
             if (isNullishOrEmpty(categoryResolver.unwrap())) {
-                categoryChannel = await this.guild!.channels.create(categoryName, {
-                    type: 'GUILD_CATEGORY',
+                categoryChannel = await this.guild!.channels.create({
+                    name: categoryName,
+                    type: ChannelType.GuildCategory,
                     permissionOverwrites: overwrites
                 } as GuildChannelCreateOptions) as unknown as CategoryChannel;
             } else {
@@ -100,16 +101,11 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
         if (channelName) {
             var channelResolver = await Resolvers.resolveGuildTextChannel(channelName, this.guild!);
             if (isNullishOrEmpty(channelResolver.unwrap())) {
-
-                if (!categoryChannel) {
-                    channel = await this.guild!.channels.create(channelName, {
-                        permissionOverwrites: overwrites
-                    } as GuildChannelCreateOptions) as GuildTextBasedChannel;
-                } else {
-                    channel = await categoryChannel.createChannel(channelName, {
-                        permissionOverwrites: overwrites
-                    } as CategoryCreateChannelOptions)
-                }
+                channel = await this.guild!.channels.create({
+                    name: channelName,
+                    parent: categoryChannel?.id,
+                    permissionOverwrites: overwrites
+                } as GuildChannelCreateOptions) as GuildTextBasedChannel;
             } else {
                 channel = channelResolver.unwrap()
             }
@@ -132,8 +128,8 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
             if (isNullishOrEmpty(roleResolver.unwrap())) {
                 role = await this.guild!.roles.create({
                     name: roleName,
-                    color: 'DEFAULT',
-                    permissions: Permissions.DEFAULT,
+                    color: 'Default',
+                    permissions: 'ManageRoles',
                     mentionable: true,
                 })
             } else {

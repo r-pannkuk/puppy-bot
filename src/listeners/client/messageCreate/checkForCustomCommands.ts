@@ -7,7 +7,7 @@ import type { Message } from "discord.js";
 })
 export class MessageCreateCheckForCustomCommands extends Listener<typeof Events.MessageCreate> {
 	public override async run(message: Message) {
-		if(!message.guild) return;
+		if (!message.guild) return;
 
 		var sapphirePrefix = (await container.client.fetchPrefix(message)) as string | readonly string[] | null;
 
@@ -15,11 +15,18 @@ export class MessageCreateCheckForCustomCommands extends Listener<typeof Events.
 		if (typeof sapphirePrefix === 'string') sapphirePrefix = [sapphirePrefix];
 
 		// Replacing escaped characters for regex.
-		const prefixes : readonly string[] = ['\/'].concat(sapphirePrefix.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+		const prefixes: readonly string[] = ['\/'].concat(sapphirePrefix.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
 		const customCommands = message.guild.customCommandSystem.customCommands;
 
-		for(var [_id, command] of customCommands.filter((command) => (message.content.toLowerCase().match(new RegExp(`^(${prefixes.join('|')})(${[command.name].concat(command.aliases).join('|')})$`))?.length ?? []) > 0)) {
+		for (
+			var [_id, command] of
+			customCommands.filter((command) => (
+				message.content.toLowerCase().match(
+					new RegExp(`^(${prefixes.join('|')})(${[command.name].concat(command.aliases).join('|')})$`)
+				) ?? []
+			).length > 0)
+		) {
 			await message.guild!.customCommandSystem.run(message, command);
 		}
 	}

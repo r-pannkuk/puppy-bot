@@ -1,8 +1,8 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, container } from "@sapphire/framework";
-import { CategoryChannel, CommandInteraction, Constants, Guild, GuildMember, GuildTextBasedChannel, Message, Role, User } from "discord.js";
+import { CategoryChannel, ChannelType, Guild, GuildMember, GuildTextBasedChannel, Message, Role, User } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import type { OverwriteData } from "discord.js";
+import type { ChatInputCommandInteraction, OverwriteData } from "discord.js";
 import { Emojis } from "../../lib/utils/constants";
 
 const SHORT_DESCRIPTION = 'Creates a new group and role for discussion.';
@@ -17,8 +17,8 @@ const SHORT_DESCRIPTION = 'Creates a new group and role for discussion.';
         `\`!add group #channel\`\n` +
         `\`!add group #CATEGORY/channel\`\n` +
         `\`!add group #channel @role_name\`\n`,
-    requiredUserPermissions: ["MANAGE_CHANNELS", "MANAGE_ROLES"],
-    requiredClientPermissions: ['SEND_MESSAGES', "MANAGE_CHANNELS", "MANAGE_ROLES"],
+    requiredUserPermissions: ["ManageChannels", "ManageRoles"],
+    requiredClientPermissions: ["SendMessages", "ManageChannels", "ManageRoles"],
     nsfw: false,
     runIn: 'GUILD_ANY',
     options: true,
@@ -49,7 +49,7 @@ export class AddCommand extends PuppyBotCommand {
                     .addChannelOption((option) =>
                         option
                             .setName("category")
-                            .addChannelTypes(Constants.ChannelTypes.GUILD_CATEGORY.valueOf())
+                            .addChannelTypes(ChannelType.GuildCategory)
                             .setDescription("The category to place this channel into.")
                     )
                     .addStringOption((option) =>
@@ -63,7 +63,7 @@ export class AddCommand extends PuppyBotCommand {
         )
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         var subcommand = interaction.options.getSubcommand(true);
 
         if (subcommand === 'group-channel') {
@@ -108,7 +108,7 @@ export class AddCommand extends PuppyBotCommand {
     }
 
     public async run<S extends AddCommand.ValidSubCommand>(args: {
-        messageOrInteraction: Message | CommandInteraction,
+        messageOrInteraction: Message | ChatInputCommandInteraction,
         subCommand: S,
         guild: Guild,
         user: User,
@@ -122,7 +122,7 @@ export class AddCommand extends PuppyBotCommand {
         }
     }
 
-    public async handleGroup(messageOrInteraction: Message | CommandInteraction, guild: Guild, _user: User, options: AddCommand.CommandOptions<'group-channel'>) {
+    public async handleGroup(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, _user: User, options: AddCommand.CommandOptions<'group-channel'>) {
         const followUp = await this.generateFollowUp(messageOrInteraction);
         const role = await guild.settings.createRole(options["role-name"]);
 
@@ -131,27 +131,27 @@ export class AddCommand extends PuppyBotCommand {
         var overwrites: OverwriteData[] = [{
             id: guild.roles.everyone,
             deny: [
-                'SEND_MESSAGES',
-                'VIEW_CHANNEL',
-                'ADD_REACTIONS',
-                'SEND_TTS_MESSAGES',
-                'EMBED_LINKS',
-                'ATTACH_FILES',
-                'READ_MESSAGE_HISTORY',
-                'USE_EXTERNAL_EMOJIS'
+                "SendMessages",
+                'ViewChannel',
+                'AddReactions',
+                'SendTTSMessages',
+                'EmbedLinks',
+                'AttachFiles',
+                'ReadMessageHistory',
+                'UseExternalEmojis'
             ]
         },
         {
             id: role!,
             allow: [
-                'SEND_MESSAGES',
-                'VIEW_CHANNEL',
-                'ADD_REACTIONS',
-                'SEND_TTS_MESSAGES',
-                'EMBED_LINKS',
-                'ATTACH_FILES',
-                'READ_MESSAGE_HISTORY',
-                'USE_EXTERNAL_EMOJIS'
+                "SendMessages",
+                'ViewChannel',
+                'AddReactions',
+                'SendTTSMessages',
+                'EmbedLinks',
+                'AttachFiles',
+                'ReadMessageHistory',
+                'UseExternalEmojis'
             ]
         }]
 

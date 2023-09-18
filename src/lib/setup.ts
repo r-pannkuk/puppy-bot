@@ -9,26 +9,25 @@ import '@sapphire/plugin-logger/register';
 import '@sapphire/plugin-editable-commands/register';
 import '@sapphire/plugin-api/register';
 // import '@sapphire/plugin-hmr/register';
-import { ScheduledTaskRedisStrategy } from '@sapphire/plugin-scheduled-tasks/register-redis';
-
+import '@sapphire/plugin-scheduled-tasks/register';
 import type { ClientOptions } from 'discord.js';
 import { Time } from '@sapphire/time-utilities';
 import { BucketScope } from '@sapphire/framework';
-import { Constants } from 'discord.js';
+import { ActivityType, Partials } from 'discord.js';
 import { envParseArray, envParseInteger, envParseString } from './env/utils';
 import './utils/time'
 
 export const CLIENT_OPTIONS: ClientOptions = {
     intents: [
-        'GUILDS',
-        'GUILD_MEMBERS',
-        'GUILD_BANS',
-        'GUILD_EMOJIS_AND_STICKERS',
-        'GUILD_VOICE_STATES',
-        'GUILD_MESSAGES',
-        'GUILD_MESSAGE_REACTIONS',
-        'DIRECT_MESSAGES',
-        'DIRECT_MESSAGE_REACTIONS',
+        'Guilds',
+        'GuildMembers',
+        'GuildBans',
+        'GuildEmojisAndStickers',
+        'GuildVoiceStates',
+        'GuildMessages',
+        'GuildMessageReactions',
+        'DirectMessages',
+        'DirectMessageReactions',
 
     ],
     defaultPrefix: envParseString('CLIENT_PREFIX', '!'),
@@ -37,12 +36,12 @@ export const CLIENT_OPTIONS: ClientOptions = {
     loadDefaultErrorListeners: true,
     loadMessageCommandListeners: true,
     partials: [
-        'CHANNEL',
-        'GUILD_MEMBER',
-        'GUILD_SCHEDULED_EVENT',
-        'MESSAGE',
-        'REACTION',
-        'USER'
+        Partials.Channel,
+        Partials.GuildMember,
+        Partials.GuildScheduledEvent,
+        Partials.Message,
+        Partials.Reaction,
+        Partials.User,
     ],
     defaultCooldown: {
         delay: Time.Second * 10,
@@ -57,23 +56,21 @@ export const CLIENT_OPTIONS: ClientOptions = {
     //     // silent: true
     // },
     tasks: {
-        strategy: new ScheduledTaskRedisStrategy({
-            bull: {
-                connection: {
-                    password: envParseString('REDIS_PASSWORD'),
-                    port: envParseInteger('REDIS_PORT'),
-                    host: envParseString('REDIS_URL'),
-                    db: envParseInteger('REDIS_DB'),
-                }
+        bull: {
+            connection: {
+                password: envParseString('REDIS_PASSWORD'),
+                port: envParseInteger('REDIS_PORT'),
+                host: envParseString('REDIS_URL'),
+                db: envParseInteger('REDIS_DB'),
             }
-        })
+        }
     },
     presence: {
         status: 'online',
         activities: [
             {
                 name: "Woof!",
-                type: Constants.ActivityTypes.LISTENING
+                type: ActivityType.Listening
             }
         ]
     }
@@ -81,10 +78,10 @@ export const CLIENT_OPTIONS: ClientOptions = {
 
 
 declare module '@sapphire/plugin-scheduled-tasks' {
-	interface ScheduledTasks {
-		BattleSystem_RegenerateUsers: never;
-		CheckGameStatus_AdvanceWarsByWeb: never;
-		MusicPlayer_UpdateProgress: never;
-		Reminder_FireReminder: never;
-	}
+    interface ScheduledTasks {
+        BattleSystem_RegenerateUsers: never;
+        CheckGameStatus_AdvanceWarsByWeb: never;
+        MusicPlayer_UpdateProgress: never;
+        Reminder_FireReminder: never;
+    }
 }

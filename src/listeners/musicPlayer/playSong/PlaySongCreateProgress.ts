@@ -14,7 +14,7 @@ const UPDATE_INTERVAL = 5000;
 export class PlaySongCreateProgress extends Listener {
 	public override async run(queue: Queue, song: Song) {
 		await this.container.tasks.run('MusicPlayer_UpdateProgress', {
-			guildId: queue.clientMember.guild.id,
+			guildId: queue.clientMember?.guild.id,
 			songId: song.id,
 			override: {
 				currentTime: 0,
@@ -23,10 +23,10 @@ export class PlaySongCreateProgress extends Listener {
 			}
 		} as SongProgressPayload);
 
-		const job = await container.tasks.create(
+		/* const job = */ await container.tasks.create(
 			'MusicPlayer_UpdateProgress',
 			{
-				guildId: queue.clientMember.guild.id,
+				guildId: queue.clientMember?.guild.id,
 				songId: song.id
 			} as SongProgressPayload,
 			{
@@ -39,9 +39,9 @@ export class PlaySongCreateProgress extends Listener {
 				repeated: true,
 				interval: UPDATE_INTERVAL
 			}
-		) as Job;
+		);
 
-		queue.job = job;
+		// queue.job = job;
 	}
 }
 

@@ -1,9 +1,9 @@
 import { BattleTrapState } from "@prisma/client";
-import { Constants, MessageEmbed } from "discord.js";
 import prettyMs from "pretty-ms";
 import type { BattleSystem } from "../../../../managers/BattleSystem";
 import { BattleTrap } from "../BattleTrapPaginatedMessage";
 import { CheckEmbed } from "./CheckEmbed";
+import { EmbedBuilder, ComponentType } from "discord.js";
 
 export enum _InteractionIds {
 	GoToPage = 'CheckPaginatedMessage.goToPage',
@@ -21,22 +21,23 @@ export class CheckPaginatedMessage extends BattleTrap.TrapPaginatedMessage {
 			...options
 		})
 
-		if(options.battleUser) {
+		if (options.battleUser) {
 			this.battleUserId = options.battleUser.id as unknown as [battleUserId: string];
 		}
 
-		
-		if (!this.battleUser) {this.addPageEmbed(new MessageEmbed({
-			title: `User Not Found`,
-			description: `This user was not found when searching.  This is an error that shouldn't happen!.`
-		}))
-		return;
+
+		if (!this.battleUser) {
+			this.addPageEmbed(new EmbedBuilder({
+				title: `User Not Found`,
+				description: `This user was not found when searching.  This is an error that shouldn't happen!.`
+			}))
+			return;
 		}
 
 		const validTraps = this.battleUser?.battleTraps.filter((trap) => trap.state === BattleTrapState.Armed)
 
-		if(validTraps!.size === 0) {
-			this.addPageEmbed(new MessageEmbed({
+		if (validTraps!.size === 0) {
+			this.addPageEmbed(new EmbedBuilder({
 				title: `No Trap Found`,
 				description: `No traps were found for this user.  Please create a trap using the \`\`/trap create\`\` command.`
 			}))
@@ -46,10 +47,14 @@ export class CheckPaginatedMessage extends BattleTrap.TrapPaginatedMessage {
 		if (validTraps.size > 1) {
 			this.addAction({
 				customId: InteractionIds.GoToPage,
-				type: Constants.MessageComponentTypes.SELECT_MENU,
+				type: ComponentType.StringSelect,
+				options: [{
+					label: "Filling...",
+					value: "TBD",
+				}],
 				placeholder: "Select Active Trap...",
 				run: ({ handler, interaction }) => {
-					if (interaction.isSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
+					if (interaction.isStringSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
 						handler.index = parseInt(interaction.values[0], 10);
 					}
 				}

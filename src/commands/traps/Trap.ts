@@ -1,7 +1,7 @@
 import { BattleTrapRecordType, BattleTrapState } from "@prisma/client";
 import { ApplyOptions } from "@sapphire/decorators";
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from "@sapphire/framework";
-import { ButtonInteraction, CommandInteraction, Guild, Message, MessageActionRow, MessageButton, MessageEmbed, MessagePayload, ReplyMessageOptions, User } from "discord.js";
+import { ButtonInteraction, CommandInteraction, Guild, Message, ActionRowBuilder, MessagePayload, InteractionEditReplyOptions, User, ChatInputCommandInteraction, MessageReplyOptions, EmbedBuilder, ButtonBuilder } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import type { BattleSystem } from "../../lib/structures/managers/BattleSystem";
 import { ClearPaginatedMessage } from "../../lib/structures/message/battleSystem/traps/clear/ClearPaginatedMessage";
@@ -19,8 +19,8 @@ const DEFAULT_LIST_SIZE = 10;
     description: SHORT_DESCRIPTION,
     detailedDescription: SHORT_DESCRIPTION + ' Examples:\n' +
         `\`!trap <phrase>\``,
-    requiredUserPermissions: ['VIEW_CHANNEL'],
-    requiredClientPermissions: ['VIEW_CHANNEL'],
+    requiredUserPermissions: ['ViewChannel'],
+    requiredClientPermissions: ['ViewChannel'],
     nsfw: false,
     runIn: 'GUILD_ANY',
     subcommands: [
@@ -121,7 +121,7 @@ export class TrapCommand extends PuppyBotCommand {
         )
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         var subCommandGroup = interaction.options.getSubcommandGroup(false);
         var subCommand = interaction.options.getSubcommand(true);
         var phrase = interaction.options.getString('phrase');
@@ -189,7 +189,7 @@ export class TrapCommand extends PuppyBotCommand {
         })
     }
 
-    public async run(messageOrInteraction: Message | CommandInteraction
+    public async run(messageOrInteraction: Message | ChatInputCommandInteraction
         , guild: Guild
         , user: User
         , args: {
@@ -221,7 +221,7 @@ export class TrapCommand extends PuppyBotCommand {
         }
     }
 
-    public async handleListMine(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User) {
+    public async handleListMine(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, user: User) {
         return this.handleClear(messageOrInteraction, guild, user);
         // if (messageOrInteraction instanceof Message) {
         //     messageOrInteraction = await user.send({
@@ -243,7 +243,7 @@ export class TrapCommand extends PuppyBotCommand {
         // await paginatedMessage.run(messageOrInteraction, user);
     }
 
-    public async handleListUntriggered(messageOrInteraction: Message | CommandInteraction, guild: Guild, amount?: number | null) {
+    public async handleListUntriggered(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, amount?: number | null) {
         if (!amount) {
             amount = DEFAULT_LIST_SIZE;
         }
@@ -274,7 +274,7 @@ export class TrapCommand extends PuppyBotCommand {
      * @param guild Guild that this command was invoked from.
      * @param amount The amount of entries to fetch.
      */
-    public async handleListTopTraps(messageOrInteraction: Message | CommandInteraction, guild: Guild, amount?: number | null) {
+    public async handleListTopTraps(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, amount?: number | null) {
         if (!amount) {
             amount = DEFAULT_LIST_SIZE;
         }
@@ -302,7 +302,7 @@ export class TrapCommand extends PuppyBotCommand {
         await paginatedMessage.run(messageOrInteraction);
     }
 
-    public async handleListTopFails(messageOrInteraction: Message | CommandInteraction, guild: Guild, amount?: number | null) {
+    public async handleListTopFails(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, amount?: number | null) {
         if (!amount) {
             amount = DEFAULT_LIST_SIZE;
         }
@@ -331,21 +331,21 @@ export class TrapCommand extends PuppyBotCommand {
         await paginatedMessage.run(messageOrInteraction);
     }
 
-    public async handleCreate(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User, phrase: string) {
-        let followUp: (options: string | MessagePayload | ReplyMessageOptions) => Promise<any>;
+    public async handleCreate(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, user: User, phrase: string) {
+        let followUp: (options) => Promise<Message>;
         if (messageOrInteraction instanceof Message) {
             messageOrInteraction = await user.send({
                 content: `Generating embed...`
             })
 
-            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as Message).reply(options);
+            followUp = async (options: string | MessagePayload | MessageReplyOptions) => (messageOrInteraction as Message).reply(options);
         } else {
             if (!messageOrInteraction.replied) {
                 await messageOrInteraction.deferReply({
                     ephemeral: true,
                 });
             }
-            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
+            followUp = async (options: string | MessagePayload | InteractionEditReplyOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
         }
 
         const abilityAttempt = await guild.battleSystem.checkAttemptTrap(user)
@@ -365,11 +365,11 @@ export class TrapCommand extends PuppyBotCommand {
         await followUp({ embeds: [embed] });
     }
 
-    public async handleClear(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User) {
+    public async handleClear(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, user: User) {
         const battleUser = await guild.battleSystem.generateBattleUser(user);
 
         if (battleUser.getActiveTraps().size === 0) {
-            const embed = new MessageEmbed({
+            const embed = new EmbedBuilder({
                 title: `No traps found.`,
                 description: `No traps were found for this user.  Please create a trap using the \`\`/trap create\`\` command.`
             });
@@ -387,20 +387,20 @@ export class TrapCommand extends PuppyBotCommand {
             return;
         }
 
-        let followUp: (options: string | MessagePayload | ReplyMessageOptions) => Promise<any>;
+        let followUp: (options) => Promise<any>;
         if (messageOrInteraction instanceof Message) {
             messageOrInteraction = await user.send({
                 content: `Generating embed...`
             })
 
-            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as Message).reply(options);
+            followUp = async (options) => (messageOrInteraction as Message).reply(options);
         } else {
             if (!messageOrInteraction.replied) {
                 await messageOrInteraction.deferReply({
                     ephemeral: true,
                 });
             }
-            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
+            followUp = async (options) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
         }
 
         if (battleUser.getActiveTraps().size === 1) {
@@ -412,12 +412,12 @@ export class TrapCommand extends PuppyBotCommand {
                     })
                 ],
                 components: [
-                    new MessageActionRow()
+                    new ActionRowBuilder()
                         .addComponents(
-                            new MessageButton(ClearPaginatedMessage.clearAction)
+                            new ButtonBuilder(ClearPaginatedMessage.clearAction)
                         )
                 ]
-            });
+            } as InteractionEditReplyOptions);
             message.createMessageComponentCollector({
                 filter: (interaction) => interaction.customId === ClearPaginatedMessage.clearAction.customId && interaction.user.id === user.id,
                 dispose: true,
@@ -445,10 +445,10 @@ export class TrapCommand extends PuppyBotCommand {
             // Doing this to automatically instigate a component, thereby allowing ephemeral message.
             // This is hacky and awful and I hate it.
             // await (paginatedMessage.response as Message).createMessageComponentCollector({
-            //     componentType: Constants.MessageComponentTypes.SELECT_MENU,
+            //     componentType: ComponentType.StringSelect,
             //     filter: (interaction) => interaction.customId === InteractionIds.GoToPage
             // }).addListener('collected', async (interaction: SelectMenuInteraction) => {
-            //     if (interaction.isSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
+            //     if (interaction.isStringSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
             // 		paginatedMessage.index = parseInt(interaction.values[0], 10);
             // 	}
             // })
@@ -461,20 +461,20 @@ export class TrapCommand extends PuppyBotCommand {
         }
     }
 
-    public async handleDisarm(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User, phrase: string) {
-        let followUp: (options: string | MessagePayload | ReplyMessageOptions) => Promise<any>;
+    public async handleDisarm(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, user: User, phrase: string) {
+        let followUp: (options) => Promise<Message>;
         if (messageOrInteraction instanceof Message) {
             messageOrInteraction = await messageOrInteraction.reply({
                 content: `Generating embed...`
             })
 
-            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as Message).reply(options);
+            followUp = async (options) => (messageOrInteraction as Message).reply(options);
         } else {
             if (!messageOrInteraction.replied) {
                 await messageOrInteraction.deferReply({
                 });
             }
-            followUp = async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
+            followUp = async (options) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
         }
         const matchedTraps = guild.battleSystem.traps.filter((trap) => trap.state === BattleTrapState.Armed && trap.phrase === phrase.toLowerCase())
 

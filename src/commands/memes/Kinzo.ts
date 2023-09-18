@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext, ContextMenuCommandContext } from '@sapphire/framework';
-import type { CommandInteraction, ContextMenuInteraction, Message } from 'discord.js';
+import type { ChatInputCommandInteraction, ContextMenuCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
 const SHORT_DESCRIPTION = 'Someone is whining again.'
@@ -10,8 +10,8 @@ const SHORT_DESCRIPTION = 'Someone is whining again.'
     description: SHORT_DESCRIPTION,
     detailedDescription: SHORT_DESCRIPTION + ' Examples:\n' +
         '-- /kinzo --user=@user --text=text\n',
-    requiredUserPermissions: ["SEND_MESSAGES"],
-    requiredClientPermissions: ["SEND_MESSAGES"],
+    requiredUserPermissions: ["SendMessages"],
+    requiredClientPermissions: ["SendMessages"],
     scriptName: 'kinzo.py',
     nsfw: false,
     options: ['user', 'text']
@@ -45,7 +45,7 @@ export class KinzoCommand extends PyScriptCommand {
         )
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         const user = interaction.options.getUser('user', true)
         const member = interaction.guild?.members.cache.get(interaction.options.getUser('user', true)?.id);
         const text = interaction.options.getString('text', true);
@@ -54,8 +54,8 @@ export class KinzoCommand extends PyScriptCommand {
         await interaction.editReply({ files: files });
     }
 
-    public override async contextMenuRun(interaction: ContextMenuInteraction, _context: ContextMenuCommandContext) {
-        if (interaction.isMessageContextMenu()) {
+    public override async contextMenuRun(interaction: ContextMenuCommandInteraction, _context: ContextMenuCommandContext) {
+        if (interaction.isMessageContextMenuCommand()) {
             const message = interaction.targetMessage;
             const member = interaction.guild?.members.cache.get(message.author.id);
             const text = message.content;

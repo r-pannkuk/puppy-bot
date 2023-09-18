@@ -1,5 +1,5 @@
 import { Events, Listener } from "@sapphire/framework";
-import type { Collection, GuildAuditLogsEntry, GuildMember } from "discord.js";
+import { AuditLogEvent, Collection, GuildAuditLogsEntry, GuildMember } from "discord.js";
 import {ApplyOptions} from '@sapphire/decorators'
 
 @ApplyOptions<Listener.Options>({
@@ -11,23 +11,13 @@ export class GuildMemberRemoveLeaveAnnouncement extends Listener<typeof Events.G
         const checkLogs =
             (entries: Collection<
                 string,
-                GuildAuditLogsEntry<
-                    "MEMBER_BAN_ADD" | "MEMBER_KICK",
-                    "MEMBER_BAN_ADD" | "MEMBER_KICK",
-                    "DELETE",
-                    "USER"
-                >
+                GuildAuditLogsEntry
             >) => {
                 var filtered = entries.filter(entry => entry.createdTimestamp >= Date.now() - 5000)
                 for (var i in filtered) {
-                    const entry: GuildAuditLogsEntry<
-                        "MEMBER_BAN_ADD" | "MEMBER_KICK",
-                        "MEMBER_BAN_ADD" | "MEMBER_KICK",
-                        "DELETE",
-                        "USER"
-                    > = entries[i];
+                    const entry: GuildAuditLogsEntry = entries[i];
 
-                    if (entry.target?.id === member.user.id) {
+                    if (entry.targetId === member.user.id) {
                         return entry;
                     }
                 }
@@ -37,14 +27,14 @@ export class GuildMemberRemoveLeaveAnnouncement extends Listener<typeof Events.G
 
         if (!member.user.bot) {
             var bans = await member.guild.fetchAuditLogs({
-                type: "MEMBER_BAN_ADD"
+                type: AuditLogEvent.MemberBanAdd
             });
 
             var found = checkLogs(bans.entries);
 
             if (!found) {
                 var kicks = await member.guild.fetchAuditLogs({
-                    type: "MEMBER_KICK"
+                    type: AuditLogEvent.MemberKick
                 });
 
                 found = checkLogs(kicks.entries);
@@ -53,9 +43,9 @@ export class GuildMemberRemoveLeaveAnnouncement extends Listener<typeof Events.G
             if (!found) {
                 await member.guild.systemChannel?.send(`${member} has left the server.`);
             } else {
-                if (found.action === "MEMBER_BAN_ADD") {
+                if (found.action === AuditLogEvent.MemberBanAdd) {
                     var action = "banned"
-                } else if (found.action === "MEMBER_KICK") {
+                } else if (found.action === AuditLogEvent.MemberKick) {
                     var action = "kicked"
                 } else {
                     var action = "UNKNOWN";

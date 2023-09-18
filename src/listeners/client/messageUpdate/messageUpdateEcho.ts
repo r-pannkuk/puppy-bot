@@ -12,7 +12,7 @@ export class MessageUpdateEcho extends Listener<typeof Events.MessageUpdate> {
     public async run(before: Message, after: Message) {
         if (!after.guild?.messageEchoer.echoEdits) return;
 
-        if (!after.channel.isText()) return;
+        if (!after.channel.isTextBased()) return;
 
         if (after.author === container.client.user || after.author.bot) return;
 

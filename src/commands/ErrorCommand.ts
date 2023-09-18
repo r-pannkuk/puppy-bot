@@ -1,5 +1,5 @@
 import { ApplicationCommandRegistry, ChatInputCommandContext, UserError } from '@sapphire/framework';
-import type { CommandInteraction, Message } from 'discord.js';
+import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { ApplyOptions } from '@sapphire/decorators'
 import { PuppyBotCommand } from '../lib/structures/command/PuppyBotCommand';
 
@@ -29,7 +29,7 @@ export class ErrorCommand extends PuppyBotCommand {
 		})
 	}
 
-	public override async chatInputRun(interaction: CommandInteraction, context: ChatInputCommandContext) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction, context: ChatInputCommandContext) {
 		throw new UserError({
 			identifier: `[Slash] Testing something`,
 			context: {

@@ -12,7 +12,6 @@ import { container, UserError } from "@sapphire/framework";
 import { Time } from "@sapphire/time-utilities";
 import type { JobOptions } from "bull";
 import { Collection, User } from "discord.js";
-import { default as got } from 'got';
 import { JSDOM } from 'jsdom';
 import { envParseInteger } from "../../../env/utils";
 import { debugLog } from "../../../utils/logging";
@@ -421,8 +420,8 @@ export class AWBWScanner implements IGuildConfigLoader<GameScanConfig>, IGuildMa
 		if (!game) throw new UserError({ identifier: `Game wasn't found.`, context: id })
 
 		const url = `${AWBW_GAME_VIEW_URL}${game.gameId}`
-		got(url).then(async response => {
-			const dom = new JSDOM(response.body);
+		fetch(url).then(async response => {
+			const dom = new JSDOM(await response.arrayBuffer());
 			const document = dom.window.document;
 
 			let dayNo: number | undefined | null = await (async () => {

@@ -1,7 +1,7 @@
 import { BattleTrapRecordType, BattleTrapState } from "@prisma/client";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener } from "@sapphire/framework";
-import type { Message } from "discord.js";
+import { ChannelType, type Message } from "discord.js";
 import type { BattleSystem } from "../../../lib/structures/managers/BattleSystem";
 
 @ApplyOptions<Listener.Options>({
@@ -9,8 +9,8 @@ import type { BattleSystem } from "../../../lib/structures/managers/BattleSystem
 })
 export class MessageCreateCheckForTraps extends Listener<typeof Events.MessageCreate> {
     public async run(message: Message) {
-        if (message.channel.type !== 'GUILD_TEXT' &&
-            message.channel.type !== 'GUILD_PUBLIC_THREAD') {
+        if (message.channel.type !== ChannelType.GuildText &&
+            message.channel.type !== ChannelType.PublicThread) {
             return;
         }
 

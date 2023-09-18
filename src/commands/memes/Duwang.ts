@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import type { CommandInteraction, Message } from 'discord.js';
+import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
 const SHORT_DESCRIPTION = 'Exclaim your wonder for the beautiful day.'
@@ -11,8 +11,8 @@ const SHORT_DESCRIPTION = 'Exclaim your wonder for the beautiful day.'
     detailedDescription: SHORT_DESCRIPTION + ' Examples:\n' +
         '-- /duwang\n' +
         '-- /duwang <image>',
-    requiredUserPermissions: ["SEND_MESSAGES"],
-    requiredClientPermissions: ["SEND_MESSAGES"],
+    requiredUserPermissions: ["SendMessages"],
+    requiredClientPermissions: ["SendMessages"],
     scriptName: 'duwang.py',
     nsfw: false,
     options: ['target']
@@ -31,7 +31,7 @@ export class DuwangCommand extends PyScriptCommand {
         )
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         const target = interaction.options.getString('target');
         await interaction.deferReply()
         const files = await this.run([target ?? ""]);

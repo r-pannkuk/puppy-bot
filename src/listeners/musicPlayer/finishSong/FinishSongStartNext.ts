@@ -1,6 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { container, Listener } from "@sapphire/framework";
-import type { Job } from "bull";
 import type { Queue, Song } from "distube";
 import { debugLog } from "../../../lib/utils/logging";
 import type { SongProgressPayload } from "../../../scheduled-tasks/musicPlayer/UpdateProgress";
@@ -15,7 +14,7 @@ export class FinishSongStartNext extends Listener {
 		debugLog('debug',`In: ${this.event.toString()}`);
 
 		await this.container.tasks.run('updateProgress', {
-			guildId: queue.clientMember.guild.id,
+			guildId: queue.clientMember?.guild.id,
 			songId: song.id,
 			override: {
 				currentTime: song.duration,
@@ -24,20 +23,20 @@ export class FinishSongStartNext extends Listener {
 			}
 		} as SongProgressPayload);
 
-		// const jobId = queue.job.opts.jobId;
-		const list = await container.tasks.list({
-			name: queue.job.name
-		}) as Job[];
+		// // const jobId = queue.job.opts.jobId;
+		// const list = await container.tasks.list({
+		// 	name: queue.job.name
+		// }) as Job[];
 
-		await list.forEach(async j => {
-			if (j?.id) {
-				try {
-					await container.tasks.delete(j.id);
-				} catch {
-					return;
-				}
-			}
-		});
+		// await list.forEach(async j => {
+		// 	if (j?.id) {
+		// 		try {
+		// 			await container.tasks.delete(j.id);
+		// 		} catch {
+		// 			return;
+		// 		}
+		// 	}
+		// });
 
 	}
 }

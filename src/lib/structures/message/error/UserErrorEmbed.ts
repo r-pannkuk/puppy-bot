@@ -1,5 +1,5 @@
 import type { UserError } from "@sapphire/framework";
-import type { MessageEmbedOptions } from "discord.js";
+import type { EmbedData } from "discord.js";
 import { PuppyBotEmbed } from "../PuppyBotEmbed";
 
 export class UserErrorEmbed extends PuppyBotEmbed {
@@ -29,7 +29,7 @@ export class UserErrorEmbed extends PuppyBotEmbed {
 }
 
 export namespace UserErrorEmbed {
-	export type Options = MessageEmbedOptions & {
+	export type Options = EmbedData & {
 		error: UserError
 	}
 }

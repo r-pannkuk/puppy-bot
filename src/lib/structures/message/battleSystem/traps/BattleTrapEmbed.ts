@@ -1,5 +1,5 @@
 import { container } from "@sapphire/framework";
-import { Guild, MessageEmbedOptions } from "discord.js";
+import { EmbedData, Guild } from "discord.js";
 import prettyMs from "pretty-ms";
 import type { BattleSystem } from "../../../managers/BattleSystem";
 import { PuppyBotEmbed } from "../../PuppyBotEmbed";
@@ -42,7 +42,7 @@ export namespace BattleTrap {
 	}
 
 	export namespace Embed {
-		export type Options = MessageEmbedOptions & {
+		export type Options = EmbedData & {
 			trap: BattleSystem.Trap.Instance,
 		}
 	}

@@ -1,6 +1,6 @@
 import { PaginatedMessage, PaginatedMessageOptions } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
-import { Constants, Guild } from "discord.js";
+import { ButtonStyle, ComponentType, Guild } from "discord.js";
 import { Emojis } from "../../../../utils/constants";
 
 export namespace BattleTrap {
@@ -13,9 +13,9 @@ export namespace BattleTrap {
 				actions: options.actions ?? [
 					{
 						customId: InteractionIds.PreviousPage,
-						style: 'PRIMARY',
+						style: ButtonStyle.Primary,
 						emoji: Emojis.ArrowLeft,
-						type: Constants.MessageComponentTypes.BUTTON,
+						type: ComponentType.Button,
 						run: ({ handler }) => {
 							if (handler.index === 0) {
 								handler.index = handler.pages.length - 1;
@@ -26,9 +26,9 @@ export namespace BattleTrap {
 					},
 					{
 						customId: InteractionIds.NextPage,
-						style: 'PRIMARY',
+						style: ButtonStyle.Primary,
 						emoji: Emojis.ArrowRight,
-						type: Constants.MessageComponentTypes.BUTTON,
+						type: ComponentType.Button,
 						run: ({ handler }) => {
 							if (handler.index === handler.pages.length - 1) {
 								handler.index = 0;

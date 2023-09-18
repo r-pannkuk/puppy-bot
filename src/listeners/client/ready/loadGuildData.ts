@@ -14,7 +14,7 @@ export class ReadyLoadGuildData extends Listener<typeof Events.ClientReady> {
         for (var [_, guild] of client.guilds.cache) {
             await GuildCreateGuildInitialize.loadGuild(client, guild);
 
-            var textChannels = guild.channels.cache.filter(c => c.isText()) as Collection<string, TextBasedChannel>;
+            var textChannels = guild.channels.cache.filter(c => c.isTextBased()) as Collection<string, TextBasedChannel>;
 
             for (var [_, channel] of textChannels) {
                 await channel.messages.fetch({ limit: 100 });

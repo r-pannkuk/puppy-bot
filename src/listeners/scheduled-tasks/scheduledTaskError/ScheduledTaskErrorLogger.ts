@@ -7,7 +7,7 @@ import { debugLog } from "../../../lib/utils/logging";
 	event: ScheduledTaskEvents.ScheduledTaskError
 })
 export class ScheduledTaskErrorLogger extends Listener<typeof ScheduledTaskEvents.ScheduledTaskError> {
-	public async run(_error: Error, _task: string, _duration: number, _payload: any) {
+	public async run(_error: Error, _task: string, _payload: any) {
 		debugLog('debug',`In: ${this.event.toString()} - ${_error}`);
 	}
 }

@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { ApplicationCommandRegistry, ChatInputCommandContext, container, ContextMenuCommandContext } from "@sapphire/framework";
+import { ApplicationCommandRegistry, ChatInputCommandContext, Command, container, ContextMenuCommandContext } from "@sapphire/framework";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import { Collection, CommandInteraction, ContextMenuInteraction, Guild, GuildEmoji, GuildTextBasedChannel, Message, MessagePayload, ReplyMessageOptions, User } from "discord.js";
+import { Collection, CommandInteraction, Guild, GuildEmoji, GuildTextBasedChannel, Message, MessagePayload, InteractionEditReplyOptions, User, MessageReplyOptions, ChatInputCommandInteraction } from "discord.js";
 import { EmojiUsagePaginatedMessage } from "../../lib/structures/message/admin/EmojiUsagePaginatedMessage";
 import { Stopwatch } from '@sapphire/stopwatch';
 import { GuildMessageScanner } from "../../lib/structures/managers/GuildMessageScanner";
@@ -20,8 +20,8 @@ const WAIT_DURATION_FOR_FOLLOWUP = 600000;
         'emoji-stats',
     ],
     description: SHORT_DESCRIPTION,
-    requiredUserPermissions: ['ADMINISTRATOR'],
-    requiredClientPermissions: ['VIEW_CHANNEL'],
+    requiredUserPermissions: ['Administrator'],
+    requiredClientPermissions: ['ViewChannel'],
     nsfw: false,
     runIn: 'GUILD_ANY',
     options: ['emoji', 'member', 'count-reactions'],
@@ -60,7 +60,7 @@ export class EmojiUsageCommand extends PuppyBotCommand {
         )
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         const guild = interaction.guild!;
         const user = interaction.options.getUser('member')!;
         const emojiString = interaction.options.getString('emojis');
@@ -85,8 +85,8 @@ export class EmojiUsageCommand extends PuppyBotCommand {
         });
     }
 
-    public override async contextMenuRun(interaction: ContextMenuInteraction, _context: ContextMenuCommandContext) {
-        if (interaction.isUserContextMenu()) {
+    public override async contextMenuRun(interaction: Command.ContextMenuCommandInteraction, _context: ContextMenuCommandContext) {
+        if (interaction.isUserContextMenuCommand()) {
             const guild = interaction.guild!;
             const user = interaction.targetUser;
             await this.run({
@@ -101,26 +101,26 @@ export class EmojiUsageCommand extends PuppyBotCommand {
         }
     }
 
-    protected async generateFollowUp(messageOrInteraction: Message | CommandInteraction | ContextMenuInteraction):
-        Promise<(options: string | MessagePayload | ReplyMessageOptions) => Promise<Message<boolean>>> {
+    protected async generateFollowUp(messageOrInteraction: Message | ChatInputCommandInteraction | Command.ContextMenuCommandInteraction):
+        Promise<(options: string | MessagePayload | MessageReplyOptions) => Promise<Message<boolean>>> {
         if (messageOrInteraction instanceof Message) {
             messageOrInteraction = await messageOrInteraction.channel.send({
                 content: `Scanning...`
             })
 
-            return async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as Message).reply(options);
+            return async (options: string | MessagePayload | MessageReplyOptions) => (messageOrInteraction as Message).reply(options);
         } else {
             if (!messageOrInteraction.replied) {
                 await messageOrInteraction.reply({
                     content: `Scanning...`,
                 });
             }
-            return async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
+            return async (options: string | MessagePayload | InteractionEditReplyOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
         }
     }
 
     public async run(args: {
-        messageOrInteraction: Message | CommandInteraction | ContextMenuInteraction,
+        messageOrInteraction: Message | ChatInputCommandInteraction | Command.ContextMenuCommandInteraction,
         guild: Guild,
         user: User,
         options: EmojiUsageCommand.CommandOptions
@@ -252,11 +252,11 @@ export class EmojiUsageCommand extends PuppyBotCommand {
     //             customId: 'select-user',
     //             maxValues: 1,
     //             options: guild.members.cache.map(m => { return { value: m.id, label: m.displayName } as MessageSelectOptionData }).concat({ value: 'all', label: 'All Members' }),
-    //             type: Constants.MessageComponentTypes.SELECT_MENU,
+    //             type: ComponentType.StringSelect,
     //             run: async ({ handler, interaction, collector }) => {
     //                 const page = handler.pages[handler.index] as PaginatedMessagePage;
 
-    //                 if (interaction.isSelectMenu()) {
+    //                 if (interaction.isStringSelectMenu()) {
     //                     interaction.values
     //                     collector.removeAllListeners();
     //                     interaction.deferred = false;

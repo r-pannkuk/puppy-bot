@@ -1,5 +1,5 @@
 import { container } from "@sapphire/framework";
-import type { Collection, Guild, GuildBasedChannel, GuildTextBasedChannel, Message } from "discord.js";
+import { ChannelType, type Collection, type Guild, type GuildBasedChannel, type GuildTextBasedChannel, type Message } from "discord.js";
 import { debugLog } from "../../utils/logging";
 import type { IGuildManager } from "./IGuildManager";
 
@@ -22,13 +22,13 @@ export class GuildMessageScanner implements IGuildManager {
 		const channels = this.guild!.channels.cache
 			.filter(c =>
 				(
-					c.type === 'GUILD_TEXT' ||
-					c.type === 'GUILD_PUBLIC_THREAD' ||
-					c.type === "GUILD_NEWS" ||
-					c.type === "GUILD_NEWS_THREAD" ||
-					c.type === "GUILD_PRIVATE_THREAD"
+					c.type === ChannelType.GuildText ||
+					c.type === ChannelType.PublicThread ||
+					c.type === ChannelType.GuildAnnouncement ||
+					c.type === ChannelType.AnnouncementThread ||
+					c.type === ChannelType.PrivateThread
 				) &&
-				c.permissionsFor(container.client.user!)?.has('VIEW_CHANNEL') === true &&
+				c.permissionsFor(container.client.user!)?.has('ViewChannel') === true &&
 				c.messages.cache.size > 0
 			);
 

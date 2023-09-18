@@ -1,6 +1,5 @@
 import type { Args, ApplicationCommandRegistry, ChatInputCommandContext } from '@sapphire/framework'
-import { Message, CommandInteraction, MessageActionRow, MessageButton, ButtonInteraction, Collection } from 'discord.js'
-import { MessageEmbed, Constants } from 'discord.js'
+import { Message, ActionRowBuilder, ButtonInteraction, Collection, EmbedBuilder, ChatInputCommandInteraction, ButtonStyle, ButtonBuilder, ComponentType, MessageReplyOptions } from 'discord.js'
 import 'dotenv/config'
 import { ApplyOptions } from '@sapphire/decorators'
 import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand'
@@ -13,8 +12,8 @@ const SHORT_DESCRIPTION = 'Constructs random teams of size N with the provided l
     aliases: ['teams', 'team', 'group'],
     description: SHORT_DESCRIPTION,
     detailedDescription: SHORT_DESCRIPTION + "\nExample:\n--\`\`!groups 2 Dog Doggo Doggete Doglord Dogbug Dogive\`\`",
-    requiredUserPermissions: ['SEND_MESSAGES'],
-    requiredClientPermissions: ['SEND_MESSAGES'],
+    requiredUserPermissions: ["SendMessages"],
+    requiredClientPermissions: ["SendMessages"],
     nsfw: false
 })
 export class GroupsCommand extends PuppyBotCommand {
@@ -65,13 +64,14 @@ export class GroupsCommand extends PuppyBotCommand {
             ++i;
         }
 
-        var embed = new MessageEmbed();
+        var embed = new EmbedBuilder();
 
         groups.forEach((group, index) => {
-            embed.addField(`Group ${index + 1}:`,
-                group.sort()
-                    .reduce((p, c) => p + c + `\n`, ``),
-                true);
+            embed.addFields({
+                name: `Group ${index + 1}:`,
+                value: group.sort().reduce((p, c) => p + c + `\n`, ``),
+                inline: true
+            });
         });
 
         if (rerollAmount) {
@@ -83,7 +83,7 @@ export class GroupsCommand extends PuppyBotCommand {
         return embed;
     }
 
-    public async run(messageOrInteraction: Message<boolean> | CommandInteraction, user: User, groupSize?: number | null, entries?: string | string[] | null) {
+    public async run(messageOrInteraction: Message<boolean> | ChatInputCommandInteraction, user: User, groupSize?: number | null, entries?: string | string[] | null) {
         const followUp = await this.generateFollowUp(messageOrInteraction);
 
         if (!groupSize || groupSize <= 0) {
@@ -114,18 +114,21 @@ export class GroupsCommand extends PuppyBotCommand {
 
         const customId = 'GroupsCommand.reroll';
 
-        const row = new MessageActionRow()
+        const row = new ActionRowBuilder()
             .addComponents(
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId(customId)
                     .setLabel('Re-Roll')
-                    .setStyle(Constants.MessageButtonStyles.SECONDARY)
+                    .setStyle(ButtonStyle.Secondary)
             )
 
-        // Wtf.
-        const response = messageOrInteraction.channel?.messages.cache.get((await followUp({ embeds: [await generateEmbed()], components: [row] })).id)!;
+        const followUpMessage = await followUp({
+            embeds: [await generateEmbed()],
+            components: [row]
+        } as MessageReplyOptions)
+        const response = messageOrInteraction.channel?.messages.cache.get(followUpMessage.id)!;
         response.createMessageComponentCollector({
-            componentType: Constants.MessageComponentTypes.BUTTON,
+            componentType: ComponentType.Button,
             filter: (interaction: ButtonInteraction) => interaction.customId === customId && interaction.user.id === user.id
         }).addListener('collect', async (interaction: ButtonInteraction) => {
             await interaction.update({ embeds: [generateEmbed()] })
@@ -144,7 +147,7 @@ export class GroupsCommand extends PuppyBotCommand {
         await this.run(message, message.author, groupSize, entries);
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         const groupSize = interaction.options.getInteger('size') ?? this.cachedQuery.get(interaction.guildId ?? interaction.user.id)?.size
         const entries = interaction.options.getString('entries') ?? this.cachedQuery.get(interaction.guildId ?? interaction.user.id)?.entries;
 

@@ -1,6 +1,6 @@
 import { PaginatedMessage, PaginatedMessageAction, PaginatedMessageMessageOptionsUnion, PaginatedMessageOptions } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
-import { ButtonInteraction, CacheType, Collection, Constants, MessageEmbed } from "discord.js";
+import { ButtonInteraction, ButtonStyle, CacheType, Collection, Colors, ComponentType, SelectMenuComponentOptionData } from "discord.js";
 import prettyMilliseconds from "pretty-ms";
 import { Emojis, SELECT_MENU_OPTION_LIMIT } from "../../../utils/constants";
 import type { ReminderManager } from "../../managers/ReminderManager";
@@ -62,9 +62,9 @@ export class ListReminderPaginatedMessage extends PaginatedMessage {
 			actions: options.actions ?? [
 				{
 					customId: InteractionIds.PreviousPage,
-					style: 'PRIMARY',
+					style: ButtonStyle.Primary,
 					emoji: Emojis.ArrowLeft,
-					type: Constants.MessageComponentTypes.BUTTON,
+					type: ComponentType.Button,
 					run: ({ handler }) => {
 						if (handler.index === 0) {
 							handler.index = handler.pages.length - 1;
@@ -78,9 +78,9 @@ export class ListReminderPaginatedMessage extends PaginatedMessage {
 				},
 				{
 					customId: InteractionIds.NextPage,
-					style: 'PRIMARY',
+					style: ButtonStyle.Primary,
 					emoji: Emojis.ArrowRight,
-					type: Constants.MessageComponentTypes.BUTTON,
+					type: ComponentType.Button,
 					run: ({ handler }) => {
 						if (handler.index === handler.pages.length - 1) {
 							handler.index = 0;
@@ -106,10 +106,11 @@ export class ListReminderPaginatedMessage extends PaginatedMessage {
 
 		this.addAction({
 			customId: InteractionIds.GoToPage,
-			type: Constants.MessageComponentTypes.SELECT_MENU,
+			type: ComponentType.StringSelect,
+			options: this.cachedReminderIds.slice(0, 25).map((_, i) => this.generateMenuOption(i + 1)),
 			run: ({ handler, interaction }) => {
-				if (interaction.isSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
-					handler.index = parseInt(interaction.values[0], 10);
+				if (interaction.isStringSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
+					handler.index = parseInt(interaction.values[0], 10) - 1;
 					((handler.messages[handler.index] as PaginatedMessageMessageOptionsUnion).embeds?.at(0) as ReminderEmbed).update();
 					this.generateSelectMenu();
 				}
@@ -129,37 +130,43 @@ export class ListReminderPaginatedMessage extends PaginatedMessage {
 		this.generateSelectMenu();
 	}
 
-	public generateSelectMenu() {
-		this.setSelectMenuOptions((pageIndex) => {
-			var reminder = this.reminders.at(pageIndex - 1);
+	public generateMenuOption(pageIndex : number) {
+		var reminder = this.reminders.at(pageIndex - 1);
 
-			if (!reminder) {
-				return {
-					label: `NOT_FOUND`
-				}
-			}
-
-			let description: string;
-			if (reminder.getIsPending()) {
-				description = `${prettyMilliseconds(reminder.getActiveSchedule()!.getNextInstance().getTime() - Date.now())}`;
-			} else {
-				description = `${reminder.schedules.last()!.reminderTime}`;
-			}
-
-			var emoji: string | undefined = undefined;
-			if (reminder.isDisabled) {
-				emoji = Emojis.CrossMarkRed;
-			} else if (reminder.getIsPending()) {
-				emoji = Emojis.Timer;
-			}
-
+		if (!reminder) {
 			return {
-				emoji,
-				label: reminder.content.length > 20 ? `${reminder.content.slice(0, 20)}...` : reminder.content,
-				description,
-			};
+				value: 'NOT_FOUND',
+				default: true,
+				description: `NOT_FOUND`,
+				label: `NOT_FOUND`,
+				emoji: undefined,
+			} as SelectMenuComponentOptionData;
+		}
 
-		});
+		let description: string;
+		if (reminder.getIsPending()) {
+			description = `${prettyMilliseconds(reminder.getActiveSchedule()!.getNextInstance().getTime() - Date.now())}`;
+		} else {
+			description = `${reminder.schedules.last()!.reminderTime}`;
+		}
+
+		var emoji: string | undefined = undefined;
+		if (reminder.isDisabled) {
+			emoji = Emojis.CrossMarkRed;
+		} else if (reminder.getIsPending()) {
+			emoji = Emojis.Timer;
+		}
+
+		return {
+			emoji,
+			value: pageIndex.toString(),
+			label: reminder.content.length > 20 ? `${reminder.content.slice(0, 20)}...` : reminder.content,
+			description,
+		} as SelectMenuComponentOptionData;
+	}
+
+	public generateSelectMenu() {
+		this.setSelectMenuOptions(this.generateMenuOption);
 	}
 
 	public generatePages() {
@@ -170,11 +177,11 @@ export class ListReminderPaginatedMessage extends PaginatedMessage {
 				}));
 			}
 		} else {
-			this.addPageEmbed(new MessageEmbed({
-				title: `ERROR: No reminders found.`,
-				description: `No reminders were found for this user.`,
-				color: Constants.Colors.DARK_RED,
-			}))
+			this.addPageEmbed((embed) => {
+				return embed.setTitle(`ERROR: No reminders found.`)
+					.setDescription(`No reminders were found for this user.`)
+					.setColor(Colors.DarkRed);
+			})
 		}
 	}
 }

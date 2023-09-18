@@ -5,26 +5,26 @@ import {
 	Listener,
 	UserError,
 } from "@sapphire/framework";
-import type { Message } from "discord.js";
 import { UserErrorEmbed } from "../../../lib/structures/message/error/UserErrorEmbed";
 
 @ApplyOptions<Listener.Options>({
 	event: Events.ChatInputCommandDenied,
 })
 export class ChatInputCommandDeniedReportError extends Listener<typeof Events.ChatInputCommandDenied> {
-	public async run(error: Error, { interaction }: ChatInputCommandDeniedPayload): Promise<Message<boolean> | void> {
+	public async run(error: Error, { interaction }: ChatInputCommandDeniedPayload) {
 		if(error instanceof UserError) {
 			const embed = new UserErrorEmbed({
 				error: error
 			});
 	
 			if (interaction.replied || interaction.deferred) {
-				return interaction.editReply({
+				await interaction.editReply({
 					embeds: [embed]
-				}) as Promise<Message<boolean>>;
+				});
+				return;
 			}
 	
-			return interaction.reply({
+			await interaction.reply({
 				embeds: [embed]
 			});
 		}

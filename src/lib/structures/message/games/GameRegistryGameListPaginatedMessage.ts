@@ -1,6 +1,6 @@
 import { PaginatedMessage, PaginatedMessageOptions } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
-import { Collection, Constants, Guild, MessageEmbed } from "discord.js";
+import { ButtonStyle, Collection, ComponentType, Guild } from "discord.js";
 import { Emojis } from "../../../utils/constants";
 import type { AdvanceWarsByWeb } from "../../managers/games/AWBWScanner";
 import { GameRegistryGameEmbed } from "./GameRegistryGameEmbed";
@@ -46,9 +46,9 @@ export class GameRegistryGameListPaginatedMessage extends PaginatedMessage {
 			actions: options.actions ?? [
 				{
 					customId: InteractionIds.PreviousPage,
-					style: 'PRIMARY',
+					style: ButtonStyle.Primary,
 					emoji: Emojis.ArrowLeft,
-					type: Constants.MessageComponentTypes.BUTTON,
+					type: ComponentType.Button,
 					run: ({ handler }) => {
 						if (handler.index === 0) {
 							handler.index = handler.pages.length - 1;
@@ -59,9 +59,9 @@ export class GameRegistryGameListPaginatedMessage extends PaginatedMessage {
 				},
 				{
 					customId: InteractionIds.NextPage,
-					style: 'PRIMARY',
+					style: ButtonStyle.Primary,
 					emoji: Emojis.ArrowRight,
-					type: Constants.MessageComponentTypes.BUTTON,
+					type: ComponentType.Button,
 					run: ({ handler }) => {
 						if (handler.index === handler.pages.length - 1) {
 							handler.index = 0;
@@ -86,9 +86,13 @@ export class GameRegistryGameListPaginatedMessage extends PaginatedMessage {
 
 		this.addAction({
 			customId: InteractionIds.GoToPage,
-			type: Constants.MessageComponentTypes.SELECT_MENU,
+			type: ComponentType.StringSelect,
+			options: [{
+				label: "Filling...",
+				value: "TBD",
+			}],
 			run: ({ handler, interaction }) => {
-				if (interaction.isSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
+				if (interaction.isStringSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
 					handler.index = parseInt(interaction.values[0], 10)
 				}
 			}
@@ -101,9 +105,7 @@ export class GameRegistryGameListPaginatedMessage extends PaginatedMessage {
 			}
 
 			if(this.registryEntries.length === 0) {
-				this.addPageEmbed(new MessageEmbed({
-					description: `No tracked games were found.`
-				}))
+				this.addPageEmbed((embed) => embed.setDescription(`No tracked games were found.`));
 				return;
 			}
 		}

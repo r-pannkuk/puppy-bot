@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import type { CommandInteraction, Message } from 'discord.js';
+import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
 const SHORT_DESCRIPTION = 'You really don\'t want to do anything else.'
@@ -11,8 +11,8 @@ const SHORT_DESCRIPTION = 'You really don\'t want to do anything else.'
     detailedDescription: SHORT_DESCRIPTION + ' Examples:\n' +
         '-- /sylphie\n' +
         '-- /sylphie <activity>',
-    requiredUserPermissions: ["SEND_MESSAGES"],
-    requiredClientPermissions: ["SEND_MESSAGES"],
+    requiredUserPermissions: ["SendMessages"],
+    requiredClientPermissions: ["SendMessages"],
     scriptName: 'sylphie.py',
     nsfw: false,
     options: ['activity']
@@ -32,7 +32,7 @@ export class SylphieCommand extends PyScriptCommand {
         )
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         const activity = interaction.options.getString('activity');
         await interaction.deferReply()
         const files = await this.run([activity || ""]);

@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, container, UserError } from "@sapphire/framework";
 import { PermissionFlagsBits } from "discord-api-types/v9";
-import { CommandInteraction, User, GuildTextBasedChannel, Constants, Role, GuildMember, Message, Guild, ButtonInteraction, MessageActionRow, MessageButton, MessagePayload, ReplyMessageOptions } from "discord.js";
+import { User, GuildTextBasedChannel, Role, GuildMember, Message, Guild, ButtonInteraction, ChannelType, ChatInputCommandInteraction } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import { Duration } from '@sapphire/time-utilities'
 import { ReminderTargetType } from "@prisma/client";
@@ -10,6 +10,7 @@ import type { ReminderManager, ValidTarget } from "../../lib/structures/managers
 import { InteractionIds, ReminderEmbed } from "../../lib/structures/message/reminder/ReminderEmbed";
 import { ListReminderPaginatedMessage } from "../../lib/structures/message/reminder/ListReminderPaginatedMessage";
 import { DEFAULT_TIMEZONE } from "../../lib/utils/constants";
+import { ActionRowBuilder, ButtonBuilder } from "@discordjs/builders";
 
 const SHORT_DESCRIPTION = `Set a reminder to go off later.`
 
@@ -75,7 +76,7 @@ export class ReminderCommand extends PuppyBotCommand {
 						option
 							.setName('location')
 							.setDescription('Where the reminder should go off.  Defaults to DMing the user or the channel.')
-							.addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+							.addChannelTypes(ChannelType.GuildText)
 					)
 			)
 			.addSubcommand((builder) =>
@@ -92,7 +93,7 @@ export class ReminderCommand extends PuppyBotCommand {
 		)
 	}
 
-	public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
 		const subCommand = interaction.options.getSubcommand(true) as Remind.ValidSubCommand;
 		var mention: string | User | GuildMember | Role | null | undefined = interaction.options.getMentionable('mention') as string | User | GuildMember | Role;
 		if (!mention) {
@@ -154,7 +155,7 @@ export class ReminderCommand extends PuppyBotCommand {
 	}
 
 	public async run<S extends Remind.ValidSubCommand>(args: {
-		messageOrInteraction: Message | CommandInteraction,
+		messageOrInteraction: Message | ChatInputCommandInteraction,
 		subCommand: S,
 		guild?: Guild | null,
 		user: User,
@@ -167,17 +168,39 @@ export class ReminderCommand extends PuppyBotCommand {
 		} else this.error(`Invalid SubCommand.`, args)
 	}
 
-	public static async executeFollowUp(followUp: (options: string | MessagePayload | ReplyMessageOptions) => Promise<Message<boolean>>, reminder: ReminderManager.Reminder.Instance, user: User, options?: Omit<ReminderEmbed.Options, 'reminder'> | null) {
+	public static async executeFollowUp(followUp: (options) => Promise<Message<boolean>>, reminder: ReminderManager.Reminder.Instance, user: User, options?: Omit<ReminderEmbed.Options, 'reminder'> | null) {
 		const _actionRow1: string[] = [InteractionIds.Remove, InteractionIds.Reschedule, InteractionIds.RepeatMany];
 		const _actionRow2: string[] = [InteractionIds.Subscribe, InteractionIds.Unsubscribe]
 
-		const actionRow1 = new MessageActionRow()
+		const actionRow1 = new ActionRowBuilder()
 			.addComponents(
-				_actionRow1.map(id => new MessageButton(ReminderEmbed.actions.find(action => action.customId === id)!))
+				_actionRow1.map(id => {
+					const action = ReminderEmbed.actions.find(action => action.customId === id)!;
+					return new ButtonBuilder({
+						custom_id: action.customId,
+						disabled: action.disabled,
+						label: action.label,
+						style: action.style,
+						emoji: {
+							name: action.emoji?.toString(),
+						},
+					})
+				})
 			)
-		const actionRow2 = new MessageActionRow()
+		const actionRow2 = new ActionRowBuilder()
 			.addComponents(
-				_actionRow2.map(id => new MessageButton(ReminderEmbed.actions.find(action => action.customId === id)!))
+				_actionRow2.map(id => {
+					const action = ReminderEmbed.actions.find(action => action.customId === id)!;
+					return new ButtonBuilder({
+						custom_id: action.customId,
+						disabled: action.disabled,
+						label: action.label,
+						style: action.style,
+						emoji: {
+							name: action.emoji?.toString(),
+						},
+					})
+				})
 			)
 
 		if (actionRow1.components.length !== _actionRow1.length || actionRow1.components.some((action) => action === undefined)) {
@@ -224,7 +247,7 @@ export class ReminderCommand extends PuppyBotCommand {
 		return message;
 	}
 
-	public async handleCreate(messageOrInteraction: Message | CommandInteraction, guild: Guild | null | undefined, user: User, options: Remind.CommandOptions<'create'>) {
+	public async handleCreate(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild | null | undefined, user: User, options: Remind.CommandOptions<'create'>) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
 		var parsed = ReminderCommand.parseTime(options.when);
@@ -291,7 +314,7 @@ export class ReminderCommand extends PuppyBotCommand {
 		});
 	}
 
-	public async handleList(messageOrInteraction: Message | CommandInteraction, _guild: Guild | null | undefined, user: User, options: Remind.CommandOptions<'list'>) {
+	public async handleList(messageOrInteraction: Message | ChatInputCommandInteraction, _guild: Guild | null | undefined, user: User, options: Remind.CommandOptions<'list'>) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 		const paginatedMessage = new ListReminderPaginatedMessage({
 			ownerId: user.id,

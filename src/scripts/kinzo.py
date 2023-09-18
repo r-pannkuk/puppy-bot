@@ -33,9 +33,9 @@ def drawText(new_img, full_string, original_x_offset, character_count, y_offset,
             # Text
             draw.text((x_offset, y_offset), character, fill=(255,255,255,255), font=font)
 
-            x_offset += font.getsize(character)[0]
+            x_offset += font.getbbox(character)[2] - font.getbbox(character)[0]
 
-        y_offset += font_height
+        y_offset -= font_height
 
 
 def main():
@@ -84,7 +84,7 @@ def main():
     new_img.paste(kinzo, (0,0))
 
     font = ImageFont.truetype("./src/assets/fonts/sazanami-gothic.ttf", 20)
-    font_height = font.getsize('T')[1] * 1.5
+    font_height = (font.getbbox('T')[1] - font.getbbox('T')[3]) * 1.5
 
     # Message Author
     original_x_offset = 60

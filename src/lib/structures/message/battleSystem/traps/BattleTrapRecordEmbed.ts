@@ -1,6 +1,6 @@
 import { BattleTrapRecordType } from "@prisma/client";
 import { container } from "@sapphire/framework";
-import type { GuildTextBasedChannel, MessageEmbedOptions } from "discord.js";
+import type { GuildTextBasedChannel, EmbedData } from "discord.js";
 import prettyMs from "pretty-ms";
 import type { BattleSystem } from "../../../managers/BattleSystem";
 import { BattleTrap as BT } from "./BattleTrapEmbed";
@@ -77,7 +77,7 @@ export class RecordEmbed extends BT.Embed {
 }
 
 export namespace RecordEmbed {
-	export type Options = MessageEmbedOptions & {
+	export type Options = EmbedData & {
 		record: BattleSystem.Trap.Record.Instance
 	}
 }

@@ -1,5 +1,5 @@
 import type { Args, ChatInputCommandContext, Command } from '@sapphire/framework';
-import type { CommandInteraction, Message } from 'discord.js';
+import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { readdirSync } from 'fs';
 import { join, parse } from 'path';
 import { CHAT_INPUT_OPTION_CHOICE_LIMIT } from '../../utils/constants';
@@ -30,8 +30,8 @@ export abstract class RandomMediaCommand extends PuppyBotCommand {
 				(options.typeDescriptions !== undefined) ?
 				(`  /${options.name} ${Object.keys(options.typeDescriptions!)[0]}`) :
 				"",
-			requiredUserPermissions: ['SEND_MESSAGES'],
-			requiredClientPermissions: ['SEND_MESSAGES'],
+			requiredUserPermissions: ["SendMessages"],
+			requiredClientPermissions: ["SendMessages"],
 			nsfw: false,
 			options: ['type']
 		})
@@ -86,7 +86,7 @@ export abstract class RandomMediaCommand extends PuppyBotCommand {
 		)
 	}
 
-	public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
 		const type = interaction.options.getString('type');
 		await interaction.deferReply()
 		const file = await this.run(type);

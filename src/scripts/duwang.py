@@ -62,8 +62,8 @@ def main():
     if(urlparse(location).scheme != ""):
         
         font = ImageFont.truetype("./src/assets/fonts/animeace2_ital.ttf", 13)
-        font_height = font.getsize('T')[1] + 4
-        max_width = font.getsize('WWWWWWWWWW')[0]
+        font_height = (font.getbbox('T')[1] - font.getbbox('T')[3]) + 4
+        max_width = font.getbbox('WWWWWWWWWW')[2] - font.getbbox('WWWWWWWWWW')[0]
 
         response = requests.get(location)
 
@@ -81,14 +81,14 @@ def main():
     # otherwise use text
     else:
         font = ImageFont.truetype("./src/assets/fonts/animeace2_ital.ttf", 13)
-        font_height = font.getsize('T')[1] + 4
-        max_width = font.getsize('WWWWWWWWWW')[0]
+        font_height = (font.getbbox('T')[1] - font.getbbox('T')[3]) * 1.25
+        max_width = font.getbbox('WWWWWWWWWW')[2] - font.getbbox('WWWWWWWWWW')[0]
 
-        offset = 5 + (int)((110 - (len(textwrap.wrap(sys.argv[1], width=9))*font_height))/2)
+        offset = 5 + (int)((110 - (len(textwrap.wrap(sys.argv[1], width=9))*(-font_height)))/2)
 
         for line in textwrap.wrap(sys.argv[1], width=9):
-            ImageDraw.Draw(new_img).text((185 + (int)((max_width - font.getsize(line)[0])/2), offset), line, fill=(0,0,0,255), font=font)
-            offset += font_height
+            ImageDraw.Draw(new_img).text((185 + (int)((max_width - (font.getbbox(line)[2] - font.getbbox(line)[0]))/2), offset), line, fill=(0,0,0,255), font=font)
+            offset -= font_height
 
     # save
     new_img.save(save_name)

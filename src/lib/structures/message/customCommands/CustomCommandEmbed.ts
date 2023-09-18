@@ -1,6 +1,6 @@
 import type { CustomCommand } from "@prisma/client";
 import { container } from "@sapphire/framework";
-import { ButtonInteraction, Constants, ExcludeEnum, MessageButtonOptions, MessageEmbedOptions } from "discord.js";
+import { ButtonComponentData, ButtonInteraction, ButtonStyle, ComponentType, EmbedData } from "discord.js";
 import { Emojis } from "../../../utils/constants";
 import { PuppyBotEmbed } from "../PuppyBotEmbed";
 
@@ -31,10 +31,10 @@ export class CustomCommandEmbed extends PuppyBotEmbed {
 	public get stringifyCreatedAt() { return `**Created At**: ${new Date(this.schema?.createdAt ?? 0)}` }
 	public get stringifyLastUsedAt() { return `**Last Used At**: ${new Date(this.schema?.lastUsedAt ?? 0)}` }
 
-	public static actions: (MessageButtonOptions & { customId: string, run: (interaction: ButtonInteraction, command: CustomCommand) => any })[] = [
+	public static actions: (ButtonComponentData & { customId: string, run: (interaction: ButtonInteraction, command: CustomCommand) => any })[] = [
 		// {
 		// 	customId: InteractionIds.AddAlias,
-		// 	type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+		// 	type: ComponentType.Button as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
 		// 	emoji: Emojis.Paperclips,
 		// 	label: 'Add Alias',
 		// 	style: Constants.MessageButtonStyles.SUCCESS as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
@@ -42,23 +42,23 @@ export class CustomCommandEmbed extends PuppyBotEmbed {
 		// },
 		// {
 		// 	customId: InteractionIds.RemoveAlias,
-		// 	type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+		// 	type: ComponentType.Button as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
 		// 	emoji: Emojis.Paperclips,
 		// 	label: 'Remove Alias',
-		// 	style: Constants.MessageButtonStyles.DANGER as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
+		// 	style: ButtonStyle.Danger as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
 		// 	run: async (_interaction, _command: CustomCommand) => {}
 		// },
 		// {
 		// 	customId: InteractionIds.Rename,
-		// 	type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+		// 	type: ComponentType.Button as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
 		// 	emoji: Emojis.Pencil,
 		// 	label: 'Rename',
-		// 	style: Constants.MessageButtonStyles.SECONDARY as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
+		// 	style: ButtonStyle.Secondary as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
 		// 	run: async (_interaction, _command: CustomCommand) => {}
 		// },
 		// {
 		// 	customId: InteractionIds.EditContent,
-		// 	type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+		// 	type: ComponentType.Button as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
 		// 	emoji: Emojis.Memo,
 		// 	label: 'Edit Content',
 		// 	style: Constants.MessageButtonStyles.PRIMARY as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
@@ -66,10 +66,10 @@ export class CustomCommandEmbed extends PuppyBotEmbed {
 		// },
 		{
 			customId: InteractionIds.Remove,
-			type: Constants.MessageComponentTypes.BUTTON as ExcludeEnum<typeof Constants.MessageComponentTypes, "ACTION_ROW" | "SELECT_MENU">,
+			type: ComponentType.Button,
 			emoji: Emojis.CrossMark,
 			label: 'Remove',
-			style: Constants.MessageButtonStyles.DANGER as ExcludeEnum<typeof Constants.MessageButtonStyles, "LINK">,
+			style: ButtonStyle.Danger,
 			run: async (interaction, command) => {
 				await interaction.guild?.customCommandSystem.remove(command);
 				await interaction.channel?.messages.cache.get(interaction.message.id)?.delete();
@@ -116,7 +116,7 @@ export class CustomCommandEmbed extends PuppyBotEmbed {
 }
 
 export namespace CustomCommandEmbed {
-	export type Options = MessageEmbedOptions & {
+	export type Options = EmbedData & {
 		schema: CustomCommand
 	}
 }

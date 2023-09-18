@@ -1,6 +1,5 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { type ChatInputCommandErrorPayload, Events, Listener, UserError } from '@sapphire/framework';
-import type { Message } from 'discord.js';
 import { UserErrorEmbed } from '../../../lib/structures/message/error/UserErrorEmbed';
 
 @ApplyOptions<Listener.Options>({
@@ -8,7 +7,7 @@ import { UserErrorEmbed } from '../../../lib/structures/message/error/UserErrorE
 	event: Events.ChatInputCommandError
 })
 export class UserListener extends Listener<typeof Events.ChatInputCommandError> {
-	public async run(error: Error, { interaction }: ChatInputCommandErrorPayload): Promise<Message<boolean> | void> {
+	public async run(error: Error, { interaction }: ChatInputCommandErrorPayload) {
 		if(error instanceof UserError) {
 			if (Reflect.get(Object(error.context), 'silent')) return;
 
@@ -17,12 +16,13 @@ export class UserListener extends Listener<typeof Events.ChatInputCommandError> 
 			});
 	
 			if (interaction.replied || interaction.deferred) {
-				return interaction.editReply({
+				await interaction.editReply({
 					embeds: [embed]
-				}) as Promise<Message<boolean>>;
+				});
+				return;
 			}
 	
-			return interaction.reply({
+			await interaction.reply({
 				embeds: [embed]
 			});
 		}

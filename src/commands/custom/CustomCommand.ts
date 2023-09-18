@@ -2,10 +2,11 @@ import type { CustomCommand } from "@prisma/client";
 import { ApplyOptions, RequiresUserPermissions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { PermissionFlagsBits } from "discord-api-types/v9";
-import { ButtonInteraction, CommandInteraction, Guild, Message, MessageActionRow, MessageButton, MessagePayload, ReplyMessageOptions, User } from "discord.js";
+import { ButtonInteraction, Guild, Message, User, ChatInputCommandInteraction } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import { CustomCommandEmbed } from "../../lib/structures/message/customCommands/CustomCommandEmbed";
 import { CustomCommandListPaginatedMessage } from "../../lib/structures/message/customCommands/CustomCommandListPaginatedMessage";
+import { ActionRowBuilder, ButtonBuilder } from "@discordjs/builders";
 
 const SHORT_DESCRIPTION = `Manage server custom commands.`
 
@@ -183,7 +184,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 		)
 	}
 
-	public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
 		await this.run({
 			subCommand: interaction.options.getSubcommand(true) as CustomCommandCommand.ValidSubCommand,
 			messageOrInteraction: interaction,
@@ -297,7 +298,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 	}
 
 	public async run<S extends CustomCommandCommand.ValidSubCommand>(args: {
-		messageOrInteraction: Message | CommandInteraction,
+		messageOrInteraction: Message | ChatInputCommandInteraction,
 		subCommand: S,
 		guild: Guild,
 		user: User,
@@ -332,15 +333,27 @@ export class CustomCommandCommand extends PuppyBotCommand {
 		}
 	}
 
-	protected static async executeFollowUp(followUp: (options: string | MessagePayload | ReplyMessageOptions) => Promise<Message<boolean>>, command: CustomCommand, user: User) {
+	protected static async executeFollowUp(
+		followUp: (payload) => Promise<Message<boolean>>
+		, command: CustomCommand
+		, user: User
+	) {
 		const message = await followUp({
-			embeds: [new CustomCommandEmbed({
-				schema: command
-			})],
+			options: {
+				embeds: [new CustomCommandEmbed({
+					schema: command
+				})],
+			},
 			components: [
-				new MessageActionRow()
+				new ActionRowBuilder()
 					.addComponents(
-						CustomCommandEmbed.actions.map(action => new MessageButton(action))
+						CustomCommandEmbed.actions.map(action => new ButtonBuilder({
+							custom_id: action.customId,
+							disabled: action.disabled,
+							label: action.label,
+							style: action.style,
+							// emoji: action.emoji
+						}))
 					)
 			]
 		});
@@ -352,7 +365,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 			});
 	}
 
-	public async handleAdd(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User, name: string, output: string) {
+	public async handleAdd(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, user: User, name: string, output: string) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
 		name = name.toLowerCase();
@@ -369,7 +382,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 		await CustomCommandCommand.executeFollowUp(followUp, command, user);
 	}
 
-	public async handleAlias(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User, commandName: string, alias: string) {
+	public async handleAlias(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, user: User, commandName: string, alias: string) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
 		const customCommandSystem = guild.customCommandSystem;
@@ -382,7 +395,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 		await CustomCommandCommand.executeFollowUp(followUp, command, user);
 	}
 
-	public async handleRemove(messageOrInteraction: Message | CommandInteraction, guild: Guild, _user: User, commandName: string) {
+	public async handleRemove(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, _user: User, commandName: string) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
 		const customCommandSystem = guild.customCommandSystem;
@@ -399,7 +412,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 		}
 	}
 
-	public async handleEdit(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User, commandName: string, output: string) {
+	public async handleEdit(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, user: User, commandName: string, output: string) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
 		const customCommandSystem = guild.customCommandSystem;
@@ -412,7 +425,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 		await CustomCommandCommand.executeFollowUp(followUp, command, user);
 	}
 
-	public async handleRename(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User, commandName: string, newName: string) {
+	public async handleRename(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, user: User, commandName: string, newName: string) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
 		const customCommandSystem = guild.customCommandSystem;
@@ -429,8 +442,8 @@ export class CustomCommandCommand extends PuppyBotCommand {
 		await CustomCommandCommand.executeFollowUp(followUp, command, user);
 	}
 
-	@RequiresUserPermissions("ADMINISTRATOR")
-	public async handleReset(messageOrInteraction: Message | CommandInteraction, guild: Guild, _user: User) {
+	@RequiresUserPermissions("Administrator")
+	public async handleReset(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, _user: User) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
 		const customCommandSystem = guild.customCommandSystem;
@@ -440,7 +453,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 		await followUp(`Removed all custom commands from this server.`);
 	}
 
-	public async handleList(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User) {
+	public async handleList(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, user: User) {
 		if (guild.customCommandSystem.customCommands.size === 0) {
 			this.error(`No custom commands found on this server.`);
 		}
@@ -454,7 +467,7 @@ export class CustomCommandCommand extends PuppyBotCommand {
 		await paginatedMessage.run(messageOrInteraction, user);
 	}
 
-	public async handleInfo(messageOrInteraction: Message | CommandInteraction, guild: Guild, user: User, commandName: string) {
+	public async handleInfo(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, user: User, commandName: string) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
 		var command = guild.customCommandSystem.getByNameOrAlias({
@@ -490,8 +503,8 @@ export namespace CustomCommandCommand {
 			'command': string,
 			'name': string,
 		},
-		'list': {},
-		'reset': {},
+		'list': PuppyBotCommand.SubCommandNoOptions,
+		'reset': PuppyBotCommand.SubCommandNoOptions,
 		'info': {
 			'command': string,
 		}

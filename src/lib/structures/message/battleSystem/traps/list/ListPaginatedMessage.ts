@@ -1,4 +1,4 @@
-import { Collection, Constants, MessageEmbed } from "discord.js";
+import { Collection, ComponentType, EmbedBuilder } from "discord.js";
 import type { BattleSystem } from "../../../../managers/BattleSystem";
 import { BattleTrap } from "../BattleTrapPaginatedMessage";
 import { ListEmbed } from "./ListEmbed";
@@ -46,7 +46,7 @@ export class ListPaginatedMessage extends BattleTrap.TrapPaginatedMessage {
 		}
 
 		if (!this.traps || this.traps.size === 0) {
-			this.addPageEmbed(new MessageEmbed({
+			this.addPageEmbed(new EmbedBuilder({
 				title: `No traps found.`,
 				description: `No traps were found for this user.  Please create a trap using the \`\`/trap create\`\` command.`
 			}))
@@ -55,10 +55,14 @@ export class ListPaginatedMessage extends BattleTrap.TrapPaginatedMessage {
 		
 		this.addAction({
 			customId: InteractionIds.GoToPage,
-			type: Constants.MessageComponentTypes.SELECT_MENU,
+			type: ComponentType.StringSelect,
+			options: [{
+				label: "Filling...",
+				value: "TBD",
+			}],
 			placeholder: "Select Trap...",
 			run: ({ handler, interaction }) => {
-				if (interaction.isSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
+				if (interaction.isStringSelectMenu() && interaction.customId === InteractionIds.GoToPage) {
 					handler.index = parseInt(interaction.values[0], 10);
 				}
 			}

@@ -1,7 +1,7 @@
-import { Command, CommandOptionsRunTypeEnum, RegisterBehavior, UserError } from "@sapphire/framework";
+import { ApplicationCommandRegistryRegisterOptions, Command, CommandOptionsRunTypeEnum, RegisterBehavior, UserError } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { Time } from "@sapphire/time-utilities";
-import { Channel, CommandInteraction, ContextMenuInteraction, Guild, GuildMember, Message, MessagePayload, ReplyMessageOptions, Role, User } from "discord.js";
+import { Channel, CommandInteraction, Guild, GuildMember, Message, MessagePayload, Role, User, InteractionEditReplyOptions, ChatInputCommandInteraction, ContextMenuCommandInteraction, MessageReplyOptions } from "discord.js";
 import { envParseArray, envParseString } from "../../env/utils";
 
 export const SLASH_ID_HINTS: Record<string, string[]> = {
@@ -52,13 +52,13 @@ export abstract class PuppyBotCommand extends Subcommand {
     public readonly guarded: Boolean;
     public readonly hidden: Boolean;
 
-    protected slashCommandOptions = {
+    protected slashCommandOptions: ApplicationCommandRegistryRegisterOptions = {
         behaviorWhenNotIdentical: RegisterBehavior.Overwrite,
         guildIds: (!this.options?.runIn || this.options?.runIn?.includes(CommandOptionsRunTypeEnum.Dm)) ? undefined : [envParseString("DEV_GUILD_ID")],
         idHints: (this.name in SLASH_ID_HINTS) ? SLASH_ID_HINTS[this.name] : undefined,
     }
 
-    protected contextCommandOptions = {
+    protected contextCommandOptions: ApplicationCommandRegistryRegisterOptions = {
         behaviorWhenNotIdentical: RegisterBehavior.Overwrite,
         guildIds: (this.options?.runIn?.includes(CommandOptionsRunTypeEnum.Dm)) ? undefined : [envParseString('DEV_GUILD_ID')],
         idHints: (this.name in CONTEXT_MENU_ID_HINTS) ? CONTEXT_MENU_ID_HINTS[this.name] : undefined
@@ -81,14 +81,13 @@ export abstract class PuppyBotCommand extends Subcommand {
         throw typeof identifier === 'string' ? new UserError({ identifier, context }) : identifier;
     }
 
-    protected async generateFollowUp(messageOrInteraction: Message | CommandInteraction | ContextMenuInteraction):
-        Promise<(options: string | MessagePayload | ReplyMessageOptions) => Promise<Message<boolean>>> {
+    protected async generateFollowUp(messageOrInteraction: Message | ChatInputCommandInteraction | ContextMenuCommandInteraction) {
         if (messageOrInteraction instanceof Message) {
             messageOrInteraction = await messageOrInteraction.channel.send({
                 content: `Generating embed...`
             })
 
-            return async (options: string | MessagePayload | ReplyMessageOptions) => {
+            return async (options: string | MessagePayload | MessageReplyOptions) => {
                 const reply = await (messageOrInteraction as Message).reply(options);
                 await messageOrInteraction.channel?.messages.cache.get(messageOrInteraction.id)?.delete();
                 return reply;
@@ -98,7 +97,7 @@ export abstract class PuppyBotCommand extends Subcommand {
                 await messageOrInteraction.deferReply({
                 });
             }
-            return async (options: string | MessagePayload | ReplyMessageOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
+            return async (options: string | MessagePayload | InteractionEditReplyOptions) => (messageOrInteraction as CommandInteraction).editReply(options);
         }
     }
 }
@@ -113,90 +112,131 @@ export namespace PuppyBotCommand {
 
     export interface CommandStructure { }
 
-    // interface testCommandStructure {
-    //     'group': {
-    //         'sub-command1': {
-    //             'option1.1': string,
-    //             'option1.2': number,
-    //         },
-    //         'sub-command3': {
-    //             'option3.1': number,
-    //             'option3.2': string,
-    //         }
-    //     },
-    //     'sub-command2': {
-    //         'option2.1': string
-    //         'option2.2': number
-    //     },
-    //     'option3.1': boolean,
-    //     'option4.1': string
-    // }
-
     export type ParameterType = boolean | Channel | number | Role | User | GuildMember | string | undefined | null | Array<any>;
 
-    export type ValidSubCommandGroup<T extends CommandStructure> = keyof T
-    export type ValidSubCommand<T extends CommandStructure, G extends ValidSubCommandGroup<T> | undefined = undefined> =
+    export type ValidSubCommandGroup<T extends CommandStructure> = {
+        [g in keyof T]: T[g] extends SubCommandNoOptions
+        ? never
+        : (T[g] extends object
+            ? ({
+                [s in keyof T[g]]: T[g][s] extends object
+                ? ({
+                    [o in keyof T[g][s]]: T[g][s][o] extends ParameterType ? g : never
+                }[keyof T[g][s]]) : never
+            }[keyof T[g]])
+            : never
+        )
+    }[keyof T];
+
+    export type SubCommandNoOptions = Record<string, never>
+
+    export type ValidSubCommand<
+        T extends CommandStructure,
+        G extends (ValidSubCommandGroup<T> | undefined) = undefined
+    > =
         (
-            G extends ValidSubCommandGroup<T>
-            ? keyof T[G]
-            : {
+            G extends undefined
+            ?
+            {
                 [s in keyof T]: T[s] extends object
                 ? ({
                     [o in keyof T[s]]: T[s][o] extends ParameterType ? s : never
-                }[keyof T[s]]) | (s extends {} ? s : never)
-                : never
+                }[keyof T[s]])
+                : T[s] extends SubCommandNoOptions ? s : never
+            }[keyof T]
+            :
+            {
+                [g in keyof T]: g extends G ? (
+                    {
+                        [s in keyof T[g]]: T[g][s] extends object
+                        ? ({
+                            [o in keyof T[g][s]]: T[g][s][o] extends ParameterType ? s : never
+                        }[keyof T[g][s]])
+                        : T[g][s] extends SubCommandNoOptions ? s : never
+                    }[keyof T[g]]
+                ) : never
             }[keyof T]
         );
-    export type ValidOption<T extends CommandStructure, G extends ValidSubCommandGroup<T> | undefined = undefined, S extends ValidSubCommand<T, G> | undefined = undefined> =
-        (
-            G extends ValidSubCommandGroup<T>
-            ? (
-                S extends ValidSubCommand<T, G>
-                ? {
-                    [k in keyof T[G]]: k extends S ? keyof T[G][k] : never
-                }[keyof T[G]]
-                : never
-            ) : (
-                S extends ValidSubCommand<T>
-                ? {
-                    [k in keyof T]: k extends S ? keyof T[k] : never
-                }[keyof T]
-                : (
-                    S extends undefined
-                    ? {
-                        [k in keyof T]: T[k] extends ParameterType ? k : never
-                    }[keyof T]
-                    : never
-                )
-            )
-        );
-    export type ValidOptionType<T extends CommandStructure, G extends ValidSubCommandGroup<T> | undefined = undefined, S extends ValidSubCommand<T, G> | undefined = undefined, O extends ValidOption<T, G, S> | undefined = undefined> =
-        G extends ValidSubCommandGroup<T> // G is a valid SubCommandGroup
-        ? {
-            [g in keyof T]: g extends G
-            ? {
-                [s in keyof T[g]]: s extends S
-                ? {
-                    [o in keyof T[g][s]]: o extends O ? T[g][s][o] : never
-                }[keyof T[g][s]]
-                : never
-            }[keyof T[g]]
-            : never
+
+    export type ValidOption<
+        T extends CommandStructure,
+        G extends ValidSubCommandGroup<T> | undefined = undefined,
+        S extends ValidSubCommand<
+            T,
+            G
+        > | undefined = undefined
+    > =
+        S extends undefined
+        ?
+        {
+            [o in keyof T]: T[o] extends ParameterType ? o : never
         }[keyof T]
         :
-        S extends ValidSubCommand<T> // S is a valid SubCommand
-        ? {
-            [s in keyof T]: s extends S
-            ? {
-                [o in keyof T[s]]: o extends O ? T[s][o] : never
-            }[keyof T[s]]
-            : never
-        }[keyof T]
-        : {
+        (
+            G extends undefined
+            ?
+            {
+                [s in keyof T]: s extends S
+                ? {
+                    [o in keyof T[s]]: T[s][o] extends ParameterType ? o : never
+                }[keyof T[s]]
+                : never
+            }[keyof T]
+            :
+            {
+                [g in keyof T]: g extends G ? (
+                    {
+                        [s in keyof T[g]]: s extends S
+                        ? ({
+                            [o in keyof T[g][s]]: T[g][s][o] extends ParameterType ? o : never
+                        }[keyof T[g][s]])
+                        : never
+                    }[keyof T[g]]
+                ) : never
+            }[keyof T]
+        )
+
+    export type ValidOptionType<
+        T extends CommandStructure,
+        G extends ValidSubCommandGroup<T> | undefined = undefined,
+        S extends ValidSubCommand<T, G> | undefined = undefined,
+        O extends ValidOption<T, G, S> | undefined = undefined
+    > =
+        S extends undefined
+        ?
+        {
             [o in keyof T]: o extends O ? T[o] : never
         }[keyof T]
+        :
+        (
+            G extends undefined
+            ?
+            {
+                [s in keyof T]: s extends S
+                ? {
+                    [o in keyof T[s]]: o extends O ? T[s][o] : never
+                }[keyof T[s]]
+                : never
+            }[keyof T]
+            :
+            {
+                [g in keyof T]: g extends G ? (
+                    {
+                        [s in keyof T[g]]: s extends S
+                        ? ({
+                            [o in keyof T[g][s]]: o extends O ? T[g][s][o] : never
+                        }[keyof T[g][s]])
+                        : never
+                    }[keyof T[g]]
+                ) : never
+            }[keyof T]
+        )
 
-    export type CommandOptions<T extends CommandStructure, G extends ValidSubCommandGroup<T> | undefined = undefined, S extends ValidSubCommand<T, G> | undefined = undefined> =
+    export type CommandOptions<
+        T extends CommandStructure,
+        G extends ValidSubCommandGroup<T> | undefined = undefined,
+        S extends ValidSubCommand<T, G> | undefined = undefined
+    > =
         {
             [o in ValidOption<T, G, S>]: ValidOptionType<T, G, S, o>
         }
@@ -206,12 +246,119 @@ export namespace PuppyBotCommand {
         G extends PuppyBotCommand.ValidSubCommandGroup<T> | undefined = undefined,
         S extends PuppyBotCommand.ValidSubCommand<T, G> | undefined = undefined,
     > {
-        messageOrInteraction: Message | CommandInteraction,
-        subCommandGroup?: G | null,
-        subCommand?: S | null,
+        messageOrInteraction: Message | ChatInputCommandInteraction,
         guild?: Guild | null,
         user: User,
         options: PuppyBotCommand.CommandOptions<T, G, S>
     }
 
+    // interface testCommandStructure {
+    //     'group': {
+    //         'sub-command1': {
+    //             'option1.1': string,
+    //             'option1.2': number,
+    //         },
+    //         'sub-command2': {
+    //             'option2.1': number,
+    //             'option2.2': string,
+    //         }
+    //     },
+    //     'sub-command3': {
+    //         'option3.1': string
+    //         'option3.2': number
+    //     },
+    //     'sub-command4': {
+    //         'option4.1': boolean
+    //         'option4.2': number
+    //     },
+    //     'sub-command-no-options': SubCommandNoOptions,
+    //     'option5.1': boolean,
+    //     'option6.1': string
+    // }
+
+    // var TestSubCommandGroup: ValidSubCommandGroup<testCommandStructure>;
+    // var TestSubCommandGroupDefined: ValidSubCommand<testCommandStructure, 'group'>;
+    // var TestSubCommandGroupUndefined: ValidSubCommand<testCommandStructure, undefined>;
+    // var TestOption1: ValidOption<testCommandStructure, 'group', 'sub-command1'>;
+    // var TestOption2: ValidOption<testCommandStructure, 'group', 'sub-command2'>;
+    // var TestOption3: ValidOption<testCommandStructure, undefined, 'sub-command3'>;
+    // var TestOption4: ValidOption<testCommandStructure, undefined, 'sub-command4'>;
+    // var TestOptionNone: ValidOption<testCommandStructure, undefined, 'sub-command-no-options'>;
+    // var TestOptionType1_1: ValidOptionType<testCommandStructure, 'group', 'sub-command1', 'option1.1'>;
+    // var TestOptionType1_2: ValidOptionType<testCommandStructure, 'group', 'sub-command1', 'option1.2'>;
+    // var TestOptionType2_1: ValidOptionType<testCommandStructure, 'group', 'sub-command2', 'option2.1'>;
+    // var TestOptionType2_2: ValidOptionType<testCommandStructure, 'group', 'sub-command2', 'option2.2'>;
+    // var TestOptionType3_1: ValidOptionType<testCommandStructure, undefined, 'sub-command3', 'option3.1'>;
+    // var TestOptionType3_2: ValidOptionType<testCommandStructure, undefined, 'sub-command3', 'option3.2'>;
+    // var TestOptionType4_1: ValidOptionType<testCommandStructure, undefined, 'sub-command4', 'option4.1'>;
+    // var TestOptionType4_2: ValidOptionType<testCommandStructure, undefined, 'sub-command4', 'option4.2'>;
+    // var TestOptionTypeNone: ValidOptionType<testCommandStructure, undefined, 'sub-command-no-options', undefined>;
+    // var TestOptionType5: ValidOptionType<testCommandStructure, undefined, undefined, 'option5.1'>;
+    // var TestOptionType6: ValidOptionType<testCommandStructure, undefined, undefined, 'option6.1'>;
+    // var TestCommandOption1: CommandOptions<testCommandStructure, 'group', 'sub-command1'>;
+    // var TestCommandOption2: CommandOptions<testCommandStructure, 'group', 'sub-command2'>;
+    // var TestCommandOption3: CommandOptions<testCommandStructure, undefined, 'sub-command3'>;
+    // var TestCommandOption4: CommandOptions<testCommandStructure, undefined, 'sub-command4'>;
+    // var TestCommandOptionNone: CommandOptions<testCommandStructure, undefined, 'sub-command-no-options'>;
+    // var TestCommandOptionBase: CommandOptions<testCommandStructure, undefined, undefined>;
+    // var TestArgs: Args<testCommandStructure, 'group', 'sub-command2'>;
+    
+    // assert(TestSubCommandGroup = 'group');
+    // assert(TestSubCommandGroupDefined = 'sub-command1');
+    // assert(TestSubCommandGroupDefined = 'sub-command2');
+    // assert(TestSubCommandGroupUndefined = 'sub-command3');
+    // assert(TestSubCommandGroupUndefined = 'sub-command4');
+    // assert(TestSubCommandGroupUndefined = 'sub-command-no-options');
+    // assert(TestOption1 = 'option1.1');
+    // assert(TestOption1 = 'option1.2');
+    // assert(TestOption2 = 'option2.1');
+    // assert(TestOption2 = 'option2.2');
+    // assert(TestOption3 = 'option3.1');
+    // assert(TestOption3 = 'option3.2');
+    // assert(TestOption4 = 'option4.1');
+    // assert(TestOption4 = 'option4.2');
+    // assert(TestOptionNone = 'never')
+    // assert(TestOptionType1_1 = 'string');
+    // assert(TestOptionType1_2 = 1.0);
+    // assert(TestOptionType2_1 = 1.0);
+    // assert(TestOptionType2_2 = 'string');
+    // assert(TestOptionType3_1 = 'string');
+    // assert(TestOptionType3_2 = 1.0);
+    // assert(TestOptionType4_1 = false);
+    // assert(TestOptionType4_2 = 1.0);
+    // assert(TestOptionType5 = true);
+    // assert(TestOptionType6 = 'string');
+    // assert(TestCommandOption1 = {
+    //     "option1.1": "test",
+    //     "option1.2": 1.0,
+    // });
+    // assert(TestCommandOption2 = {
+    //     "option2.1": 1.0,
+    //     "option2.2": "test",
+    // });
+    // assert(TestCommandOption3 = {
+    //     "option3.1": "test",
+    //     "option3.2": 1.0,
+    // });
+    // assert(TestCommandOption4 = {
+    //     "option4.1": false,
+    //     "option4.2": 1.0,
+    // });
+    // assert(TestCommandOptionNone = {
+
+    // });
+    // assert(TestCommandOptionBase = {
+    //     "option5.1": true,
+    //     "option6.1": "test"
+    // });
+
+    // assert(TestArgs = {
+    //     messageOrInteraction: Message.prototype,
+    //     guild: Guild.prototype,
+    //     user: User.prototype,
+    //     options: {
+    //         "option2.1": 1.0,
+    //         "option2.2": "test"
+    //     }
+    // })
 }

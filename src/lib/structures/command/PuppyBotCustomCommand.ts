@@ -2,7 +2,7 @@
 
 import type { CustomCommand } from "@prisma/client";
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, Command, container, RegisterBehavior } from "@sapphire/framework";
-import { Message, CommandInteraction } from "discord.js";
+import { Message, CommandInteraction, ChatInputCommandInteraction } from "discord.js";
 import { PuppyBotCommand } from "./PuppyBotCommand";
 
 export class PuppyBotCustomCommand extends PuppyBotCommand {
@@ -52,7 +52,7 @@ export class PuppyBotCustomCommand extends PuppyBotCommand {
 		await this.run(message);
 	}
 
-	public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+	public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
 		await this.run(interaction);
 	}
 

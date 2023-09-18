@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import type { ApplicationCommandRegistry, ChatInputCommandContext } from "@sapphire/framework";
-import { CommandInteraction, Constants, Guild, GuildTextBasedChannel, Message, Role, User } from "discord.js";
+import { ChannelType, ChatInputCommandInteraction, Guild, GuildTextBasedChannel, Message, Role, User } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import { isNullish, isNullishOrEmpty } from "@sapphire/utilities"
 import { PuppyBotEmbed } from "../../lib/structures/message/PuppyBotEmbed";
@@ -15,8 +15,8 @@ const SHORT_DESCRIPTION = 'Sets a designated guild role or channel.';
         '`!set delete channel #channel`\n' +
         '`!set role-assign channel #channel`\n' +
         '`!set moderate role @role`\n',
-    requiredUserPermissions: ["MANAGE_CHANNELS", "MANAGE_ROLES"],
-    requiredClientPermissions: ['SEND_MESSAGES', "MANAGE_CHANNELS", "MANAGE_ROLES"],
+    requiredUserPermissions: ["ManageChannels", "ManageRoles"],
+    requiredClientPermissions: ["SendMessages", "ManageChannels", "ManageRoles"],
     nsfw: false,
     runIn: 'GUILD_ANY',
     options: true
@@ -34,7 +34,7 @@ export class AddCommand extends PuppyBotCommand {
                         option
                             .setName("channel")
                             .setDescription("What channel should store message audit logs?")
-                            .addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+                            .addChannelTypes(ChannelType.GuildText)
                     )
                     .addBooleanOption((option) =>
                         option
@@ -55,7 +55,7 @@ export class AddCommand extends PuppyBotCommand {
                         option
                             .setName("channel")
                             .setDescription("What channel should moderated users be limited to?")
-                            .addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+                            .addChannelTypes(ChannelType.GuildText)
                     )
                     .addRoleOption((option) =>
                         option
@@ -72,7 +72,7 @@ export class AddCommand extends PuppyBotCommand {
                             .setName("channel")
                             .setDescription("What channel should role assignment messages be sent to?")
                             .setRequired(true)
-                            .addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+                            .addChannelTypes(ChannelType.GuildText)
                     )
             )
             .addSubcommand((builder) =>
@@ -84,7 +84,7 @@ export class AddCommand extends PuppyBotCommand {
                             .setName("channel")
                             .setDescription("What channel should trap messages be sent to?")
                             .setRequired(true)
-                            .addChannelTypes(Constants.ChannelTypes.GUILD_TEXT.valueOf())
+                            .addChannelTypes(ChannelType.GuildText)
                     )
             )
             ,
@@ -92,7 +92,7 @@ export class AddCommand extends PuppyBotCommand {
         )
     }
 
-    public override async chatInputRun(interaction: CommandInteraction, _context: ChatInputCommandContext) {
+    public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
         var subCommand = interaction.options.getSubcommand(true) as SetCommand.ValidSubCommand;
         // var targetRole = interaction.options.getRole('role') as Role
         var channel = interaction.options.getChannel('channel') as GuildTextBasedChannel;
@@ -117,7 +117,7 @@ export class AddCommand extends PuppyBotCommand {
     }
 
     public async run<S extends SetCommand.ValidSubCommand>(args: {
-        messageOrInteraction: Message | CommandInteraction,
+        messageOrInteraction: Message | ChatInputCommandInteraction,
         subCommand: S,
         guild: Guild,
         user: User,
@@ -145,7 +145,7 @@ export class AddCommand extends PuppyBotCommand {
         }
     }
 
-    public async handleLogging(messageOrInteraction: Message | CommandInteraction, guild: Guild, _user: User, options: SetCommand.CommandOptions<'logging'>) {
+    public async handleLogging(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, _user: User, options: SetCommand.CommandOptions<'logging'>) {
         const followUp = await this.generateFollowUp(messageOrInteraction);
 
         const oldConfig = guild.messageEchoer.config;
@@ -173,7 +173,7 @@ export class AddCommand extends PuppyBotCommand {
 
     }
 
-    public async handleModerate(_messageOrInteraction: Message | CommandInteraction, _guild: Guild, _user: User, options: SetCommand.CommandOptions<'moderate'>) {
+    public async handleModerate(_messageOrInteraction: Message | ChatInputCommandInteraction, _guild: Guild, _user: User, options: SetCommand.CommandOptions<'moderate'>) {
         const { channel, role } = options;
         if (isNullishOrEmpty(channel) && isNullishOrEmpty(role)) {
             this.error("Moderation Settings", "Either channel or role must be provided to update settings.");
@@ -190,7 +190,7 @@ export class AddCommand extends PuppyBotCommand {
         // }
     }
 
-    public async handleRoleAssign(messageOrInteraction: Message | CommandInteraction, guild: Guild, _user: User, options: SetCommand.CommandOptions<'role-assign'>) {
+    public async handleRoleAssign(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, _user: User, options: SetCommand.CommandOptions<'role-assign'>) {
         const followUp = await this.generateFollowUp(messageOrInteraction);
         const oldChannel = guild.channels.cache.get(guild.roleAssigner.config?.roleChannelId ?? 'null');
 
@@ -214,7 +214,7 @@ export class AddCommand extends PuppyBotCommand {
         })
     }
 
-    public async handleTrap(messageOrInteraction: Message | CommandInteraction, guild: Guild, _user: User, options: SetCommand.CommandOptions<'trap'>) {
+    public async handleTrap(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild, _user: User, options: SetCommand.CommandOptions<'trap'>) {
         const followUp = await this.generateFollowUp(messageOrInteraction);
         var config = guild.battleSystem.config;
         const oldChannel = guild.channels.cache.get(config?.trapConfig.trapChannelId ?? 'null');
