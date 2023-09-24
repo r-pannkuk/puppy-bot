@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import type { ApplicationCommandRegistry, ChatInputCommandContext } from "@sapphire/framework";
+import { CommandOptionsRunTypeEnum, type ApplicationCommandRegistry, type ChatInputCommandContext } from "@sapphire/framework";
 import { ChannelType, ChatInputCommandInteraction, Guild, GuildTextBasedChannel, Message, Role, User } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import { isNullish, isNullishOrEmpty } from "@sapphire/utilities"
@@ -18,7 +18,7 @@ const SHORT_DESCRIPTION = 'Sets a designated guild role or channel.';
     requiredUserPermissions: ["ManageChannels", "ManageRoles"],
     requiredClientPermissions: ["SendMessages", "ManageChannels", "ManageRoles"],
     nsfw: false,
-    runIn: 'GUILD_ANY',
+    runIn: [CommandOptionsRunTypeEnum.GuildAny],
     options: true
 })
 export class AddCommand extends PuppyBotCommand {

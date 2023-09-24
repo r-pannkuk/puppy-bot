@@ -1,4 +1,4 @@
-import { ApplicationCommandRegistryRegisterOptions, Command, CommandOptionsRunTypeEnum, RegisterBehavior, UserError } from "@sapphire/framework";
+import { ApplicationCommandRegistryRegisterOptions, Command, RegisterBehavior, UserError } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { Time } from "@sapphire/time-utilities";
 import { Channel, CommandInteraction, Guild, GuildMember, Message, MessagePayload, Role, User, InteractionEditReplyOptions, ChatInputCommandInteraction, ContextMenuCommandInteraction, MessageReplyOptions } from "discord.js";
@@ -54,13 +54,13 @@ export abstract class PuppyBotCommand extends Subcommand {
 
     protected slashCommandOptions: ApplicationCommandRegistryRegisterOptions = {
         behaviorWhenNotIdentical: RegisterBehavior.Overwrite,
-        guildIds: (!this.options?.runIn || this.options?.runIn?.includes(CommandOptionsRunTypeEnum.Dm)) ? undefined : [envParseString("DEV_GUILD_ID")],
+        guildIds: (!this.options?.runIn /* || this.options?.runIn?.includes(CommandOptionsRunTypeEnum.Dm) */) ? undefined : [envParseString("DEV_GUILD_ID")],
         idHints: (this.name in SLASH_ID_HINTS) ? SLASH_ID_HINTS[this.name] : undefined,
     }
 
     protected contextCommandOptions: ApplicationCommandRegistryRegisterOptions = {
         behaviorWhenNotIdentical: RegisterBehavior.Overwrite,
-        guildIds: (this.options?.runIn?.includes(CommandOptionsRunTypeEnum.Dm)) ? undefined : [envParseString('DEV_GUILD_ID')],
+        guildIds: /*(this.options?.runIn?.includes(CommandOptionsRunTypeEnum.Dm)) ? undefined : */ [envParseString('DEV_GUILD_ID')],
         idHints: (this.name in CONTEXT_MENU_ID_HINTS) ? CONTEXT_MENU_ID_HINTS[this.name] : undefined
     }
 

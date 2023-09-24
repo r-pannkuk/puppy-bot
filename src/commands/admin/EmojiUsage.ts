@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { ApplicationCommandRegistry, ChatInputCommandContext, Command, container, ContextMenuCommandContext } from "@sapphire/framework";
+import { ApplicationCommandRegistry, ChatInputCommandContext, Command, CommandOptionsRunTypeEnum, container, ContextMenuCommandContext } from "@sapphire/framework";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import { Collection, CommandInteraction, Guild, GuildEmoji, GuildTextBasedChannel, Message, MessagePayload, InteractionEditReplyOptions, User, MessageReplyOptions, ChatInputCommandInteraction } from "discord.js";
 import { EmojiUsagePaginatedMessage } from "../../lib/structures/message/admin/EmojiUsagePaginatedMessage";
@@ -23,7 +23,7 @@ const WAIT_DURATION_FOR_FOLLOWUP = 600000;
     requiredUserPermissions: ['Administrator'],
     requiredClientPermissions: ['ViewChannel'],
     nsfw: false,
-    runIn: 'GUILD_ANY',
+    runIn: [CommandOptionsRunTypeEnum.GuildAny],
     options: ['emoji', 'member', 'count-reactions'],
     cooldownLimit: 1,
     cooldownDelay: 20

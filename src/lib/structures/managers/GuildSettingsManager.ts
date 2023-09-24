@@ -1,5 +1,4 @@
 import type { GuildSettings, PrismaClient } from "@prisma/client";
-import { isNullishOrEmpty } from "@sapphire/utilities"
 import type { CategoryChannel, GuildChannelCreateOptions, GuildTextBasedChannel, OverwriteResolvable, Role } from "discord.js";
 import { container, Resolvers } from "@sapphire/framework";
 import { ChannelType, Guild } from "discord.js";
@@ -85,7 +84,7 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
 
         if (categoryName) {
             var categoryResolver = await Resolvers.resolveGuildCategoryChannel(categoryName, this.guild!)
-            if (isNullishOrEmpty(categoryResolver.unwrap())) {
+            if ('error' in categoryResolver) {
                 categoryChannel = await this.guild!.channels.create({
                     name: categoryName,
                     type: ChannelType.GuildCategory,
@@ -100,7 +99,7 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
 
         if (channelName) {
             var channelResolver = await Resolvers.resolveGuildTextChannel(channelName, this.guild!);
-            if (isNullishOrEmpty(channelResolver.unwrap())) {
+            if ('error' in channelResolver) {
                 channel = await this.guild!.channels.create({
                     name: channelName,
                     parent: categoryChannel?.id,
@@ -125,7 +124,7 @@ export class GuildSettingsManager implements GuildSettings, IGuildManager {
         /* Role Validator */
         if (roleName) {
             var roleResolver = await Resolvers.resolveRole(roleName, this.guild!);
-            if (isNullishOrEmpty(roleResolver.unwrap())) {
+            if ('error' in roleResolver) {
                 role = await this.guild!.roles.create({
                     name: roleName,
                     color: 'Default',

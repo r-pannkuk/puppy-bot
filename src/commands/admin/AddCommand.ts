@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { ApplicationCommandRegistry, Args, ChatInputCommandContext, container } from "@sapphire/framework";
+import { ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum, container } from "@sapphire/framework";
 import { CategoryChannel, ChannelType, Guild, GuildMember, GuildTextBasedChannel, Message, Role, User } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import type { ChatInputCommandInteraction, OverwriteData } from "discord.js";
@@ -20,7 +20,7 @@ const SHORT_DESCRIPTION = 'Creates a new group and role for discussion.';
     requiredUserPermissions: ["ManageChannels", "ManageRoles"],
     requiredClientPermissions: ["SendMessages", "ManageChannels", "ManageRoles"],
     nsfw: false,
-    runIn: 'GUILD_ANY',
+    runIn: [CommandOptionsRunTypeEnum.GuildAny],
     options: true,
     subcommands: [
         {

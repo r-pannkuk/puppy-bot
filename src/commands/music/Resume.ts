@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from "@sapphire/framework";
+import { CommandOptionsRunTypeEnum, type ApplicationCommandRegistry, type Args, type ChatInputCommandContext } from "@sapphire/framework";
 import type { ChatInputCommandInteraction, Guild } from "discord.js";
 import type { Message } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
@@ -14,7 +14,7 @@ const SHORT_DESCRIPTION = `Resume music that has been paused.`
     requiredUserPermissions: ["Connect"],
     requiredClientPermissions: ["Connect", "Speak", "RequestToSpeak"],
     nsfw: false,
-    runIn: 'GUILD_ANY',
+    runIn: [CommandOptionsRunTypeEnum.GuildAny],
     options: true
 })
 export class ResumeCommand extends PuppyBotCommand {

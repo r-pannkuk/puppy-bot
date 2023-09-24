@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from "@sapphire/framework";
+import { CommandOptionsRunTypeEnum, type ApplicationCommandRegistry, type Args, type ChatInputCommandContext } from "@sapphire/framework";
 import { ChannelType, type GuildMember, type GuildTextBasedChannel, type VoiceBasedChannel } from "discord.js";
 import type { ChatInputCommandInteraction, Message } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
@@ -16,7 +16,7 @@ const SHORT_DESCRIPTION = `Plays music from the specified YouTube, Spotify, or A
     requiredUserPermissions: ["Connect"],
     requiredClientPermissions: ["Connect", "Speak", "RequestToSpeak"],
     nsfw: false,
-    runIn: 'GUILD_ANY',
+    runIn: [CommandOptionsRunTypeEnum.GuildAny],
     options: true
 })
 export class PlayCommand extends PuppyBotCommand {
@@ -46,12 +46,9 @@ export class PlayCommand extends PuppyBotCommand {
         }
 
         await player.play(voiceChannel, query, {
-            textChannel: responseChannel,
-            member: searcher,
-            metadata: {
-                interval: undefined
-            }
-        })
+			textChannel: responseChannel,
+			member: searcher,
+		});
 
         return player.getQueue(searcher.guild.id);
     }

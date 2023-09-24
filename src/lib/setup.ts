@@ -13,21 +13,25 @@ import '@sapphire/plugin-scheduled-tasks/register';
 import type { ClientOptions } from 'discord.js';
 import { Time } from '@sapphire/time-utilities';
 import { BucketScope } from '@sapphire/framework';
-import { ActivityType, Partials } from 'discord.js';
+import { ActivityType, GatewayIntentBits, Partials } from 'discord.js';
 import { envParseArray, envParseInteger, envParseString } from './env/utils';
 import './utils/time'
 
 export const CLIENT_OPTIONS: ClientOptions = {
     intents: [
-        'Guilds',
-        'GuildMembers',
-        'GuildBans',
-        'GuildEmojisAndStickers',
-        'GuildVoiceStates',
-        'GuildMessages',
-        'GuildMessageReactions',
-        'DirectMessages',
-        'DirectMessageReactions',
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.DirectMessageReactions,
+        GatewayIntentBits.DirectMessageTyping,
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildModeration,
+        GatewayIntentBits.GuildEmojisAndStickers,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageTyping,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildVoiceStates,
 
     ],
     defaultPrefix: envParseString('CLIENT_PREFIX', '!'),

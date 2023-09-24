@@ -134,7 +134,7 @@ export class GroupsCommand extends PuppyBotCommand {
             await interaction.update({ embeds: [generateEmbed()] })
         })
 
-        this.cachedQuery.set(messageOrInteraction.guildId ?? user.id!, {
+        this.cachedQuery.set(messageOrInteraction.guildId ?? user.id!.toString(), {
             size: groupSize,
             entries,
         })

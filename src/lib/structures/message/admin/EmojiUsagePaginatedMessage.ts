@@ -1,6 +1,6 @@
 import { PaginatedMessage, PaginatedMessageOptions } from '@sapphire/discord.js-utilities';
 import { Collection, Colors, ComponentType, Guild, GuildEmoji } from "discord.js";
-import { Emojis, SELECT_MENU_OPTION_LIMIT } from "../../../utils/constants";
+import { Emojis } from "../../../utils/constants";
 import type { EmojiRecords } from "../../managers/EmojiUsageManager";
 import { PuppyBotEmbed } from "../PuppyBotEmbed";
 import { ButtonStyle } from 'discord.js';
@@ -14,17 +14,21 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 
 	public get Keys() {
 		var keys = this.records
+			.sort((a, b) => 
+				b.userRecords.reduce((sum, value) => sum + (value.messageCount || 0) + ((this.countReactions) ? (value.reactionCount || 0) : 0), 0) - 
+				a.userRecords.reduce((sum, value) => sum + (value.messageCount || 0) + ((this.countReactions) ? (value.reactionCount || 0) : 0), 0)
+			)
 			.map((_value, key) => key.toString())
 			.filter(e => this.guild.emojis.cache.has(e));
 
-		if (keys.length > SELECT_MENU_OPTION_LIMIT - 1) {
-			keys = keys.slice(0, SELECT_MENU_OPTION_LIMIT - 1);
-		}
+		// if (keys.length > SELECT_MENU_OPTION_LIMIT - 1) {
+		// 	keys = keys.slice(0, SELECT_MENU_OPTION_LIMIT - 1);
+		// }
 
 		return ['All'].concat(keys);
 	}
 
-	public get Emojis() : Collection<string, GuildEmoji | undefined> {
+	public get Emojis(): Collection<string, GuildEmoji | undefined> {
 		return this.records.mapValues((_value, key) => this.guild.emojis.cache.get(key.toString()));
 	}
 
@@ -81,14 +85,11 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 		this.addAction({
 			customId: EmojiUsagePaginatedMessage.InteractionIds.GoToPage,
 			type: ComponentType.StringSelect,
-			options: [{
-				label: "Filling...",
-				value: "TBD",
-			}],
+			options: this.Keys /* .slice(0, 25) */ .map((_, i) => this.generateMenuOption(i + 1)),
 			placeholder: "Select Custom Emoji...",
 			run: ({ handler, interaction }) => {
 				if (interaction.isStringSelectMenu() && interaction.customId === EmojiUsagePaginatedMessage.InteractionIds.GoToPage) {
-					handler.index = parseInt(interaction.values[0], 10)
+					handler.index = parseInt(interaction.values[0], 10) - 1;
 				}
 			}
 		});
@@ -145,22 +146,26 @@ export class EmojiUsagePaginatedMessage extends PaginatedMessage {
 		})
 	}
 
-	public generateSelectMenu() {
-		this.setSelectMenuOptions((pageIndex, _i18n) => {
-			const key = this.Keys.at(pageIndex - 1);
+	public generateMenuOption(pageIndex: number) {
+		const key = this.Keys.at(pageIndex - 1);
 
-			if (key === 'All') {
-				return {
-					label: 'All'
-				}
-			} else {
-				const emoji = this.guild.emojis.cache.get(this.Keys.at(pageIndex - 1)!)!;
-				return {
-					label: emoji.name!,
-					emoji: emoji.id,
-				}
+		if (key === 'All') {
+			return {
+				value: pageIndex.toString(),
+				label: 'All'
 			}
-		});
+		} else {
+			const emoji = this.guild.emojis.cache.get(this.Keys.at(pageIndex - 1)!)!;
+			return {
+				value: pageIndex.toString(),
+				label: emoji.name!,
+				emoji: emoji.id,
+			}
+		}
+	}
+
+	public generateSelectMenu() {
+		this.setSelectMenuOptions(this.generateMenuOption);
 	}
 
 	public generatePages() {

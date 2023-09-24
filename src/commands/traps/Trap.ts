@@ -1,6 +1,6 @@
 import { BattleTrapRecordType, BattleTrapState } from "@prisma/client";
 import { ApplyOptions } from "@sapphire/decorators";
-import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from "@sapphire/framework";
+import { CommandOptionsRunTypeEnum, type ApplicationCommandRegistry, type Args, type ChatInputCommandContext } from "@sapphire/framework";
 import { ButtonInteraction, CommandInteraction, Guild, Message, ActionRowBuilder, MessagePayload, InteractionEditReplyOptions, User, ChatInputCommandInteraction, MessageReplyOptions, EmbedBuilder, ButtonBuilder } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import type { BattleSystem } from "../../lib/structures/managers/BattleSystem";
@@ -22,7 +22,7 @@ const DEFAULT_LIST_SIZE = 10;
     requiredUserPermissions: ['ViewChannel'],
     requiredClientPermissions: ['ViewChannel'],
     nsfw: false,
-    runIn: 'GUILD_ANY',
+    runIn: [CommandOptionsRunTypeEnum.GuildAny],
     subcommands: [
         {
             name: 'list',

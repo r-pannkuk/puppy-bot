@@ -1,7 +1,7 @@
 /* OBSOLETE - Not valid with limitations on slash commands. */
 
 import type { CustomCommand } from "@prisma/client";
-import { ApplicationCommandRegistry, Args, ChatInputCommandContext, Command, container, RegisterBehavior } from "@sapphire/framework";
+import { ApplicationCommandRegistry, Args, ChatInputCommandContext, Command, CommandOptionsRunTypeEnum, container, RegisterBehavior } from "@sapphire/framework";
 import { Message, CommandInteraction, ChatInputCommandInteraction } from "discord.js";
 import { PuppyBotCommand } from "./PuppyBotCommand";
 
@@ -19,7 +19,7 @@ export class PuppyBotCustomCommand extends PuppyBotCommand {
 			name: `${options.schema.guildId}-${options.schema.name}`,
 			aliases: [options.schema.name].concat(options.schema.aliases),
 			description: `Custom command created by ${container.client.users.cache.get(options.schema.ownerId)}.`,
-			runIn: "GUILD_ANY"
+			runIn: [CommandOptionsRunTypeEnum.GuildAny]
 		})
 
 		this.schema = options.schema;

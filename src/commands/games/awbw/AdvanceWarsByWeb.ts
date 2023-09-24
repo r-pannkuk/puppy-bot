@@ -2,7 +2,7 @@ import type { GameScanConfig } from "@prisma/client";
 import { ApplyOptions, RequiresUserPermissions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum, UserError } from "@sapphire/framework";
 import { PermissionFlagsBits } from "discord-api-types/v9";
-import { ChannelType, ChatInputCommandInteraction, Guild, GuildTextBasedChannel, Message, User } from "discord.js";
+import { ChannelType, ChatInputCommandInteraction, Colors, EmbedBuilder, Guild, GuildTextBasedChannel, Message, User } from "discord.js";
 import { PuppyBotCommand } from "../../../lib/structures/command/PuppyBotCommand";
 import { AWBWScanner, AdvanceWarsByWeb as AWBW } from '../../../lib/structures/managers/games/AWBWScanner'
 import { GameRegistryGameListPaginatedMessage } from "../../../lib/structures/message/games/GameRegistryGameListPaginatedMessage";
@@ -339,9 +339,9 @@ export class AdvanceWarsByWeb extends PuppyBotCommand {
 			const paginatedMessage = new GameRegistryGameListPaginatedMessage({
 				registryEntries,
 				guild: guild,
-				// template: new EmbedBuilder()
-				// 	.setTitle(`Added Game:`)
-				// 	.setColor(Colors.Aqua)
+				template: new EmbedBuilder()
+					.setTitle(`Added Game:`)
+					.setColor(Colors.Aqua)
 			});
 
 			await paginatedMessage.run(messageOrInteraction);
