@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import PIL
 from PIL import _imaging
 from PIL import Image, ImageDraw, ImageFont
