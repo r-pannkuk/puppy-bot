@@ -1,21 +1,14 @@
 #!/usr/bin/env python3
 
-import PIL
-from PIL import _imaging
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 import hashlib
-import time
 from pathlib import Path
 from urllib.parse import urlparse
-from urllib.request import urlretrieve
 from stat import S_ISREG, ST_CTIME, ST_MODE
 import requests
 from io import BytesIO
 import sys
 import os
-import time
-import re
-import textwrap
 
 MAX_THRESHOLD = 30
 MIN_THRESHOLD = 10

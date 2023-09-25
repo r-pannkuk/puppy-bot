@@ -2,15 +2,10 @@
 
 from PIL import Image, ImageDraw, ImageFont
 import hashlib
-import time
 from pathlib import Path
-from urllib.parse import urlparse
-from urllib.request import urlretrieve
 from stat import S_ISREG, ST_CTIME, ST_MODE
 import sys
 import os
-import time
-import re
 import textwrap
 
 MAX_THRESHOLD = 30
