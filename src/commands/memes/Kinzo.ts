@@ -2,7 +2,6 @@ import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext, ContextMenuCommandContext } from '@sapphire/framework';
 import type { ChatInputCommandInteraction, ContextMenuCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
-import { ContextMenuCommandType } from '../../lib/utils/constants';
 
 const SHORT_DESCRIPTION = 'Someone is whining again.'
 
