@@ -46,8 +46,8 @@ export const SLASH_ID_HINTS: Record<string, string[]> = {
 
 export const CONTEXT_MENU_ID_HINTS: Record<string, string[]> = {
     'Track Emoji Usage': ['987672068281757726', '987664879873847336',],
-    'Meme - Kinzo Whining': ['987672154021703730', '987664969283817532',],
-    'Meme - Liar': ['1271278210608529461', '1271283505229463606',],
+    'Meme - Kinzo Whining': ['1271292878135754795', '987664969283817532',],
+    'Meme - Liar': ['1271278210608529461', '1271283505229463606', '1271292879154970728'],
 }
 
 export abstract class PuppyBotCommand extends Subcommand {
@@ -62,7 +62,7 @@ export abstract class PuppyBotCommand extends Subcommand {
 
     protected contextCommandOptions: ApplicationCommandRegistryRegisterOptions = {
         behaviorWhenNotIdentical: RegisterBehavior.Overwrite,
-        guildIds: (this.options?.runIn /* .includes(CommandOptionsRunTypeEnum.Dm)*/ ) ? undefined :  [envParseString('DEV_GUILD_ID')],
+        guildIds: (!this.options?.runIn /* || this.options?.runIn?.includes(CommandOptionsRunTypeEnum.Dm) */) ? undefined : [envParseString("DEV_GUILD_ID")],
         idHints: (this.name in CONTEXT_MENU_ID_HINTS) ? CONTEXT_MENU_ID_HINTS[this.name] : undefined
     }
 
