@@ -62,7 +62,7 @@ export abstract class PuppyBotCommand extends Subcommand {
 
     protected contextCommandOptions: ApplicationCommandRegistryRegisterOptions = {
         behaviorWhenNotIdentical: RegisterBehavior.Overwrite,
-        guildIds: /*(this.options?.runIn?.includes(CommandOptionsRunTypeEnum.Dm)) ? undefined : */ [envParseString('DEV_GUILD_ID')],
+        guildIds: (this.options?.runIn /* .includes(CommandOptionsRunTypeEnum.Dm)*/ ) ? undefined :  [envParseString('DEV_GUILD_ID')],
         idHints: (this.name in CONTEXT_MENU_ID_HINTS) ? CONTEXT_MENU_ID_HINTS[this.name] : undefined
     }
 
