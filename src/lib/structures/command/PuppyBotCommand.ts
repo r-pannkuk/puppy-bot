@@ -24,7 +24,7 @@ export const SLASH_ID_HINTS: Record<string, string[]> = {
     kinzo: ['987664270009434112', '987664968897945670',],
     magneto: ['987664270646976524', '987664971137695794',],
     superturn: ['987664271846572062', '987664972207251466',],
-    liar: ['1271278210482700309', '1271278210482700309'],
+    liar: ['1271278210482700309', '1271283504746860545'],
 
     // Music
     pause: ['987672155665891348', '987664973054476398',],
@@ -47,7 +47,7 @@ export const SLASH_ID_HINTS: Record<string, string[]> = {
 export const CONTEXT_MENU_ID_HINTS: Record<string, string[]> = {
     'Track Emoji Usage': ['987672068281757726', '987664879873847336',],
     'Meme - Kinzo Whining': ['987672154021703730', '987664969283817532',],
-    'Meme - Liar': ['1271278210608529461', '1271278210608529461',],
+    'Meme - Liar': ['1271278210608529461', '1271283505229463606',],
 }
 
 export abstract class PuppyBotCommand extends Subcommand {
