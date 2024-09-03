@@ -1,9 +1,9 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { CommandOptionsRunTypeEnum, type ApplicationCommandRegistry, type Args, type ChatInputCommandContext } from "@sapphire/framework";
-import { ChannelType, type GuildMember, type GuildTextBasedChannel, type VoiceBasedChannel } from "discord.js";
-import type { ChatInputCommandInteraction, Message } from "discord.js";
+import { ChannelType, EmbedBuilder, TextChannel, type VoiceBasedChannel } from "discord.js";
+import { ChatInputCommandInteraction, Message } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import { Emojis } from "../../lib/utils/constants";
+import { debugLog } from "../../lib/utils/logging";
 
 const SHORT_DESCRIPTION = `Plays music from the specified YouTube, Spotify, or Apple links.`
 
@@ -27,59 +27,59 @@ export class PlayCommand extends PuppyBotCommand {
             .addStringOption((option) =>
                 option
                     .setName("source")
-                    .setDescription("Name of the track or playlist to play.")
+                    .setDescription("A URL to the track or the search query.")
                     .setRequired(true)
             ),
             this.slashCommandOptions
         )
     }
 
-    public async enqueue(searcher: GuildMember, query: string, responseChannel?: GuildTextBasedChannel | undefined, voiceChannel?: VoiceBasedChannel | undefined) {
+    public async enqueue(messageOrInteraction: Message | ChatInputCommandInteraction, input: string, voiceChannel: VoiceBasedChannel) {
         const player = this.container.client.musicPlayer;
 
         if (!voiceChannel) {
-            voiceChannel = searcher.guild!.channels.cache.filter(c => c.type === ChannelType.GuildVoice).first() as VoiceBasedChannel;
+            voiceChannel = messageOrInteraction.guild!.channels.cache.filter(c => c.type === ChannelType.GuildVoice).first() as VoiceBasedChannel;
 
             if (!voiceChannel) {
                 this.error("There are no voice channels for me to play music from!");
             }
         }
 
-        await player.play(voiceChannel, query, {
-			textChannel: responseChannel,
-			member: searcher,
-		});
-
-        return player.getQueue(searcher.guild.id);
+        player.play(voiceChannel, input, {
+            metadata: { messageOrInteraction },
+        })
+            .catch(e => {
+                debugLog('error', e);
+                var embeds = [
+                    new EmbedBuilder().setColor("Blurple").setTitle("DisTube").setDescription(`Error: \`${e.message}\``),
+                ]
+                if (messageOrInteraction.channel instanceof TextChannel) {
+                    if (messageOrInteraction instanceof Message) {
+                        messageOrInteraction.channel.send({
+                            embeds,
+                        });
+                    } else {
+                        messageOrInteraction.editReply({
+                            embeds,
+                        });
+                    }
+                }
+            });
     }
 
     public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
-        var source = interaction.options.getString('source', true);
+        const source = interaction.options.getString('source', true);
         const member = interaction.guild!.members.cache.get(interaction.user.id)!;
 
         await interaction.deferReply();
 
-        var queue = await this.enqueue(member, source, interaction.channel as GuildTextBasedChannel, (member.voice.channel) as VoiceBasedChannel);
-        var song = queue?.songs[queue.songs.length - 1];
-
-        await interaction.editReply({
-            content: (!song) ?
-                `${Emojis.NoSign} | Could not find: **${source}**` :
-                `${Emojis.Loading} | Added **${song.name}** to the queue`
-        });
+        await this.enqueue(interaction, source, (member.voice.channel) as VoiceBasedChannel);
     }
 
     public override async messageRun(message: Message, input: Args) {
-        var source = input.getOption('source') ?? input.next() as string;
+        const source = input.getOption('source') ?? input.next() as string;
         const member = message.guild!.members.cache.get(message.author.id)!;
 
-        var queue = await this.enqueue(member, source, message.channel as GuildTextBasedChannel, (member.voice.channel) as VoiceBasedChannel);
-        var song = queue?.songs[0];
-
-        await message.channel.send({
-            content: (!song) ?
-                `${Emojis.NoSign} | Could not find: **${source}**` :
-                `${Emojis.Loading} | Added **${song.name}** to the queue`
-        });
+        await this.enqueue(message, source, (member.voice.channel) as VoiceBasedChannel);
     }
 }

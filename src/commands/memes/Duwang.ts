@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import type { ChatInputCommandInteraction, Message } from 'discord.js';
+import { TextChannel, type ChatInputCommandInteraction, type Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
 const SHORT_DESCRIPTION = 'Exclaim your wonder for the beautiful day.'
@@ -41,6 +41,8 @@ export class DuwangCommand extends PyScriptCommand {
     public override async messageRun(message: Message, args: Args) {
         var target = args.getOption('target') ?? message.attachments.first()?.url;
         const files = await this.run(target ? [target] : []);
-        message.channel.send({ files: files });
+        if(message.channel instanceof TextChannel) {
+            message.channel.send({ files: files });
+        }
     }
 }

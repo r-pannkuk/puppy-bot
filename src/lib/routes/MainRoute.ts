@@ -1,8 +1,7 @@
-import type { PieceContext } from "@sapphire/framework";
 import { ApiRequest, ApiResponse, methods, Route, RouteOptions } from "@sapphire/plugin-api";
 
 export class MainRoute extends Route {
-    public constructor(context: PieceContext, options?: RouteOptions) {
+    public constructor(context: Route.LoaderContext, options?: RouteOptions) {
         super(context, {
             ...options,
             route: ''

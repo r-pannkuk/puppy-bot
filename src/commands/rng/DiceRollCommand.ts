@@ -158,10 +158,15 @@ export class DiceRollCommand extends PuppyBotCommand {
             var username = user.username;
         }
 
-        embed.setFooter({
+        var options = {
             "text": `${username}${(rerollAmount) ? ` - Rerolled ${rerollAmount} time${(rerollAmount === 1) ? `` : `s`}.` : ``}`,
-            "iconURL": user.avatarURL() || ""
-        })
+        };
+
+        if(user.avatarURL()) {
+            options["iconURL"] = user.avatarURL();
+        }
+
+        embed.setFooter(options);
 
         return embed;
     }

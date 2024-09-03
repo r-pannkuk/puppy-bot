@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { CommandOptionsRunTypeEnum, type ApplicationCommandRegistry, type Args, type ChatInputCommandContext } from "@sapphire/framework";
-import type { ChatInputCommandInteraction, Guild } from "discord.js";
+import { TextChannel, type ChatInputCommandInteraction, type Guild } from "discord.js";
 import type { Message } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import { Emojis } from "../../lib/utils/constants";
@@ -56,11 +56,13 @@ export class SkipCommand extends PuppyBotCommand {
     public override async messageRun(message: Message, _input: Args) {
         const queue = this.skip(message.guild!);
         var song = queue?.songs[1];
+        if(message.channel instanceof TextChannel) {
 
-        await message.channel.send({
-            content: (!queue) ?
-                `${Emojis.NoSign} | There is no music currently playing.` :
-                `${Emojis.Skip} | Skipping Track...${song ? `` : `End of queue.`}`
-        });
+            await message.channel.send({
+                content: (!queue) ?
+                    `${Emojis.NoSign} | There is no music currently playing.` :
+                    `${Emojis.Skip} | Skipping Track...${song ? `` : `End of queue.`}`
+            });
+        }
     }
 }

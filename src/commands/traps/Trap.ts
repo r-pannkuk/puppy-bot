@@ -1,7 +1,7 @@
 import { BattleTrapRecordType, BattleTrapState } from "@prisma/client";
 import { ApplyOptions } from "@sapphire/decorators";
 import { CommandOptionsRunTypeEnum, type ApplicationCommandRegistry, type Args, type ChatInputCommandContext } from "@sapphire/framework";
-import { ButtonInteraction, CommandInteraction, Guild, Message, ActionRowBuilder, MessagePayload, InteractionEditReplyOptions, User, ChatInputCommandInteraction, MessageReplyOptions, EmbedBuilder, ButtonBuilder } from "discord.js";
+import { ButtonInteraction, CommandInteraction, Guild, Message, ActionRowBuilder, MessagePayload, InteractionEditReplyOptions, User, ChatInputCommandInteraction, MessageReplyOptions, EmbedBuilder, ButtonBuilder, TextChannel } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import type { BattleSystem } from "../../lib/structures/managers/BattleSystem";
 import { ClearPaginatedMessage } from "../../lib/structures/message/battleSystem/traps/clear/ClearPaginatedMessage";
@@ -248,13 +248,17 @@ export class TrapCommand extends PuppyBotCommand {
             amount = DEFAULT_LIST_SIZE;
         }
 
-        if (messageOrInteraction instanceof Message) {
+        if (messageOrInteraction instanceof Message && messageOrInteraction.channel instanceof TextChannel) {
             messageOrInteraction = await messageOrInteraction.channel.send({
                 content: `Hinting at active traps in the server:`
             })
-        } else {
+        } else if(messageOrInteraction instanceof ChatInputCommandInteraction) {
             await messageOrInteraction.deferReply({
             });
+        } else {
+            await messageOrInteraction.reply({
+                content: `Hinting at active traps in the server:`
+            })
         }
 
         const paginatedMessage = new ListHiddenPaginatedMessage({
@@ -279,13 +283,17 @@ export class TrapCommand extends PuppyBotCommand {
             amount = DEFAULT_LIST_SIZE;
         }
 
-        if (messageOrInteraction instanceof Message) {
+        if (messageOrInteraction instanceof Message && messageOrInteraction.channel instanceof TextChannel) {
             messageOrInteraction = await messageOrInteraction.channel.send({
                 content: `Showing the top ${amount} traps by damage: `
             })
-        } else {
+        } else if (messageOrInteraction instanceof ChatInputCommandInteraction) {
             await messageOrInteraction.deferReply({
             });
+        } else {
+            await messageOrInteraction.reply({
+                content: `Showing the top ${amount} traps by damage: `
+            })
         }
 
         type TriggerPayload = BattleSystem.Trap.Record.Payload.Trigger;
@@ -307,13 +315,17 @@ export class TrapCommand extends PuppyBotCommand {
             amount = DEFAULT_LIST_SIZE;
         }
 
-        if (messageOrInteraction instanceof Message) {
+        if (messageOrInteraction instanceof Message && messageOrInteraction.channel instanceof TextChannel) {
             messageOrInteraction = await messageOrInteraction.channel.send({
                 content: `Showing the top ${amount} traps that misfired: `
             })
-        } else {
+        } else if(messageOrInteraction instanceof ChatInputCommandInteraction) {
             await messageOrInteraction.deferReply({
             });
+        } else {
+            await messageOrInteraction.reply({
+                content: `Showing the top ${amount} traps that misfired: `
+            })
         }
 
         type TriggerPayload = BattleSystem.Trap.Record.Payload.Trigger;

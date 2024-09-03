@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext, ContextMenuCommandContext } from '@sapphire/framework';
-import type { ChatInputCommandInteraction, ContextMenuCommandInteraction, Message } from 'discord.js';
+import { TextChannel, type ChatInputCommandInteraction, type ContextMenuCommandInteraction, type Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
 const SHORT_DESCRIPTION = 'Tell the truth, the whole truth, nothing but the truth.'
@@ -70,6 +70,8 @@ export class LiedCommand extends PyScriptCommand {
         const member = message.guild?.members.cache.get(args.getOption('user')!);
         const text = args.getOption('text');
         const files = await this.run([member!.displayAvatarURL() || member!.avatar || "", member!.displayName!, text!]);
-        message.channel.send({ files: files });
+        if(message.channel instanceof TextChannel) {
+            message.channel.send({ files: files });
+        }
     }
 }

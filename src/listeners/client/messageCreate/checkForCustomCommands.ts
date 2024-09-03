@@ -17,7 +17,9 @@ export class MessageCreateCheckForCustomCommands extends Listener<typeof Events.
 		// Replacing escaped characters for regex.
 		const prefixes: readonly string[] = ['\/'].concat(sapphirePrefix.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
-		const customCommands = message.guild.customCommandSystem.customCommands;
+		const customCommands = message.guild.customCommandSystem?.customCommands;
+
+		if (!customCommands) return;
 
 		for (
 			var [_id, command] of

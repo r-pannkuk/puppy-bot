@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { CommandOptionsRunTypeEnum, type ApplicationCommandRegistry, type Args, type ChatInputCommandContext } from "@sapphire/framework";
-import type { ChatInputCommandInteraction, Guild } from "discord.js";
+import { TextChannel, type ChatInputCommandInteraction, type Guild } from "discord.js";
 import type { Message } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
 import { Emojis } from "../../lib/utils/constants";
@@ -50,11 +50,13 @@ export class ResumeCommand extends PuppyBotCommand {
 
     public override async messageRun(message: Message, _input: Args) {
         const queue = this.resume(message.guild!);
+        if(message.channel instanceof TextChannel) {
 
-        await message.channel.send({
-            content: (!queue) ?
-                `${Emojis.NoSign} | No track currently paused.` :
-                `${Emojis.Resume} | Resumed track: ${queue.songs[0].name}`
-        });
+            await message.channel.send({
+                content: (!queue) ?
+                    `${Emojis.NoSign} | No track currently paused.` :
+                    `${Emojis.Resume} | Resumed track: ${queue.songs[0].name}`
+            });
+        }
     }
 }

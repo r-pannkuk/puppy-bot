@@ -1,9 +1,8 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { CommandOptionsRunTypeEnum, type ApplicationCommandRegistry, type Args, type ChatInputCommandContext } from "@sapphire/framework";
-import type { ChatInputCommandInteraction, Guild } from "discord.js";
-import type { Message } from "discord.js";
+import { EmbedBuilder, type ChatInputCommandInteraction } from "discord.js";
+import { Message } from "discord.js";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import { Emojis } from "../../lib/utils/constants";
 
 const SHORT_DESCRIPTION = `Stops current playback.`
 
@@ -25,35 +24,32 @@ export class StopCommand extends PuppyBotCommand {
         );
     }
 
-	public stop(guild : Guild) {
-		const queue = this.container.client.musicPlayer.getQueue(guild.id);
-
-		if(!queue) {
-			return null;
-		}
-
-		queue.stop();
-
-		return queue;
-	}
+    public async stop(messageOrInteraction: Message | ChatInputCommandInteraction) {
+        const player = this.container.client.musicPlayer;
+        try {
+            await player.stop(messageOrInteraction);
+            const embeds = [new EmbedBuilder().setColor("Blurple").setTitle("DisTube").setDescription("Stopped!")];
+            if (messageOrInteraction instanceof Message) {
+                messageOrInteraction.reply({ embeds });
+            } else {
+                messageOrInteraction.reply({ embeds });
+            }
+        } catch (e) {
+            console.error(e);
+            const embeds = [new EmbedBuilder().setColor("Blurple").setTitle("DisTube").setDescription(`Error: \`${e}\``)];
+            if (messageOrInteraction instanceof Message) {
+                messageOrInteraction.reply({ embeds });
+            } else {
+                messageOrInteraction.reply({ embeds });
+            }
+        }
+    }
 
     public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
-		const queue = this.stop(interaction.guild!);
-
-        await interaction.reply({
-            content: (!queue) ?
-                `${Emojis.NoSign} | There is no music currently playing.` :
-                `${Emojis.StopSign} | Stopping Playback...`
-        });
+        await this.stop(interaction);
     }
 
     public override async messageRun(message: Message, _input: Args) {
-        const queue = this.stop(message.guild!);
-
-		await message.channel.send({
-			content: (!queue) ?
-                `${Emojis.NoSign} | There is no music currently playing.` :
-                `${Emojis.StopSign} | Stopping Playback...`
-        });
+        await this.stop(message);
     }
 }

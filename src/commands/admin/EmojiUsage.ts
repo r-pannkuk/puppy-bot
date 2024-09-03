@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { ApplicationCommandRegistry, ChatInputCommandContext, Command, CommandOptionsRunTypeEnum, container, ContextMenuCommandContext } from "@sapphire/framework";
 import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import { Collection, CommandInteraction, Guild, GuildEmoji, GuildTextBasedChannel, Message, MessagePayload, InteractionEditReplyOptions, User, MessageReplyOptions, ChatInputCommandInteraction } from "discord.js";
+import { Collection, CommandInteraction, Guild, GuildEmoji, GuildTextBasedChannel, Message, MessagePayload, InteractionEditReplyOptions, User, MessageReplyOptions, ChatInputCommandInteraction, TextChannel } from "discord.js";
 import { EmojiUsagePaginatedMessage } from "../../lib/structures/message/admin/EmojiUsagePaginatedMessage";
 import { Stopwatch } from '@sapphire/stopwatch';
 import { GuildMessageScanner } from "../../lib/structures/managers/GuildMessageScanner";
@@ -101,21 +101,22 @@ export class EmojiUsageCommand extends PuppyBotCommand {
         }
     }
 
-    protected async generateFollowUp(messageOrInteraction: Message | ChatInputCommandInteraction | Command.ContextMenuCommandInteraction):
-        Promise<(options: string | MessagePayload | MessageReplyOptions) => Promise<Message<boolean>>> {
-        if (messageOrInteraction instanceof Message) {
-            messageOrInteraction = await messageOrInteraction.channel.send({
+    protected async generateFollowUp(messageOrInteraction: Message | ChatInputCommandInteraction | Command.ContextMenuCommandInteraction) {
+        if (messageOrInteraction instanceof Message && messageOrInteraction.channel instanceof TextChannel) {
+            messageOrInteraction = await messageOrInteraction.channel?.send({
                 content: `Scanning...`
             })
 
             return async (options: string | MessagePayload | MessageReplyOptions) => (messageOrInteraction as Message).reply(options);
-        } else {
+        } else if (messageOrInteraction instanceof ChatInputCommandInteraction) {
             if (!messageOrInteraction.replied) {
                 await messageOrInteraction.reply({
                     content: `Scanning...`,
                 });
             }
             return async (options: string | MessagePayload | InteractionEditReplyOptions) => (messageOrInteraction as CommandInteraction).editReply(options) as Promise<Message<boolean>>;
+        } else {
+            return async (options: string | MessagePayload | InteractionEditReplyOptions) => (messageOrInteraction as Command.ContextMenuCommandInteraction).editReply(options) as Promise<Message<boolean>>;
         }
     }
 

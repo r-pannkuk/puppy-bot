@@ -39,7 +39,7 @@ export class ReminderCommand extends PuppyBotCommand {
 		if (!parsed || isNaN(parsed.getTime()) || parsed <= new Date(Date.now())) {
 			parsed = chrono.parseDate(input, {
 				timezone: DEFAULT_TIMEZONE
-			});
+			}) ?? new Date(input);
 		}
 
 		if (!parsed || isNaN(parsed.getTime()) || parsed <= new Date(Date.now())) throw new UserError({ identifier: `Could not parse reminder time.`, context: input });

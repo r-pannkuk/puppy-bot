@@ -1,7 +1,7 @@
 import { ApplicationCommandRegistryRegisterOptions, Command, RegisterBehavior, UserError } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { Time } from "@sapphire/time-utilities";
-import { Channel, CommandInteraction, Guild, GuildMember, Message, MessagePayload, Role, User, InteractionEditReplyOptions, ChatInputCommandInteraction, ContextMenuCommandInteraction, MessageReplyOptions } from "discord.js";
+import { Channel, CommandInteraction, Guild, GuildMember, Message, TextChannel, MessagePayload, Role, User, InteractionEditReplyOptions, ChatInputCommandInteraction, ContextMenuCommandInteraction, MessageReplyOptions } from "discord.js";
 import { envParseArray, envParseString } from "../../env/utils";
 
 export const SLASH_ID_HINTS: Record<string, string[]> = {
@@ -46,8 +46,8 @@ export const SLASH_ID_HINTS: Record<string, string[]> = {
 
 export const CONTEXT_MENU_ID_HINTS: Record<string, string[]> = {
     'Track Emoji Usage': ['987672068281757726', '987664879873847336',],
-    'Meme - Kinzo Whining': ['1271292878135754795', '987664969283817532',],
-    'Meme - Liar': ['1271278210608529461', '1271283505229463606', '1271292879154970728'],
+    'Meme - Kinzo Whining': ['1271292878135754795', '987664969283817532', '1271293260492443650'],
+    'Meme - Liar': ['1271278210608529461', '1271283505229463606', '1271292879154970728', '1271293262136610826'],
 }
 
 export abstract class PuppyBotCommand extends Subcommand {
@@ -84,7 +84,7 @@ export abstract class PuppyBotCommand extends Subcommand {
     }
 
     protected async generateFollowUp(messageOrInteraction: Message | ChatInputCommandInteraction | ContextMenuCommandInteraction) {
-        if (messageOrInteraction instanceof Message) {
+        if (messageOrInteraction instanceof Message && messageOrInteraction.channel instanceof TextChannel) {
             messageOrInteraction = await messageOrInteraction.channel.send({
                 content: `Generating embed...`
             })
@@ -94,11 +94,13 @@ export abstract class PuppyBotCommand extends Subcommand {
                 await messageOrInteraction.channel?.messages.cache.get(messageOrInteraction.id)?.delete();
                 return reply;
             };
-        } else {
+        } else if (messageOrInteraction instanceof ChatInputCommandInteraction) {
             if (!messageOrInteraction.replied) {
                 await messageOrInteraction.deferReply({
                 });
             }
+            return async (options: string | MessagePayload | InteractionEditReplyOptions) => (messageOrInteraction as CommandInteraction).editReply(options);
+        } else {
             return async (options: string | MessagePayload | InteractionEditReplyOptions) => (messageOrInteraction as CommandInteraction).editReply(options);
         }
     }

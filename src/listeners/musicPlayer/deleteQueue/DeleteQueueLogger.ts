@@ -1,11 +1,11 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { container, Listener } from "@sapphire/framework";
-import type { Queue, Song } from "distube";
+import {Events, Queue, Song } from "distube";
 import { debugLog } from "../../../lib/utils/logging";
 
 @ApplyOptions<Listener.Options>({
 	name: 'deleteQueueLogger',
-	event: 'deleteQueue',
+	event: Events.DELETE_QUEUE,
 	emitter: container.client.musicPlayer
 })
 export class DeleteQueueLogger extends Listener {

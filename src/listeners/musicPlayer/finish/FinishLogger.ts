@@ -1,15 +1,21 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { container, Listener } from "@sapphire/framework";
-import type { Queue } from "distube";
-import { debugLog } from "../../../lib/utils/logging";
+import { Events, type Queue } from "distube";
+import { EmbedBuilder } from "discord.js";
 
 @ApplyOptions<Listener.Options>({
 	name: 'finishLogger',
-	event: 'finish',
+	event: Events.FINISH,
 	emitter: container.client.musicPlayer
 })
 export class FinishLogger extends Listener {
-	public async run(_queue: Queue) {
-		debugLog('debug',`In: ${this.event.toString()}`);
+	public async run(queue: Queue) {
+		const embeds = [
+			new EmbedBuilder()
+				.setColor("Green")
+				.setTitle("DisTube")
+				.setDescription(`Queue finished.`),
+		];
+		queue.textChannel?.send({embeds});
 	}
 }

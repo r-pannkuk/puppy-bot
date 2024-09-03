@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import type { ChatInputCommandInteraction, Message } from 'discord.js';
+import { TextChannel, type ChatInputCommandInteraction, type Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
 const SHORT_DESCRIPTION = 'Correct a user with a well-placed intention to their face.'
@@ -44,6 +44,8 @@ export class BrightCommand extends PyScriptCommand {
     public override async messageRun(message: Message, args: Args) {
         const target = message.guild!.members.cache.get(args.getOption('target') as string);
         const files = await this.run([target!.displayAvatarURL()]);
-        message.channel.send({ files: files });
+        if(message.channel instanceof TextChannel) {
+            message.channel.send({ files: files });
+        }
     }
 }

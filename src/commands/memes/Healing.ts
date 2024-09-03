@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import type { ChatInputCommandInteraction, Message } from 'discord.js';
+import { TextChannel, type ChatInputCommandInteraction, type Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
 const SHORT_DESCRIPTION = 'You really don\'t want to do anything else.'
@@ -42,6 +42,8 @@ export class SylphieCommand extends PyScriptCommand {
     public override async messageRun(message: Message, args: Args) {
         const activity = args.getOption('activity') || "";
         const files = await this.run([activity]);
-        message.channel.send({ files: files });
+        if(message.channel instanceof TextChannel) {
+            message.channel.send({ files: files });
+        }
     }
 }

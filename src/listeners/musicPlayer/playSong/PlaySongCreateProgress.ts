@@ -1,18 +1,19 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { container, Listener } from "@sapphire/framework";
 import type { Job, JobOptions } from "bull";
-import type { Queue, Song } from "distube";
+import { Events, type Queue, type Song } from "distube";
 import type { SongProgressPayload } from "../../../scheduled-tasks/musicPlayer/UpdateProgress";
+import { Message, ChatInputCommandInteraction } from "discord.js";
 
 const UPDATE_INTERVAL = 5000;
 
 @ApplyOptions<Listener.Options>({
 	name: 'playSongCreateProgress',
-	event: 'playSong',
+	event: Events.PLAY_SONG,
 	emitter: container.client.musicPlayer
 })
 export class PlaySongCreateProgress extends Listener {
-	public override async run(queue: Queue, song: Song) {
+	public override async run(queue: Queue, song: Song<Message | ChatInputCommandInteraction>) {
 		await this.container.tasks.run('MusicPlayer_UpdateProgress', {
 			guildId: queue.clientMember?.guild.id,
 			songId: song.id,

@@ -3,10 +3,10 @@ import { container, SapphireClient } from '@sapphire/framework';
 import { PrismaClient } from '@prisma/client'
 import type { Message } from 'discord.js';
 import { CLIENT_OPTIONS } from "../../setup";
-import SoundCloudPlugin from "@distube/soundcloud";
-import SpotifyPlugin from "@distube/spotify";
-import { YtDlpPlugin } from "@distube/yt-dlp";
 import DisTube from "distube";
+import { YouTubePlugin } from '@distube/youtube';
+import {SoundCloudPlugin} from "@distube/soundcloud";
+import SpotifyPlugin from "@distube/spotify";
 
 export class PuppyBotClient extends SapphireClient {
     public constructor() {
@@ -18,18 +18,33 @@ export class PuppyBotClient extends SapphireClient {
             emitAddListWhenCreatingQueue: true,
             emitAddSongWhenCreatingQueue: true,
             emitNewSongOnly: true,
-            leaveOnStop: true,
-            leaveOnEmpty: true,
-            leaveOnFinish: true,
             plugins: [
-                new SpotifyPlugin({
-                    emitEventsAfterFetching: true,
-                }),
+                new YouTubePlugin(),
                 new SoundCloudPlugin(),
-                new YtDlpPlugin()
+                new SpotifyPlugin(),
             ],
-            searchSongs: 5,
-            searchCooldown: 30,
+            customFilters: {
+                'bassboost': 'bass=g=10',
+                '8D': 'apulsator=hz=0.08',
+                'vaporwave': 'aresample=48000,asetrate=48000*0.8',
+                'nightcore': 'aresample=48000,asetrate=48000*1.25',
+                'phaser': 'aphaser=in_gain=0.4',
+                'tremolo': 'tremolo',
+                'vibrato': 'vibrato=f=6.5',
+                'reverse': 'areverse',
+                'treble': 'treble=g=5',
+                'normalizer': 'dynaudnorm=g=101',
+                'surrounding': 'surround',
+                'pulsator': 'apulsator=hz=1',
+                'subboost': 'asubboost',
+                'karaoke': 'stereotools=mlev=0.03',
+                'flanger': 'flanger',
+                'gate': 'agate',
+                'haas': 'haas',
+                'mcompand': 'mcompand',
+                'earwax': 'earwax',
+            },
+            joinNewVoiceChannel: true,
         });
     }
 

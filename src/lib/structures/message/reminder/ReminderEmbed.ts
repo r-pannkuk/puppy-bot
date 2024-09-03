@@ -1,6 +1,6 @@
 import { container, UserError } from "@sapphire/framework";
 import prettyMilliseconds from "pretty-ms";
-import { ButtonInteraction, Message, EmbedData, ButtonStyle, Colors, ComponentType, ButtonComponentData } from "discord.js";
+import { TextChannel, ButtonInteraction, Message, EmbedData, ButtonStyle, Colors, ComponentType, ButtonComponentData } from "discord.js";
 import { ReminderCommand } from "../../../../commands/reminders/Reminder";
 import { Emojis } from "../../../utils/constants";
 import type { ReminderManager } from "../../managers/ReminderManager";
@@ -87,50 +87,52 @@ export class ReminderEmbed extends PuppyBotEmbed {
 					content: `Please enter an interval (e.g. \`1d 6h\`) for repeating.`,
 				});
 
-				interaction.channel?.createMessageCollector({
-					filter: (message) => {
-						if (message.author.id !== interaction.user.id) return false;
-						try {
-							return ReminderCommand.parseTime(message.content) instanceof Date;
-						} catch (e) {
-							if (e instanceof UserError) {
-								return false;
-							} else throw e;
-						}
-					},
-					max: 1,
-					dispose: true,
-				}).addListener('collect', async (message: Message) => {
-					reminder = container.client.reminders.cache.get(reminder.id)!;
-					const duration = new Duration(message.content);
-					const currentSchedule = reminder.getActiveSchedule() ?? reminder.schedules.last()!;
-					const test = duration.dateFrom(currentSchedule.reminderTime);
-					console.log(test);
-					const updatedReminder = await container.client.reminders.rescheduleReminder(reminder, {
-						...currentSchedule,
-						repeat: {
-							isRepeating: true,
-							isInfinite: true,
-							interval: (duration.fromNow.getTime() - Date.now()),
-						}
-					}, {
-						guildId: interaction.guildId,
-						channelId: interaction.channelId,
-						messageId: interaction.message.id,
-					});
+				if (interaction.channel instanceof TextChannel) {
+					interaction.channel?.createMessageCollector({
+						filter: (message) => {
+							if (message.author.id !== interaction.user.id) return false;
+							try {
+								return ReminderCommand.parseTime(message.content) instanceof Date;
+							} catch (e) {
+								if (e instanceof UserError) {
+									return false;
+								} else throw e;
+							}
+						},
+						max: 1,
+						dispose: true,
+					}).addListener('collect', async (message: Message) => {
+						reminder = container.client.reminders.cache.get(reminder.id)!;
+						const duration = new Duration(message.content);
+						const currentSchedule = reminder.getActiveSchedule() ?? reminder.schedules.last()!;
+						const test = duration.dateFrom(currentSchedule.reminderTime);
+						console.log(test);
+						const updatedReminder = await container.client.reminders.rescheduleReminder(reminder, {
+							...currentSchedule,
+							repeat: {
+								isRepeating: true,
+								isInfinite: true,
+								interval: (duration.fromNow.getTime() - Date.now()),
+							}
+						}, {
+							guildId: interaction.guildId,
+							channelId: interaction.channelId,
+							messageId: interaction.message.id,
+						});
 
-					await interaction.followUp(`Set to fire at \`${new Date(updatedReminder!.getActiveSchedule()!.getNextInstance().getTime())}\` and repeat every \`${prettyMilliseconds(duration.fromNow.getTime() - Date.now())}\``);
+						await interaction.followUp(`Set to fire at \`${new Date(updatedReminder!.getActiveSchedule()!.getNextInstance().getTime())}\` and repeat every \`${prettyMilliseconds(duration.fromNow.getTime() - Date.now())}\``);
 
-					const originalMessage = message.channel.messages.cache.get(interaction.message.id)!
-					await originalMessage.edit({
-						embeds: [
-							new ReminderEmbed({
-								title: originalMessage.embeds[0].title!,
-								reminder: updatedReminder!,
-							})
-						]
+						const originalMessage = message.channel.messages.cache.get(interaction.message.id)!
+						await originalMessage.edit({
+							embeds: [
+								new ReminderEmbed({
+									title: originalMessage.embeds[0].title!,
+									reminder: updatedReminder!,
+								})
+							]
+						})
 					})
-				})
+				}
 			}
 		},
 		{
@@ -145,44 +147,46 @@ export class ReminderEmbed extends PuppyBotEmbed {
 					content: `Please enter a duration (e.g. \`1d 6h\`) or a date (e.g. \`January 1st\`) for rescheduling.`,
 				});
 
-				interaction.channel?.createMessageCollector({
-					filter: (message) => {
-						if (message.author.id !== interaction.user.id) return false;
-						try {
-							return ReminderCommand.parseTime(message.content) instanceof Date;
-						} catch (e) {
-							if (e instanceof UserError) {
-								return false;
-							} else throw e;
-						}
-					},
-					max: 1,
-					dispose: true,
-				}).addListener('collect', async (message: Message) => {
-					reminder = container.client.reminders.cache.get(reminder.id)!;
-					const parsedDate = ReminderCommand.parseTime(message.content);
-					const currentSchedule = reminder.getActiveSchedule()!;
-					const updatedReminder = await container.client.reminders.rescheduleReminder(reminder, {
-						...currentSchedule,
-						reminderTime: parsedDate
-					}, {
-						guildId: interaction.guildId,
-						channelId: interaction.channelId,
-						messageId: interaction.message.id,
-					});
+				if (interaction.channel instanceof TextChannel) {
+					interaction.channel?.createMessageCollector({
+						filter: (message) => {
+							if (message.author.id !== interaction.user.id) return false;
+							try {
+								return ReminderCommand.parseTime(message.content) instanceof Date;
+							} catch (e) {
+								if (e instanceof UserError) {
+									return false;
+								} else throw e;
+							}
+						},
+						max: 1,
+						dispose: true,
+					}).addListener('collect', async (message: Message) => {
+						reminder = container.client.reminders.cache.get(reminder.id)!;
+						const parsedDate = ReminderCommand.parseTime(message.content);
+						const currentSchedule = reminder.getActiveSchedule()!;
+						const updatedReminder = await container.client.reminders.rescheduleReminder(reminder, {
+							...currentSchedule,
+							reminderTime: parsedDate
+						}, {
+							guildId: interaction.guildId,
+							channelId: interaction.channelId,
+							messageId: interaction.message.id,
+						});
 
-					await interaction.followUp(`Set to fire at \`${new Date(updatedReminder!.getActiveSchedule()!.getNextInstance().getTime())}\``);
-					
-					const originalMessage = message.channel.messages.cache.get(interaction.message.id)!
-					await originalMessage.edit({
-						embeds: [
-							new ReminderEmbed({
-								title: originalMessage.embeds[0].title!,
-								reminder: updatedReminder!,
-							})
-						]
+						await interaction.followUp(`Set to fire at \`${new Date(updatedReminder!.getActiveSchedule()!.getNextInstance().getTime())}\``);
+						
+						const originalMessage = message.channel.messages.cache.get(interaction.message.id)!
+						await originalMessage.edit({
+							embeds: [
+								new ReminderEmbed({
+									title: originalMessage.embeds[0].title!,
+									reminder: updatedReminder!,
+								})
+							]
+						})
 					})
-				})
+				}
 			}
 		},
 		{
