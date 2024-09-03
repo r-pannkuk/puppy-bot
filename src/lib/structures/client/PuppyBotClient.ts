@@ -9,6 +9,7 @@ import { SoundCloudPlugin } from "@distube/soundcloud";
 import SpotifyPlugin from "@distube/spotify";
 import { envParseString } from "../../env/utils";
 import fs from 'fs';
+import ytdl from "@distube/ytdl-core";
 
 export class PuppyBotClient extends SapphireClient {
     public constructor() {
@@ -16,9 +17,12 @@ export class PuppyBotClient extends SapphireClient {
         // @ts-expect-error
         container.client = this;
 
-        var cookies = envParseString('YOUTUBE_COOKIE_FILE', "") !== "" ?
+        const cookies = envParseString('YOUTUBE_COOKIE_FILE', "") !== "" ?
             JSON.parse(fs.readFileSync(envParseString('YOUTUBE_COOKIE_FILE'), 'utf-8')) :
-            undefined
+            undefined;
+
+
+        const agent = ytdl.createAgent(cookies);
 
         this.musicPlayer = new DisTube(this as SapphireClient, {
             emitAddListWhenCreatingQueue: true,
@@ -26,6 +30,9 @@ export class PuppyBotClient extends SapphireClient {
             emitNewSongOnly: true,
             plugins: [
                 new YouTubePlugin({
+                    ytdlOptions: {
+                        agent,
+                    },
                     cookies
                 }),
                 new SoundCloudPlugin(),
