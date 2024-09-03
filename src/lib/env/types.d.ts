@@ -51,5 +51,6 @@ export interface EnvTypes {
 
     SOUNDCLOUD_TOKEN: string;
     YOUTUBE_TOKEN: string;
+    YOUTUBE_COOKIE_FILE: string;
     CHALLONGE_TOKEN: string;
 }

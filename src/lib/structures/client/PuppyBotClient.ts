@@ -5,8 +5,10 @@ import type { Message } from 'discord.js';
 import { CLIENT_OPTIONS } from "../../setup";
 import DisTube from "distube";
 import { YouTubePlugin } from '@distube/youtube';
-import {SoundCloudPlugin} from "@distube/soundcloud";
+import { SoundCloudPlugin } from "@distube/soundcloud";
 import SpotifyPlugin from "@distube/spotify";
+import { envParseString } from "../../env/utils";
+import fs from 'fs';
 
 export class PuppyBotClient extends SapphireClient {
     public constructor() {
@@ -14,12 +16,18 @@ export class PuppyBotClient extends SapphireClient {
         // @ts-expect-error
         container.client = this;
 
+        var cookies = envParseString('YOUTUBE_COOKIE_FILE', "") !== "" ?
+            JSON.parse(fs.readFileSync(envParseString('YOUTUBE_COOKIE_FILE'), 'utf-8')) :
+            undefined
+
         this.musicPlayer = new DisTube(this as SapphireClient, {
             emitAddListWhenCreatingQueue: true,
             emitAddSongWhenCreatingQueue: true,
             emitNewSongOnly: true,
             plugins: [
-                new YouTubePlugin(),
+                new YouTubePlugin({
+                    cookies
+                }),
                 new SoundCloudPlugin(),
                 new SpotifyPlugin(),
             ],

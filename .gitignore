@@ -104,3 +104,6 @@ node_modules
 # saves
 saves/*/*.png
 saves/*/*.gif
+
+# custom
+youtube-cookie.json
