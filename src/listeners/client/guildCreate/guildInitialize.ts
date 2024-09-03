@@ -29,9 +29,14 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         /* Trap management and user levels. */
         guild.battleSystem = new BattleSystem(guild);
 
-        await guild.battleSystem.loadConfig();
-        await guild.battleSystem.loadFromDB();
-        await guild.battleSystem.writeToDB();
+        try {
+            await guild.battleSystem.loadConfig();
+            await guild.battleSystem.loadFromDB();
+            await guild.battleSystem.writeToDB();
+
+        } catch (error) {
+            debugLog('error', `Error loading battle system for ${guild.name} (${guild.id})`);
+        }
 
         // Games Trackers
         guild.games = {
@@ -41,28 +46,50 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
 
         };
 
-        await guild.games.awbw.loadConfig();
-        await guild.games.awbw.loadRegistry();
+        try {
+            await guild.games.awbw.loadConfig();
+            await guild.games.awbw.loadRegistry();
+        } catch (error) {
+            debugLog('error', `Error loading games for ${guild.name} (${guild.id})`);
+        }
+
 
         /* Message scanner for stat tracking */
         guild.scanner = new GuildMessageScanner(guild);
 
         /* Instantiated Message Scanners */
-        {
-            /* Track emoji usage and stats */
-            guild.emojiUsage = new EmojiUsageManager(guild);
 
-            /* Assign roles through reactions. */
-            guild.roleAssigner = new RoleAssignmentManager(guild);
+        /* Track emoji usage and stats */
+        guild.emojiUsage = new EmojiUsageManager(guild);
+        try {
+
+            await guild.emojiUsage.loadRecords();
+            await guild.emojiUsage.loadRegistry();
+            await guild.emojiUsage.generateLastMessageStore();
+        } catch (error) {
+            debugLog('error', `Error loading emoji usage for ${guild.name} (${guild.id})`);
         }
 
-        await guild.roleAssigner.loadConfig();
-        await guild.roleAssigner.generateMessageCollectors();
+        /* Assign roles through reactions. */
+        guild.roleAssigner = new RoleAssignmentManager(guild);
+
+        try {
+            await guild.roleAssigner.loadConfig();
+            await guild.roleAssigner.generateMessageCollectors();
+
+        } catch (error) {
+            debugLog('error', `Error loading role assigner for ${guild.name} (${guild.id})`);
+        }
 
         /* Message Echoer for deletions and edits */
         guild.messageEchoer = new MessageEchoManager(guild);
 
-        await guild.messageEchoer.loadConfig();
+        try {
+            await guild.messageEchoer.loadConfig();
+        } catch (error) {
+            debugLog('error', `Error loading message echoer for ${guild.name} (${guild.id})`);
+        }
+
 
         // /* Betting system for awarding users. */
         // guild.pointSystem = new PointSystem(guild.settings);
@@ -79,7 +106,12 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         /* Custom command system unique to each guild. */
         guild.customCommandSystem = new CustomCommandSystem(guild);
 
-        await guild.customCommandSystem.loadFromDB();
+        try {
+            await guild.customCommandSystem.loadFromDB();
+        } catch (error) {
+            debugLog('error', `Error loading custom commands for ${guild.name} (${guild.id})`);
+        }
+
 
         // /* Guild message cache for tracking user stats and simulations. */
         // guild.messageCache = new GuildMessageCache(guild.settings);
@@ -96,9 +128,6 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
         // guild.AWBW = new AdvanceWarsByWeb(guild.settings);
 
         /* SOMETIMES, IF THE LASTMESSAGEID IS NULL THIS WILL FAIL */
-        await guild.emojiUsage.loadRecords();
-        await guild.emojiUsage.loadRegistry();
-        await guild.emojiUsage.generateLastMessageStore();
 
         await guild.members.fetch();
 

@@ -10,6 +10,6 @@ import { Events } from "distube";
 })
 export class FFMPEGDebugErrorLogger extends Listener {
 	public async run(message: string) {
-		debugLog('debug', message);
+		debugLog('info', message);
 	}
 }

@@ -10,7 +10,7 @@ const moment = require('moment-timezone');
 })
 export class MessageUpdateEcho extends Listener<typeof Events.MessageUpdate> {
     public async run(before: Message, after: Message) {
-        if (!after.guild?.messageEchoer.echoEdits) return;
+        if (!after.guild?.messageEchoer?.echoEdits) return;
 
         if (!after.channel.isTextBased()) return;
 
