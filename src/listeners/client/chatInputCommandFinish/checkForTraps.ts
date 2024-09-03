@@ -19,7 +19,7 @@ export class ChatInputCommandFinishCheckForTraps extends Listener {
             ...Array.from(payload.interaction.options.data.values())
                 .map((option) => option.value?.toString() ?? ``)
         ]
-        const matches = guild?.battleSystem.traps?.filter((trap) => {
+        const matches = guild?.battleSystem?.traps?.filter((trap) => {
             if (trap.state !== BattleTrapState.Armed) return false;
             if (!content.some((c) => c.indexOf(trap.phrase))) return false;
 
