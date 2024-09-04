@@ -6,6 +6,7 @@ import { CLIENT_OPTIONS } from "../../setup";
 import DisTube from "distube";
 import { YouTubePlugin } from '@distube/youtube';
 import { SoundCloudPlugin } from "@distube/soundcloud";
+import {YtDlpPlugin} from "@distube/yt-dlp";
 import SpotifyPlugin from "@distube/spotify";
 import { envParseString } from "../../env/utils";
 import fs from 'fs';
@@ -37,6 +38,9 @@ export class PuppyBotClient extends SapphireClient {
                 }),
                 new SoundCloudPlugin(),
                 new SpotifyPlugin(),
+                new YtDlpPlugin({
+                    update: false
+                }),
             ],
             customFilters: {
                 'bassboost': 'bass=g=10',
