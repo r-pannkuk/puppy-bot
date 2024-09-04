@@ -6,7 +6,7 @@ import { CLIENT_OPTIONS } from "../../setup";
 import DisTube from "distube";
 import { YouTubePlugin } from '@distube/youtube';
 import { SoundCloudPlugin } from "@distube/soundcloud";
-import {YtDlpPlugin} from "@distube/yt-dlp";
+import { YtDlpPlugin } from "@distube/yt-dlp";
 import SpotifyPlugin from "@distube/spotify";
 import { envParseString } from "../../env/utils";
 import fs from 'fs';
@@ -22,8 +22,10 @@ export class PuppyBotClient extends SapphireClient {
             JSON.parse(fs.readFileSync(envParseString('YOUTUBE_COOKIE_FILE'), 'utf-8')) :
             undefined;
 
+        const proxyUri = 'http://152.26.229.66:9443';
 
-        const agent = ytdl.createAgent(cookies);
+
+        const agent = ytdl.createProxyAgent({ uri: proxyUri }, cookies);
 
         this.musicPlayer = new DisTube(this as SapphireClient, {
             emitAddListWhenCreatingQueue: true,
