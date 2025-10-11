@@ -9,6 +9,7 @@ import { GuildMessageScanner } from '../../../lib/structures/managers/GuildMessa
 import { EmojiUsageManager } from '../../../lib/structures/managers/EmojiUsageManager';
 import { RoleAssignmentManager } from '../../../lib/structures/managers/RoleAssignmentManager';
 import { MessageEchoManager } from '../../../lib/structures/managers/MessageEchoManager';
+import { GuildLeaveAnnouncerManager } from '../../../lib/structures/managers/GuildLeaveAnnouncerManager';
 import { debugLog } from '../../../lib/utils/logging';
 
 @ApplyOptions<Listener.Options>({
@@ -90,6 +91,15 @@ export class GuildCreateGuildInitialize extends Listener<typeof Events.GuildCrea
             debugLog('error', `Error loading message echoer for ${guild.name} (${guild.id})`);
         }
 
+        /* Guild Leave Announcer */
+        guild.leaveAnnouncer = new GuildLeaveAnnouncerManager(guild);
+
+        try {
+            await guild.leaveAnnouncer.loadConfig();
+        } catch (error) {
+            debugLog('error', `Error loading leave announcer for ${guild.name} (${guild.id})`);
+        }
+
 
         // /* Betting system for awarding users. */
         // guild.pointSystem = new PointSystem(guild.settings);
@@ -146,6 +156,7 @@ declare module 'discord.js' {
         },
         scanner: GuildMessageScanner,
         messageEchoer: MessageEchoManager,
+        leaveAnnouncer: GuildLeaveAnnouncerManager,
         emojiUsage: EmojiUsageManager,
         roleAssigner: RoleAssignmentManager
     }

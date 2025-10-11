@@ -292,6 +292,12 @@ model RoleAssignConfig {
   fetchOnLoad   Boolean @default(true)
 }
 
+model LeaveAnnouncerConfig {
+  guildId         String @id @map("_id")
+  outputChannelId String?
+  echoLeaves      Boolean @default(true)
+}
+
 model MessageEchoConfig {
   guildId         String  @id @map("_id")
   outputChannelId String?

@@ -99,7 +99,7 @@ export class CustomCommandEmbed extends PuppyBotEmbed {
 		]
 
 		this.setFields([]);
-		this.setDescription("");
+		this.setDescription(null);
 
 		this.splitFields({
 			content

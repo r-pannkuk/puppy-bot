@@ -40,8 +40,10 @@ export class GuildMemberRemoveLeaveAnnouncement extends Listener<typeof Events.G
                 found = checkLogs(kicks.entries);
             }
 
+            var echoChannel = member.guild.leaveAnnouncer.outputChannel;
+
             if (!found) {
-                await member.guild.systemChannel?.send(`${member} has left the server.`);
+                await echoChannel?.send(`${member} has left the server.`);
             } else {
                 if (found.action === AuditLogEvent.MemberBanAdd) {
                     var action = "banned"
@@ -50,7 +52,7 @@ export class GuildMemberRemoveLeaveAnnouncement extends Listener<typeof Events.G
                 } else {
                     var action = "UNKNOWN";
                 }
-                await member.guild.systemChannel?.send(`${member} was ${action} by ${found.executor} [${found.reason}]`);
+                await echoChannel?.send(`${member} was ${action} by ${found.executor} [${found.reason}]`);
             }
         }
     }
