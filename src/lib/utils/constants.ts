@@ -1,4 +1,4 @@
-import { envParseString } from "../env/utils";
+import { envParseString } from "../setup/utils";
 
 export const enum Emojis {
 	ArrowDown = '⬇',

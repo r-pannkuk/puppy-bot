@@ -20,7 +20,7 @@ import type { ClientOptions } from 'discord.js';
 import { Time } from '@sapphire/time-utilities';
 import { BucketScope } from '@sapphire/framework';
 import { ActivityType, GatewayIntentBits, Partials } from 'discord.js';
-import { envParseArray, envParseInteger, envParseString } from './env/utils';
+import { envParseArray, envParseInteger, envParseString } from './setup/utils';
 import { join } from 'path';
 import './utils/time';
 

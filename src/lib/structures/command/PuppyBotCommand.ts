@@ -19,7 +19,7 @@ import { ApplicationCommandRegistryRegisterOptions, Command, RegisterBehavior, U
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { Time } from "@sapphire/time-utilities";
 import { Channel, CommandInteraction, Guild, GuildMember, Message, TextChannel, MessagePayload, Role, User, InteractionEditReplyOptions, ChatInputCommandInteraction, ContextMenuCommandInteraction, MessageReplyOptions } from "discord.js";
-import { envParseArray, envParseString } from "../../env/utils";
+import { envParseArray, envParseString } from "../../setup/utils";
 
 export const SLASH_ID_HINTS: Record<string, string[]> = {
     // Admin

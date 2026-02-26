@@ -1,5 +1,5 @@
 import { container } from "@sapphire/framework";
-import { envIsDefined } from "../env/utils";
+import { envIsDefined } from "../setup/utils";
 
 export type LoggingType = 'info' | 'debug' | 'warn' | 'error' | 'fatal'
 

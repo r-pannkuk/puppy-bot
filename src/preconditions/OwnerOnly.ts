@@ -10,7 +10,7 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { Command, Precondition } from '@sapphire/framework'
 import type { ChatInputCommandInteraction, Message } from 'discord.js'
 import 'dotenv/config'
-import { envParseArray } from '../lib/env/utils';
+import { envParseArray } from '../lib/setup/utils';
 
 @ApplyOptions<Precondition.Options>({
     name: 'OwnerOnly'

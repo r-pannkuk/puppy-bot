@@ -23,7 +23,7 @@ import { default as _config } from '../../../config/default/BattleConfig.json';
 import { WHITE_CIRCLE } from "../../utils/constants";
 import type { IGuildManager } from "./IGuildManager";
 import type { IConfigLoader } from "./IConfigLoader";
-import { envParseInteger } from "../../env/utils";
+import { envParseInteger } from "../../setup/utils";
 import type { JobOptions } from "bull";
 
 const DEFAULT_CONFIG = {

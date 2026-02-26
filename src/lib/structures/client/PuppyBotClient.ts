@@ -9,7 +9,7 @@ import { PrismaClient } from '@prisma/client';
 import type { Message } from 'discord.js';
 import { CLIENT_OPTIONS } from '../../setup';
 import { Shoukaku, Connectors, type NodeOption } from 'shoukaku';
-import { envParseBoolean, envParseInteger, envParseString } from '../../env/utils';
+import { envParseBoolean, envParseInteger, envParseString } from '../../setup/utils';
 
 export class PuppyBotClient extends SapphireClient {
     public constructor() {
