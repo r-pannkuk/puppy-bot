@@ -62,7 +62,7 @@
         "dev": "run-s build start",
         "format": "prettier --write \"src/**/*.ts\"",
         "test": "run-s test:python test:js",
-        "test:python": ".venv/Scripts/pytest tests/python/ -v",
+        "test:python": "python -m pytest tests/python/ -v",
         "test:js": "vitest run",
         "test:unit": "vitest run tests/unit",
         "test:integration": "vitest run tests/integration",
