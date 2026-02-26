@@ -1,0 +1,23 @@
+{
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "rootDir": "..",
+        "outDir": "../dist-tests",
+        "moduleResolution": "nodeNext",
+        "esModuleInterop": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "skipLibCheck": true,
+        "noImplicitAny": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "resolveJsonModule": true,
+        "verbatimModuleSyntax": true
+    },
+    "include": [
+        ".",
+        "../src"
+    ]
+}

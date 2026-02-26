@@ -1,15 +1,32 @@
-import { ApplyOptions } from "@sapphire/decorators";
-import { ApplicationCommandRegistry, ChatInputCommandContext, Command, CommandOptionsRunTypeEnum, container, ContextMenuCommandContext } from "@sapphire/framework";
-import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import { Collection, CommandInteraction, Guild, GuildEmoji, GuildTextBasedChannel, Message, MessagePayload, InteractionEditReplyOptions, User, MessageReplyOptions, ChatInputCommandInteraction, TextChannel } from "discord.js";
-import { EmojiUsagePaginatedMessage } from "../../lib/structures/message/admin/EmojiUsagePaginatedMessage";
+/**
+ * @file EmojiUsage.ts
+ * @description `/emojiusage` command — scans guild message history and reports custom-emoji usage.
+ *
+ * When triggered, delegates to {@link EmojiUsageManager} which coordinates a full
+ * message-history scan via {@link GuildMessageScanner} and tallies custom emoji
+ * occurrences per emoji and per user.
+ *
+ * Results are displayed as a paginated embed ({@link EmojiUsagePaginatedMessage}).
+ * Optionally filtered by one or more emoji, by a specific member, and with/without
+ * counting reactions.
+ *
+ * Also registered as the `Track Emoji Usage` user context-menu command.
+ *
+ * Requires `Administrator` user permission; guild-only.  Rate-limited to 1 use per 20 s.
+ * Aliases: `emoji-usage`, `emoji-count`, `emoji-stats`.
+ */
+import { ApplyOptions } from '@sapphire/decorators';
+import { Command, container, ApplicationCommandRegistry, ChatInputCommandContext, ContextMenuCommandContext, CommandOptionsRunTypeEnum } from '@sapphire/framework';
+import { Collection, ChatInputCommandInteraction, CommandInteraction, Guild, GuildEmoji, GuildTextBasedChannel, InteractionEditReplyOptions, Message, MessagePayload, MessageReplyOptions, TextChannel, User } from 'discord.js';
+import { Time } from '@sapphire/time-utilities';
 import { Stopwatch } from '@sapphire/stopwatch';
-import { GuildMessageScanner } from "../../lib/structures/managers/GuildMessageScanner";
-import { Time } from "@sapphire/time-utilities";
-import { PuppyBotEmbed } from "../../lib/structures/message/PuppyBotEmbed";
+import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand';
+import { GuildMessageScanner } from '../../lib/structures/managers/GuildMessageScanner';
+import { PuppyBotEmbed } from '../../lib/structures/message/PuppyBotEmbed';
+import { EmojiUsagePaginatedMessage } from '../../lib/structures/message/admin/EmojiUsagePaginatedMessage';
 
-const SHORT_DESCRIPTION = `Provides statistics about emoji utilization in the server.`;
-const REGEX_CUSTOM_EMOJI = /<a:.+?:\d+>|<:.+?:\d+>/g
+const SHORT_DESCRIPTION = 'Scans guild message history and reports custom-emoji usage.';
+const REGEX_CUSTOM_EMOJI = /<a:.+?:\d+>|<:.+?:\d+>/g;
 const WAIT_DURATION_FOR_FOLLOWUP = 600000;
 
 @ApplyOptions<PuppyBotCommand.Options>({

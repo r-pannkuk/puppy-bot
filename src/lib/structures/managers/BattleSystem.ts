@@ -1,3 +1,20 @@
+/**
+ * @file BattleSystem.ts
+ * @description Per-guild manager for the passive text-based battle / trap game.
+ *
+ * Each Discord guild that has loaded this system contains:
+ * - A collection of {@link BattleSystem.BattleUser.Instance} records (HP, energy, XP, level).
+ * - A collection of active {@link BattleSystem.Trap.Instance} records.  A trap is armed with
+ *   a secret phrase; the first other guild member to type that phrase in any channel triggers it.
+ * - A versioned {@link BattleConfig} (stored in MongoDB) that controls level thresholds,
+ *   trap damage formulae, ability energy costs, and the designated trap-announcement channel.
+ *
+ * Damage formulae: `Base`, `Linear`, `Exponential`, or `Interval` — configured via
+ * `BattleTrapDamageFormulaType` in `BattleConfig.trapConfig.damage`.
+ *
+ * HP and energy regenerate on a recurring Bull job (`BattleSystem_RegenerateUsers`)
+ * fired every `BATTLESYSTEM_INTERVAL_SECS` seconds.
+ */
 import { BattleAbilityConfig, BattleAbilityType, BattleConfig, BattleLevelConfig, BattleTrap, BattleTrapConfig, BattleTrapDamageFormulaType, BattleTrapRecord, BattleTrapRecordType, BattleTrapState, BattleUser } from "@prisma/client";
 import type * as Prisma from "@prisma/client";
 import { container } from "@sapphire/framework";
@@ -175,18 +192,29 @@ export class BattleSystem implements IGuildManager, IConfigLoader<BattleConfig> 
 
 		this._config = loadedConfig;
 
-		await container.tasks.create(
-			"BattleSystem_RegenerateUsers",
-			{
-				guildId: this.guildId,
-			},
-			{
-				repeated: true,
-				interval: BattleSystem.regenIntervalSecs * 1000,
-				customJobOptions: {
-					removeOnComplete: true,
-				} as JobOptions
-			})
+		try {
+			// Wrap in Promise.race so a hung bullmq Queue.add() (a Promise that never
+			// settles) cannot block guild initialisation indefinitely.
+			await Promise.race([
+				container.tasks.create(
+					"BattleSystem_RegenerateUsers",
+					{
+						guildId: this.guildId,
+					},
+					{
+						repeated: true,
+						interval: BattleSystem.regenIntervalSecs * 1000,
+						customJobOptions: {
+							removeOnComplete: true,
+						} as JobOptions
+					}),
+				new Promise<never>((_, reject) =>
+					setTimeout(() => reject(new Error('Bull task creation timed out after 5 s')), 5_000)
+				),
+			]);
+		} catch (error) {
+			container.logger.error(`[BattleSystem] Failed to schedule regen job for guild ${this.guildId}:`, error);
+		}
 	}
 
 	public async loadFromDB() {

@@ -19,7 +19,7 @@ export class CustomCommandEmbed extends PuppyBotEmbed {
 	protected schemaId?: string;
 
 	public get guild() { return container.client.guilds.cache.get(this.guildId ?? ""); }
-	public get schema() { return this.guild?.customCommandSystem.customCommands.get(this.schemaId as unknown as [commandId: string] ?? ""); }
+	public get schema() { return this.guild?.customCommandSystem.customCommands.get(this.schemaId ?? ""); }
 
 	public get stringifyId() { return `**Id**: ${this.schema?.id}` }
 	public get stringifyName() { return `**Name**: ${this.schema?.name}` }

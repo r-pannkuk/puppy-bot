@@ -22,10 +22,8 @@ export interface EnvTypes {
     CLIENT_NAME: string;
     CLIENT_VERSION: string;
     CLIENT_PREFIX: string;
-    // CLIENT_REGEX_PREFIX: string;
     CLIENT_OWNERS: string;
     CLIENT_ID: string;
-    // CLIENT_SHARDS: string;
 
     CLIENT_PRESENCE_NAME: string;
     CLIENT_PRESENCE_TYPE: string;
@@ -42,7 +40,6 @@ export interface EnvTypes {
     GOOGLE_ACCOUNT_EMAIL: string;
     GOOGLE_PRIVATE_KEY: string;
 
-    AWBW_SCAN_INTERVAL_SECS: IntegerString;
     BATTLESYSTEM_INTERVAL_SECS: IntegerString;
 
     DEV_GUILD_ID: string;
@@ -50,7 +47,17 @@ export interface EnvTypes {
     DEFAULT_TIMEZONE: 'eastern'|'pacific'|'utc';
 
     SOUNDCLOUD_TOKEN: string;
-    YOUTUBE_TOKEN: string;
-    YOUTUBE_COOKIE_FILE: string;
+
+    /** Lavalink node host (Shoukaku music backend). */
+    LAVALINK_HOST: string;
+    /** Lavalink node port. Defaults to 2333. */
+    LAVALINK_PORT: IntegerString;
+    /** Lavalink node authentication password. */
+    LAVALINK_PASSWORD: string;
+    /** Whether to connect to Lavalink over TLS. */
+    LAVALINK_SECURE: BooleanString;
+    /** Set to 'false' to disable the music system entirely. */
+    LAVALINK_ENABLED: BooleanString;
+
     CHALLONGE_TOKEN: string;
 }

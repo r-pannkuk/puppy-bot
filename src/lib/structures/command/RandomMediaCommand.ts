@@ -1,3 +1,20 @@
+/**
+ * @file RandomMediaCommand.ts
+ * @description Abstract base class for commands that post a random (or selected) media file.
+ *
+ * On construction:
+ * 1. Reads all files from `src/assets/media/<folder>/`.
+ * 2. Cross-references them with the `typeDescriptions` option to build a `typeDict`
+ *    (filename → `{ description, path }`).
+ * 3. Registers a slash command with an optional `type` string-choice parameter
+ *    (capped at Discord's 25-choice limit).
+ *
+ * On invocation, the user's chosen type (or a random type when none is given)
+ * is resolved to a file path and sent as an attachment.
+ *
+ * Concrete subclasses only need `@ApplyOptions` with `folder` and `typeDescriptions`;
+ * all slash-command registration and invocation logic is implemented here.
+ */
 import type { Args, ChatInputCommandContext, Command } from '@sapphire/framework';
 import { TextChannel, type ChatInputCommandInteraction, type Message } from 'discord.js';
 import { readdirSync } from 'fs';

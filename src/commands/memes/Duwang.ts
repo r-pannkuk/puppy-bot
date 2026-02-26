@@ -1,9 +1,18 @@
+/**
+ * @file Duwang.ts
+ * @description `/duwang` command — generates the JoJo's Bizarre Adventure "What a beautiful Duwang" meme.
+ *
+ * Passes an optional image URL or text string to `duwang.py`, which overlays the
+ * content onto the manga panel template.  When no target is provided, the script
+ * uses a default image.
+ */
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import { TextChannel, type ChatInputCommandInteraction, type Message } from 'discord.js';
+import { TextChannel } from 'discord.js';
+import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
-const SHORT_DESCRIPTION = 'Exclaim your wonder for the beautiful day.'
+const SHORT_DESCRIPTION = 'What a beautiful Duwang!';
 
 @ApplyOptions<PyScriptCommand.Options>({
     name: 'duwang',

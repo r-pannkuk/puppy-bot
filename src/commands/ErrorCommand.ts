@@ -1,3 +1,11 @@
+/**
+ * @file ErrorCommand.ts
+ * @description `/error` command — simulates a thrown error for testing error-handling listeners.
+ *
+ * Guarded by the `OwnerOnly` precondition so that only bot owners can invoke it.
+ * Used to verify that Sentry capture and the `chatInputCommandError` listener
+ * are functioning correctly.
+ */
 import { ApplicationCommandRegistry, ChatInputCommandContext, UserError } from '@sapphire/framework';
 import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { ApplyOptions } from '@sapphire/decorators'
@@ -23,8 +31,7 @@ export class ErrorCommand extends PuppyBotCommand {
 		throw new UserError({
 			identifier: `[Message] Testing something`,
 			context: {
-				message,
-				context
+				message
 			},
 		})
 	}

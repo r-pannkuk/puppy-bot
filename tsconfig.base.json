@@ -1,7 +1,12 @@
 {
     "extends": "@sapphire/ts-config",
-	"compilerOptions": {
-		"target": "ESNext",
-		"removeComments": true
-	}
+    "compilerOptions": {
+        "target": "ESNext",
+        "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "noUncheckedIndexedAccess": false,
+        "removeComments": true
+    }
 }

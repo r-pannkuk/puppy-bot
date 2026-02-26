@@ -1,3 +1,11 @@
+/**
+ * @file MessageEchoManager.ts
+ * @description Per-guild message-audit-log manager.
+ *
+ * When enabled, forwards message edits (`echoEdits`) and/or deletions (`echoDeletes`)
+ * to a configured `outputChannelId`.  Configuration is stored in `MessageEchoConfig`
+ * (MongoDB) and toggled via the `/set logging` command.
+ */
 import type { MessageEchoConfig } from "@prisma/client";
 import { container } from "@sapphire/framework";
 import type { Guild, GuildTextBasedChannel } from "discord.js";

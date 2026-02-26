@@ -3,8 +3,19 @@ import { container, UserError } from "@sapphire/framework";
 import { CacheType, Collection, CommandInteraction, Guild, Message } from "discord.js";
 import type { IGuildManager } from "./IGuildManager";
 
+/**
+ * Manages the set of custom commands for a single Discord guild.
+ *
+ * Commands are persisted in MongoDB and cached in-memory at startup via
+ * {@link loadFromDB}. All mutating operations (add, edit, remove) write
+ * through to the database and update the cache atomically.
+ *
+ * If the in-memory cache is empty when a command lookup is needed (e.g., due
+ * to a startup failure), use {@link getByNameOrAliasWithFallback} which will
+ * query the database directly before returning `null`.
+ */
 export class CustomCommandSystem implements IGuildManager {
-	protected cache: Collection<[commandId: string], CustomCommand>;
+	protected cache: Collection<string, CustomCommand>;
 	protected guildId: string;
 
 	public get guild() {
@@ -15,21 +26,17 @@ export class CustomCommandSystem implements IGuildManager {
 		return this.cache;
 	}
 
+	/** Returns a flat list of all command IDs and alias strings in use. */
 	public get commandNamesInUse() {
 		return this.cache.reduce((sum, command) => {
-			sum.push(command.id);
-			sum.concat(command.aliases);
+			sum.push(command.id, ...command.aliases);
 			return sum;
-		}, new Array<string>())
+		}, new Array<string>());
 	}
 
 	public constructor(guild: Guild) {
 		this.guildId = guild.id;
 		this.cache = new Collection();
-
-		// (async () => {
-		// 	await this.loadFromDB();
-		// })()
 	}
 
 	// private async addCommandToStore(command: CustomCommand) {
@@ -60,20 +67,17 @@ export class CustomCommandSystem implements IGuildManager {
 	// 	}
 	// }
 
+	/**
+	 * Loads all custom commands for this guild from MongoDB into the
+	 * in-memory cache. Called once during guild initialization.
+	 */
 	public async loadFromDB() {
+		const commands = await container.database.customCommand.findMany({
+			where: { guildId: this.guildId }
+		});
 		this.cache = new Collection(
-			Array.from(
-				await container.database.customCommand.findMany({
-					where: {
-						guildId: this.guildId
-					}
-				}) ?? [], (value) => [value.id as unknown as [commandId: string], value]
-			)
+			commands.map((command) => [command.id, command] as [string, CustomCommand])
 		);
-
-		// for (var [, command] of this.cache) {
-		// 	await this.addCommandToStore(command);
-		// }
 	}
 
 	public contains(command: {
@@ -100,6 +104,10 @@ export class CustomCommandSystem implements IGuildManager {
 		)
 	}
 
+	/**
+	 * Looks up a command by its name or any of its aliases.
+	 * Only searches the in-memory cache.
+	 */
 	public getByNameOrAlias(command: {
 		id?: string,
 		name?: string,
@@ -111,8 +119,32 @@ export class CustomCommandSystem implements IGuildManager {
 			value.aliases?.includes(command.name ?? ``) ||
 			(command.aliases?.some(alias => alias === value.name) ?? false) ||
 			(command.aliases?.some(alias => value.aliases.includes(alias)) ?? false)
-
 		)
+	}
+
+	/**
+	 * Like {@link getByNameOrAlias} but falls back to a direct MongoDB query
+	 * when the in-memory cache is empty or the command is not found in cache.
+	 *
+	 * Use this in message-handling paths where a startup failure may have left
+	 * the cache empty, to avoid silently ignoring valid custom commands.
+	 */
+	public async getByNameOrAliasWithFallback(name: string): Promise<CustomCommand | null> {
+		const cached = this.getByNameOrAlias({ name });
+		if (cached) return cached;
+
+		// Cache miss — query DB directly and repopulate the entry.
+		const fromDb = await container.database.customCommand.findFirst({
+			where: {
+				guildId: this.guildId,
+				OR: [{ name }, { aliases: { has: name } }],
+			}
+		});
+
+		if (fromDb) {
+			this.cache.set(fromDb.id, fromDb);
+		}
+		return fromDb ?? null;
 	}
 
 	public async add(command: CustomCommand | {
@@ -144,12 +176,15 @@ export class CustomCommandSystem implements IGuildManager {
 			}
 		})
 
-		this.cache.set(command.id as unknown as [commandId: string], command);
-		// await this.addCommandToStore(command);
+		this.cache.set(command.id, command);
 
 		return command;
 	}
 
+	/**
+	 * Updates an existing command's content or aliases in both the database
+	 * and the in-memory cache. Aliases are merged (union) with existing aliases.
+	 */
 	public async edit(command: CustomCommand | {
 		id?: string,
 		name?: string,
@@ -169,7 +204,7 @@ export class CustomCommandSystem implements IGuildManager {
 
 		let foundCommand: CustomCommand | undefined;
 		if (command.id) {
-			foundCommand = this.cache.get(command.id as unknown as [commandId: string]);
+			foundCommand = this.cache.get(command.id);
 		} else {
 			foundCommand = this.getByNameOrAlias(command);
 		}
@@ -199,12 +234,15 @@ export class CustomCommandSystem implements IGuildManager {
 			data: command
 		})
 
-		this.cache.set(command.id as unknown as [commandId: string], command);
-		// await this.addCommandToStore(command);
+		this.cache.set(command.id, command);
 
 		return command;
 	}
 
+	/**
+	 * Deletes a command from both the database and the in-memory cache.
+	 * Accepts either an `id` or `name` to identify the command.
+	 */
 	public async remove(command: {
 		id?: string,
 		name?: string,
@@ -212,7 +250,7 @@ export class CustomCommandSystem implements IGuildManager {
 	}) {
 		let foundCommand: CustomCommand | undefined;
 		if (command.id) {
-			foundCommand = this.cache.get(command.id as unknown as [commandId: string]);
+			foundCommand = this.cache.get(command.id);
 		} else {
 			foundCommand = this.getByNameOrAlias(command);
 		}
@@ -230,13 +268,12 @@ export class CustomCommandSystem implements IGuildManager {
 			}
 		})
 
-		this.cache.delete(foundCommand.id as unknown as [commandId: string]);
-		// this.deleteCommandFromStore(foundCommand);
+		this.cache.delete(foundCommand.id);
 	}
 
 	public async removeAll() {
-		for (var [id,] of this.customCommands) {
-			await this.remove({ id: id.toString() });
+		for (const [id] of this.customCommands) {
+			await this.remove({ id });
 		}
 	}
 

@@ -1,3 +1,12 @@
+/**
+ * @file GuildLeaveAnnouncerManager.ts
+ * @description Per-guild leave-announcement manager.
+ *
+ * When `echoLeaves` is enabled, posts a farewell message to the configured
+ * `outputChannelId` whenever a member leaves the guild.  Configuration is
+ * stored in `LeaveAnnouncerConfig` (MongoDB) and toggled via the
+ * `/set announce` command.
+ */
 import type { LeaveAnnouncerConfig } from "@prisma/client";
 import { container } from "@sapphire/framework";
 import type { Guild, GuildTextBasedChannel } from "discord.js";

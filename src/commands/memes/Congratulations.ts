@@ -1,7 +1,19 @@
+/**
+ * @file Congratulations.ts
+ * @description `/omedetou` command — posts a random congratulations reaction image.
+ *
+ * Extends {@link RandomMediaCommand}; picks a random file from
+ * `src/assets/media/congratulations/` or the user-selected type.
+ *
+ * Available types span a range of anime/media sources: Bedman, Buu, Dio, Flonne,
+ * Evangelion, Genius (Klim Nick), Godzilla, Sailors, Sengoku, Taiga.
+ *
+ * Aliases: `congratulations`, `congrats`.
+ */
 import { ApplyOptions } from '@sapphire/decorators';
 import { RandomMediaCommand } from '../../lib/structures/command/RandomMediaCommand';
 
-const SHORT_DESCRIPTION = 'Send congrats.  They\'ve earned it.' 
+const SHORT_DESCRIPTION = 'Congratulations!';
 
 @ApplyOptions<RandomMediaCommand.Options>({
     name: 'omedetou',

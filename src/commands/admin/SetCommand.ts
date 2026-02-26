@@ -1,11 +1,24 @@
-import { ApplyOptions } from "@sapphire/decorators";
-import { CommandOptionsRunTypeEnum, type ApplicationCommandRegistry, type ChatInputCommandContext } from "@sapphire/framework";
-import { ChannelType, ChatInputCommandInteraction, Guild, GuildTextBasedChannel, Message, Role, User } from "discord.js";
-import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import { isNullish, isNullishOrEmpty } from "@sapphire/utilities"
-import { PuppyBotEmbed } from "../../lib/structures/message/PuppyBotEmbed";
+/**
+ * @file SetCommand.ts
+ * @description `/set` command — configures per-guild roles and channels for various bot subsystems.
+ *
+ * Subcommands:
+ * - `logging`    — designates a message audit-log channel and toggles edit/deletion echoing.
+ * - `moderate`   — designates a moderation channel and/or moderation role.
+ * - `role-assign` — designates the reaction-based role-assignment channel.
+ * - `prefix`     — changes the guild's prefix command prefix.
+ * - `announce`   — configures the channel for member-leave announcements.
+ *
+ * Requires `ManageChannels` and `ManageRoles` permissions; guild-only.
+ */
+import { ApplyOptions } from '@sapphire/decorators';
+import { ApplicationCommandRegistry, ChatInputCommandContext, CommandOptionsRunTypeEnum } from '@sapphire/framework';
+import { ChannelType, ChatInputCommandInteraction, Guild, GuildTextBasedChannel, Message, Role, User } from 'discord.js';
+import { isNullish, isNullishOrEmpty } from '@sapphire/utilities';
+import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand';
+import { PuppyBotEmbed } from '../../lib/structures/message/PuppyBotEmbed';
 
-const SHORT_DESCRIPTION = 'Sets a designated guild role or channel.';
+const SHORT_DESCRIPTION = 'Configures per-guild roles and channels for bot subsystems.';
 
 @ApplyOptions<PuppyBotCommand.Options>({
     name: 'set',

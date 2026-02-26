@@ -1,112 +1,100 @@
-import { isGuildBasedChannel } from "@sapphire/discord.js-utilities";
+/**
+ * @file PuppyBotClient.ts
+ * @description Extended SapphireClient that wires up the Prisma database
+ * connection and the Shoukaku/Lavalink music backend at login time.
+ */
+import { isGuildBasedChannel } from '@sapphire/discord.js-utilities';
 import { container, SapphireClient } from '@sapphire/framework';
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 import type { Message } from 'discord.js';
-import { CLIENT_OPTIONS } from "../../setup";
-import DisTube from "distube";
-import { YouTubePlugin } from '@distube/youtube';
-import { SoundCloudPlugin } from "@distube/soundcloud";
-import { YtDlpPlugin } from "@distube/yt-dlp";
-import SpotifyPlugin from "@distube/spotify";
-import { envParseString } from "../../env/utils";
-import fs from 'fs';
-import ytdl from "@distube/ytdl-core";
+import { CLIENT_OPTIONS } from '../../setup';
+import { Shoukaku, Connectors, type NodeOption } from 'shoukaku';
+import { envParseBoolean, envParseInteger, envParseString } from '../../env/utils';
 
 export class PuppyBotClient extends SapphireClient {
     public constructor() {
         super(CLIENT_OPTIONS);
-        // @ts-expect-error
-        container.client = this;
+        // Initialise the in-memory music queue map; entries are populated per guild at play-time.
+        this.musicQueue = new Map();
+    }
 
-        const cookies = envParseString('YOUTUBE_COOKIE_FILE', "") !== "" ?
-            JSON.parse(fs.readFileSync(envParseString('YOUTUBE_COOKIE_FILE'), 'utf-8')) :
-            undefined;
+    /**
+     * Initialise the Shoukaku Lavalink client and attach it to `this.musicPlayer`.
+     * Called during login so that `this` (the discord.js Client) is available as
+     * the voice-state connector.
+     */
+    private _initMusic(): void {
+        const lavalinkEnabled = envParseBoolean('LAVALINK_ENABLED', true);
+        if (!lavalinkEnabled) return;
 
-        const proxyUri = 'http://152.26.229.66:9443';
-
-
-        const agent = ytdl.createProxyAgent({ uri: proxyUri }, cookies);
-
-        this.musicPlayer = new DisTube(this as SapphireClient, {
-            emitAddListWhenCreatingQueue: true,
-            emitAddSongWhenCreatingQueue: true,
-            emitNewSongOnly: true,
-            plugins: [
-                new YouTubePlugin({
-                    ytdlOptions: {
-                        agent,
-                    },
-                    cookies
-                }),
-                new SoundCloudPlugin(),
-                new SpotifyPlugin(),
-                new YtDlpPlugin({
-                    update: false
-                }),
-            ],
-            customFilters: {
-                'bassboost': 'bass=g=10',
-                '8D': 'apulsator=hz=0.08',
-                'vaporwave': 'aresample=48000,asetrate=48000*0.8',
-                'nightcore': 'aresample=48000,asetrate=48000*1.25',
-                'phaser': 'aphaser=in_gain=0.4',
-                'tremolo': 'tremolo',
-                'vibrato': 'vibrato=f=6.5',
-                'reverse': 'areverse',
-                'treble': 'treble=g=5',
-                'normalizer': 'dynaudnorm=g=101',
-                'surrounding': 'surround',
-                'pulsator': 'apulsator=hz=1',
-                'subboost': 'asubboost',
-                'karaoke': 'stereotools=mlev=0.03',
-                'flanger': 'flanger',
-                'gate': 'agate',
-                'haas': 'haas',
-                'mcompand': 'mcompand',
-                'earwax': 'earwax',
+        const nodes: NodeOption[] = [
+            {
+                name: 'Main',
+                url: `${envParseString('LAVALINK_HOST', 'localhost')}:${envParseInteger('LAVALINK_PORT', 2333)}`,
+                auth: envParseString('LAVALINK_PASSWORD', 'youshallnotpass'),
+                secure: envParseBoolean('LAVALINK_SECURE', false),
             },
-            joinNewVoiceChannel: true,
+        ];
+
+        this.musicPlayer = new Shoukaku(new Connectors.DiscordJS(this), nodes, {
+            moveOnDisconnect: false,
+            resume: false,
+            resumeTimeout: 30,
+            // Allow up to 30 retries with 5s between attempts (~2.5 min total).
+            // Lavalink takes ~1-3s to start, so without enough retries Shoukaku
+            // gives up before Lavalink is ready when both are launched together.
+            reconnectTries: 30,
+            reconnectInterval: 5,
+            restTimeout: 10_000,
+        });
+
+        this.musicPlayer.on('error', (name, error) => {
+            container.logger.error(`[Shoukaku] Node "${name}" error:`, error);
+        });
+
+        this.musicPlayer.on('ready', (name) => {
+            container.logger.info(`[Shoukaku] Node "${name}" ready.`);
         });
     }
 
-    public override async login(token?: string) {
+    /**
+     * Opens the Prisma database connection, initialises the music player,
+     * then delegates to the Sapphire login flow.
+     */
+    public override async login(token?: string): Promise<string> {
         container.database = new PrismaClient();
         await container.database.$connect();
+        this._initMusic();
         return super.login(token);
     }
 
-    public override async destroy() {
-        container.database = new PrismaClient();
-        await container.database.$disconnect()
+    /**
+     * Gracefully closes the Prisma database connection and the music player,
+     * then calls the Sapphire / discord.js destroy.
+     */
+    public override async destroy(): Promise<void> {
+        await container.database.$disconnect();
+        // Disconnect all active Lavalink players before shutdown.
+        for (const guildId of (this.musicPlayer?.players.keys() ?? [])) {
+            this.musicPlayer.leaveVoiceChannel(guildId);
+        }
         return super.destroy();
     }
 
-    // @ts-expect-error
-    public override fetchPrefix = async (message: Message) => {
+    /**
+     * Dynamic prefix resolver: looks up the guild-specific prefix from
+     * the database, or falls back to the default prefix for DM channels.
+     */
+    public override fetchPrefix = async (message: Message): Promise<string | readonly string[]> => {
         if (isGuildBasedChannel(message.channel)) {
-            return container.database.guildSettings.findUnique({
-                where: {
-                    guildId: message?.guild?.id
-                },
-                select: {
-                    prefix: true
-                }
-            }).then((found) => found?.prefix)
+            const found = await container.database.guildSettings.findUnique({
+                where: { guildId: message?.guild?.id },
+                select: { prefix: true },
+            });
+            return found?.prefix ?? (this.options.defaultPrefix as string) ?? '!';
         }
-
-        return [this.options.defaultPrefix, ''] as readonly string[];
-    }
+        return [this.options.defaultPrefix as string, ''] as readonly string[];
+    };
 }
+// Client and container augmentations are declared in src/lib/types/augments.d.ts
 
-declare module '@sapphire/pieces' {
-    interface Container {
-        database: PrismaClient
-    }
-}
-
-declare module 'discord.js' {
-    interface Client {
-        // reminders: typeof ReminderManager,
-        musicPlayer: DisTube
-    }
-}

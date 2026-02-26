@@ -1,9 +1,16 @@
+/**
+ * @file Magneto.ts
+ * @description `/magneto` command — generates a "Magneto has been thwarted again" meme.
+ *
+ * Requires an image URL (or attachment) which `magneto.py` composites onto the meme template.
+ */
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import { TextChannel, type ChatInputCommandInteraction, type Message } from 'discord.js';
+import { TextChannel } from 'discord.js';
+import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
-const SHORT_DESCRIPTION = 'Magneto\'s been thwarted again.'
+const SHORT_DESCRIPTION = 'Magneto has been thwarted again!';
 
 @ApplyOptions<PyScriptCommand.Options>({
     name: 'magneto',

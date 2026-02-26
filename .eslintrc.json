@@ -1,0 +1,13 @@
+{
+    "extends": "@sapphire/eslint-config",
+    "root": true,
+    "parserOptions": {
+        "project": "./tsconfig.eslint.json"
+    },
+    "rules": {
+        "no-console": "warn",
+        "@typescript-eslint/no-explicit-any": "warn",
+        "indent": ["warn", "2"],
+        "no-tabs": "warn"
+    }
+}

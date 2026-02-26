@@ -1,14 +1,32 @@
-import type { CustomCommand } from "@prisma/client";
-import { ApplyOptions, RequiresUserPermissions } from "@sapphire/decorators";
-import { ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum } from "@sapphire/framework";
-import { PermissionFlagsBits } from "discord-api-types/v9";
-import { ButtonInteraction, Guild, Message, User, ChatInputCommandInteraction } from "discord.js";
-import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import { CustomCommandEmbed } from "../../lib/structures/message/customCommands/CustomCommandEmbed";
-import { CustomCommandListPaginatedMessage } from "../../lib/structures/message/customCommands/CustomCommandListPaginatedMessage";
-import { ActionRowBuilder, ButtonBuilder } from "@discordjs/builders";
+/**
+ * @file CustomCommand.ts
+ * @description `/customcommand` command — manages per-guild custom text commands.
+ *
+ * Subcommands (slash and prefix):
+ * - `add <name> <output>`    — creates a new custom command.
+ * - `alias <name> <alias>`   — adds an alias to an existing command.
+ * - `remove <name>`          — deletes a command.
+ * - `edit <name> <output>`   — updates the output of a command.
+ * - `rename <name> <new>`    — renames a command.
+ * - `list`                   — paginated view of all commands in the guild.
+ * - `reset`                  — removes all custom commands from the guild.
+ * - `info <name>`            — shows metadata (aliases, output, creation date) for a command.
+ *
+ * All mutations delegate to {@link CustomCommandSystem} which writes through to
+ * MongoDB and updates the in-memory cache atomically.
+ *
+ * Guild-only; aliases: `cc`, `custom`, `custom-command`, `meme`.
+ */
+import { ApplyOptions } from '@sapphire/decorators';
+import { RequiresUserPermissions } from '@sapphire/decorators';
+import { ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum } from '@sapphire/framework';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ChatInputCommandInteraction, Guild, Message, PermissionFlagsBits, User } from 'discord.js';
+import type { CustomCommand } from '@prisma/client';
+import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand';
+import { CustomCommandEmbed } from '../../lib/structures/message/customCommands/CustomCommandEmbed';
+import { CustomCommandListPaginatedMessage } from '../../lib/structures/message/customCommands/CustomCommandListPaginatedMessage';
 
-const SHORT_DESCRIPTION = `Manage server custom commands.`
+const SHORT_DESCRIPTION = 'Manages per-guild custom text commands.';
 
 @ApplyOptions<PuppyBotCommand.Options>({
 	aliases: ['cc', 'custom', 'custom-command', 'meme'],
@@ -339,11 +357,9 @@ export class CustomCommandCommand extends PuppyBotCommand {
 		, user: User
 	) {
 		const message = await followUp({
-			options: {
-				embeds: [new CustomCommandEmbed({
-					schema: command
-				})],
-			},
+			embeds: [new CustomCommandEmbed({
+				schema: command
+			})],
 			components: [
 				new ActionRowBuilder()
 					.addComponents(

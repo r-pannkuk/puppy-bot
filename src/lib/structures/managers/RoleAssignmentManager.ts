@@ -1,3 +1,15 @@
+/**
+ * @file RoleAssignmentManager.ts
+ * @description Per-guild reaction-based role-assignment manager.
+ *
+ * Reads a designated `roleChannelId` and attaches `ReactionCollector` instances
+ * to every message in that channel.  Adding a reaction grants the corresponding
+ * role; removing it revokes the role.  Configuration is stored in
+ * `RoleAssignConfig` (MongoDB) and set via the `/set role-assign` command.
+ *
+ * When `fetchOnLoad` is enabled the manager re-scans the role channel on startup
+ * so that reactions added while the bot was offline are still processed.
+ */
 import type { RoleAssignConfig } from "@prisma/client";
 import { container, UserError } from "@sapphire/framework";
 import { Collection, Guild, GuildTextBasedChannel, Message, MessageReaction, ReactionCollector, Role, User } from "discord.js";

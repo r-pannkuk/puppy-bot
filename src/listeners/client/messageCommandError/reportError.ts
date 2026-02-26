@@ -12,13 +12,17 @@ export class UserListener extends Listener<typeof Events.MessageCommandError> {
 		if (error instanceof UserError) {
 			if (Reflect.get(Object(error.context), 'silent')) return;
 
-			const embed = new UserErrorEmbed({
-				error
-			});
-
-			return message.reply({
-				embeds: [embed]
-			});
+			const embed = new UserErrorEmbed({ error });
+			return message.reply({ embeds: [embed] });
+		} else {
+			// Unexpected (non-UserError) exceptions — log and reply so the user
+			// gets feedback instead of silence.
+			this.container.logger.error(error);
+			try {
+				return await message.reply('An unexpected error occurred. Please try again.');
+			} catch {
+				// Message may have been deleted — nothing more we can do.
+			}
 		}
 	}
 }

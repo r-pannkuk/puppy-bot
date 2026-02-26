@@ -1,3 +1,15 @@
+/**
+ * @file EmojiUsageManager.ts
+ * @description Per-guild manager that tracks custom-emoji usage across all guild messages.
+ *
+ * Extends {@link AGuildScannerRegistryOwner} to coordinate with
+ * {@link GuildMessageScanner}: when a scan is triggered (via `/emojiusage` or the
+ * `Track Emoji Usage` context-menu command), it iterates message chunks and counts
+ * how many times each custom emoji is used, per user.
+ *
+ * Results are persisted in `GuildEmojiUsage` (MongoDB) and served as a
+ * paginated embed via {@link EmojiUsagePaginatedMessage}.
+ */
 import {
 	EmojiRecord as _EmojiRecord,
 	EmojiUserRecord as _EmojiUserRecord,

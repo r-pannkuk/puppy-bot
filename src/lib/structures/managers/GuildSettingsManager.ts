@@ -1,3 +1,14 @@
+/**
+ * @file GuildSettingsManager.ts
+ * @description Per-guild settings manager.
+ *
+ * Loads and caches a guild's `GuildSettings` record from MongoDB (prefix,
+ * timezone, designated channel/role IDs).  Changed via the `/set` command.
+ *
+ * Provides `set(partial)` for atomic DB + cache updates, and
+ * `createChannel()` to provision new Discord text channels under optional
+ * category channels.
+ */
 import type { GuildSettings, PrismaClient } from "@prisma/client";
 import type { CategoryChannel, GuildChannelCreateOptions, GuildTextBasedChannel, OverwriteResolvable, Role } from "discord.js";
 import { container, Resolvers } from "@sapphire/framework";

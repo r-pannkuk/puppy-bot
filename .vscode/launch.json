@@ -5,25 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
-            "runtimeArgs": [
-                "run-script",
-                "dev"
-            ],
-            "smartStep": true,
             "name": "Debugger",
-            "runtimeExecutable": "npm",
+            "preLaunchTask": "pre-launch",
+            "program": "${workspaceFolder}/dist/index.js",
+            "sourceMaps": true,
+            "smartStep": true,
             "skipFiles": [
                 "<node_internals>/**",
-                "node_modules/tslib/**"
+                "node_modules/**"
             ],
-            "internalConsoleOptions": "openOnSessionStart",
+            "internalConsoleOptions": "neverOpen",
+            "envFile": "${workspaceFolder}/.env",
             "env": {
                 "NODE_ENV": "development"
             },
-            "console": "internalConsole",
-            "outputCapture": "std",
+            "console": "integratedTerminal",
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
             ],

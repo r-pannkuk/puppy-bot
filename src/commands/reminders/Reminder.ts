@@ -1,18 +1,32 @@
-import { ApplyOptions } from "@sapphire/decorators";
-import { ApplicationCommandRegistry, Args, ChatInputCommandContext, container, UserError } from "@sapphire/framework";
-import { PermissionFlagsBits } from "discord-api-types/v9";
-import { User, GuildTextBasedChannel, Role, GuildMember, Message, Guild, ButtonInteraction, ChannelType, ChatInputCommandInteraction } from "discord.js";
-import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import { Duration } from '@sapphire/time-utilities'
-import { ReminderTargetType } from "@prisma/client";
+/**
+ * @file Reminder.ts
+ * @description `/reminder` command — creates and lists scheduled reminders.
+ *
+ * Subcommands:
+ * - `create <when> <content> [mention] [location]`
+ *     Creates a new reminder.  `when` is parsed first as a Sapphire `Duration`
+ *     string (e.g., `2h30m`), then as a natural-language date via `chrono-node`
+ *     (e.g., `next Monday at 9am`).
+ *     `mention` can be a user or a role; `location` overrides the target channel.
+ * - `list`  — shows all your reminders in a paginated, interactive embed.
+ *
+ * All reminder data is stored in MongoDB via {@link ReminderManager}.  Scheduled
+ * firing is handled by the `FireReminder` Bull task.
+ */
+import { ApplyOptions } from '@sapphire/decorators';
+import { container, ApplicationCommandRegistry, Args, ChatInputCommandContext, UserError } from '@sapphire/framework';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ChannelType, ChatInputCommandInteraction, Guild, GuildMember, GuildTextBasedChannel, Message, PermissionFlagsBits, Role, User } from 'discord.js';
+import { Duration } from '@sapphire/time-utilities';
 import * as chrono from 'chrono-node';
-import type { ReminderManager, ValidTarget } from "../../lib/structures/managers/ReminderManager";
-import { InteractionIds, ReminderEmbed } from "../../lib/structures/message/reminder/ReminderEmbed";
-import { ListReminderPaginatedMessage } from "../../lib/structures/message/reminder/ListReminderPaginatedMessage";
-import { DEFAULT_TIMEZONE } from "../../lib/utils/constants";
-import { ActionRowBuilder, ButtonBuilder } from "@discordjs/builders";
+import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand';
+import { ReminderManager } from '../../lib/structures/managers/ReminderManager';
+import type { ValidTarget } from '../../lib/structures/managers/ReminderManager';
+import { ReminderEmbed, InteractionIds } from '../../lib/structures/message/reminder/ReminderEmbed';
+import { ListReminderPaginatedMessage } from '../../lib/structures/message/reminder/ListReminderPaginatedMessage';
+import { ReminderTargetType } from '@prisma/client';
+import { getDefaultTimezone } from '../../lib/utils/constants';
 
-const SHORT_DESCRIPTION = `Set a reminder to go off later.`
+const SHORT_DESCRIPTION = 'Creates and lists scheduled reminders.';
 
 @ApplyOptions<PuppyBotCommand.Options>({
 	name: 'reminder',
@@ -34,11 +48,11 @@ const SHORT_DESCRIPTION = `Set a reminder to go off later.`
 })
 export class ReminderCommand extends PuppyBotCommand {
 	public static parseTime(input: string) {
-		var parsed = new Duration(input).fromNow;
+		let parsed = new Duration(input).fromNow;
 
 		if (!parsed || isNaN(parsed.getTime()) || parsed <= new Date(Date.now())) {
 			parsed = chrono.parseDate(input, {
-				timezone: DEFAULT_TIMEZONE
+				timezone: getDefaultTimezone()
 			}) ?? new Date(input);
 		}
 
@@ -95,7 +109,7 @@ export class ReminderCommand extends PuppyBotCommand {
 
 	public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
 		const subCommand = interaction.options.getSubcommand(true) as Remind.ValidSubCommand;
-		var mention: string | User | GuildMember | Role | null | undefined = interaction.options.getMentionable('mention') as string | User | GuildMember | Role;
+		let mention: string | User | GuildMember | Role | null | undefined = interaction.options.getMentionable('mention') as string | User | GuildMember | Role;
 		if (!mention) {
 			mention = container.client.users.cache.get(interaction.user.id);
 		};
@@ -118,7 +132,7 @@ export class ReminderCommand extends PuppyBotCommand {
 	}
 
 	public async messageRunCreate(message: Message, args: Args) {
-		var mention: string | User | GuildMember | Role | null | undefined = args.getOption('mention');
+		let mention: string | User | GuildMember | Role | null | undefined = args.getOption('mention');
 		if (mention) {
 			mention = message.guild?.members.cache.get(mention) ??
 				message.guild?.roles.cache.get(mention) ??
@@ -250,13 +264,13 @@ export class ReminderCommand extends PuppyBotCommand {
 	public async handleCreate(messageOrInteraction: Message | ChatInputCommandInteraction, guild: Guild | null | undefined, user: User, options: Remind.CommandOptions<'create'>) {
 		const followUp = await this.generateFollowUp(messageOrInteraction);
 
-		var parsed = ReminderCommand.parseTime(options.when);
+		const parsed = ReminderCommand.parseTime(options.when);
 
-		var target: ValidTarget;
+		let target: ValidTarget;
 
 		if (options.location) {
 			if (options.mention) {
-				var type = (options.mention instanceof Role) ? ReminderTargetType.Role : ReminderTargetType.User;
+				const type = (options.mention instanceof Role) ? ReminderTargetType.Role : ReminderTargetType.User;
 				target = {
 					type,
 					mentionableIds: [options.mention.id],

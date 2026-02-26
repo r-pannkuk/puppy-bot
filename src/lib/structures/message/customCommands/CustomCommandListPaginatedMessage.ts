@@ -22,7 +22,7 @@ export class CustomCommandListPaginatedMessage extends PaginatedMessage {
 		return container.client.guilds.cache.get(this.guildId)!;
 	}
 
-	public get customCommands() : Collection<[commandId: string], CustomCommand> {
+	public get customCommands() : Collection<string, CustomCommand> {
 		return this.guild.customCommandSystem.customCommands;
 	}
 

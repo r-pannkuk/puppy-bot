@@ -1,3 +1,15 @@
+/**
+ * @file GuildMessageScanner.ts
+ * @description Low-level utility for bulk-fetching message history across a guild.
+ *
+ * Iterates every accessible text channel (GuildText, threads, Announcement channels)
+ * in batches of 100, with a configurable inter-request delay (`REQUEST_DELAY`), emitting
+ * chunk-complete events as each batch arrives.  Consumers such as
+ * {@link EmojiUsageManager} subscribe to these events to process messages.
+ *
+ * An optional `lastMessageStore` allows incremental scanning from the last
+ * previously processed message rather than re-scanning the full history.
+ */
 import { container } from "@sapphire/framework";
 import { ChannelType, type Collection, type Guild, type GuildBasedChannel, type GuildTextBasedChannel, type Message } from "discord.js";
 import { debugLog } from "../../utils/logging";

@@ -1,9 +1,20 @@
+/**
+ * @file Lied.ts
+ * @description `/lied` command — generates a "Liar" meme stamped with a user's avatar.
+ *
+ * Passes the target user's avatar URL and a custom text string to `lied.py`,
+ * which composites them onto the Elfen Lied template.
+ *
+ * Also registered as the `Meme - Liar` message context-menu command, which
+ * uses the right-clicked message content as the "lie" text.
+ */
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext, ContextMenuCommandContext } from '@sapphire/framework';
-import { TextChannel, type ChatInputCommandInteraction, type ContextMenuCommandInteraction, type Message } from 'discord.js';
+import { TextChannel } from 'discord.js';
+import type { ChatInputCommandInteraction, ContextMenuCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
-const SHORT_DESCRIPTION = 'Tell the truth, the whole truth, nothing but the truth.'
+const SHORT_DESCRIPTION = 'You cannot lie to me!';
 
 @ApplyOptions<PyScriptCommand.Options>({
     name: 'lied',

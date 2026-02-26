@@ -1,11 +1,22 @@
-import { ApplyOptions } from "@sapphire/decorators";
-import { ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum, container } from "@sapphire/framework";
-import { CategoryChannel, ChannelType, Guild, GuildMember, GuildTextBasedChannel, Message, Role, User } from "discord.js";
-import { PuppyBotCommand } from "../../lib/structures/command/PuppyBotCommand";
-import type { ChatInputCommandInteraction, OverwriteData } from "discord.js";
-import { Emojis } from "../../lib/utils/constants";
+/**
+ * @file AddCommand.ts
+ * @description `/add` command — creates a paired text channel and opt-in role for group discussion.
+ *
+ * The `group-channel` subcommand:
+ * 1. Resolves or creates a Discord text channel (optionally under a category).
+ * 2. Resolves or creates a Discord role with the same or a specified name.
+ * 3. Applies permission overwrites so only members with the role can view the channel.
+ *
+ * Requires `ManageChannels` and `ManageRoles` permissions.
+ * Guild-only; aliases: `create`.
+ */
+import { ApplyOptions } from '@sapphire/decorators';
+import { container, ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum } from '@sapphire/framework';
+import { ChannelType, ChatInputCommandInteraction, Guild, GuildMember, GuildTextBasedChannel, CategoryChannel, Message, OverwriteData, Role, User } from 'discord.js';
+import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand';
+import { Emojis } from '../../lib/utils/constants';
 
-const SHORT_DESCRIPTION = 'Creates a new group and role for discussion.';
+const SHORT_DESCRIPTION = 'Creates a group channel with a paired opt-in role.';
 
 @ApplyOptions<PuppyBotCommand.Options>({
     name: 'add',

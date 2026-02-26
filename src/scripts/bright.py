@@ -166,20 +166,21 @@ def main():
         new_img.paste(bright["source"], (0, 0), bright["source"])
 
         if user_img != None and bright["size"] != (0, 0):
-            # copy of user image and frame for manipulation
-            user_img_copy = user_img
-            frame_copy = new_img
+            # copy of user image and frame for manipulation so
+            # thumbnail() doesn't permanently shrink the original
+            user_img_copy = user_img.copy()
+            frame_copy = new_img.copy()
 
-            # scaling user image to fit mask
-            user_img.thumbnail(bright["size"])
+            # scaling copy of user image to fit this frame's target size
+            user_img_copy.thumbnail(bright["size"])
 
-            # paste the user image onto the temporary frame
-            frame_copy.paste(user_img, (
+            # paste the user image copy onto the temporary frame copy
+            frame_copy.paste(user_img_copy, (
                 (int)(bright["position"][0] +
-                      (bright["size"][0] - user_img.size[0])/2),
+                      (bright["size"][0] - user_img_copy.size[0])/2),
                 (int)(bright["position"][1] +
-                      (bright["size"][1] - user_img.size[1])/2)
-            ), user_img)
+                      (bright["size"][1] - user_img_copy.size[1])/2)
+            ), user_img_copy)
 
             # mask the frame onto the original to get it to fit correctly
             new_img.paste(frame_copy, (0, 0), mask=bright["mask"])

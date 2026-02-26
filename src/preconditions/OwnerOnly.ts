@@ -1,3 +1,11 @@
+/**
+ * @file OwnerOnly.ts
+ * @description Sapphire precondition that restricts a command to bot owners only.
+ *
+ * Owners are defined by the `CLIENT_OWNERS` environment variable (space-separated
+ * Discord user IDs).  Any user not in that list receives an `OwnerOnly` user-error
+ * which the command-denied listener converts into an ephemeral error embed.
+ */
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command, Precondition } from '@sapphire/framework'
 import type { ChatInputCommandInteraction, Message } from 'discord.js'

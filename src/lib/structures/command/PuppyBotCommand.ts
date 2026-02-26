@@ -1,3 +1,20 @@
+/**
+ * @file PuppyBotCommand.ts
+ * @description Abstract base class for all PuppyBot slash / prefix commands.
+ *
+ * Extends Sapphire's `Subcommand` (which itself extends `Command`) and adds:
+ * - Default cooldown: 10 s window, 2 uses per channel; configurable on subclasses.
+ * - Owner bypass: members listed in `CLIENT_OWNERS` are never rate-limited.
+ * - Auto dash-less alias generation (e.g., `custom-command` → `customcommand`).
+ * - Pre-populated `slashCommandOptions` / `contextCommandOptions` with known
+ *   Discord application-command ID hints for zero-downtime re-registration.
+ * - Guild-scoped slash commands (those with `runIn` restricted to guilds) are
+ *   registered only in `DEV_GUILD_ID` during development.
+ *
+ * ID hint maps (`SLASH_ID_HINTS`, `CONTEXT_MENU_ID_HINTS`) at the top of this
+ * file enumerate the production and development command IDs that Discord has
+ * already assigned, preventing duplicate command creation on redeploy.
+ */
 import { ApplicationCommandRegistryRegisterOptions, Command, RegisterBehavior, UserError } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { Time } from "@sapphire/time-utilities";
@@ -12,9 +29,6 @@ export const SLASH_ID_HINTS: Record<string, string[]> = {
     customcommand: ['987672073075851324', '987664882050678794',],
     error: ['987664183111847986', '987664883006963722',],
     ping: ['987664272400195675', '987665053945847858',],
-
-    // Games
-    awbw: ['987672152780206110', '987664964653285386',],
 
     // Memes
     correct: ['987664184093319178', '987664965609607188',],

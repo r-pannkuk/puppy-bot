@@ -1,3 +1,20 @@
+/**
+ * @file Trap.ts
+ * @description `/trap` command — creates and manages battle-system traps.
+ *
+ * Subcommands:
+ * - `create <phrase>`   — plants a hidden trap; fires when any user types the phrase.
+ * - `list mine`         — shows your armed traps and their damage stats.
+ * - `list hidden`       — shows all obscured active traps in the guild (paginated).
+ * - `disarm <id>`       — disarms one of your own traps before it is triggered.
+ * - `clear`             — clears all triggered / expired traps (paginated confirmation).
+ *
+ * Delegates to {@link BattleSystem} for all state mutations.  Damage is
+ * calculated by the configured formula (`Base`, `Linear`, `Exponential`, or
+ * `Interval`) and announced in the designated trap channel.
+ *
+ * Guild-only.
+ */
 import { BattleTrapRecordType, BattleTrapState } from "@prisma/client";
 import { ApplyOptions } from "@sapphire/decorators";
 import { CommandOptionsRunTypeEnum, type ApplicationCommandRegistry, type Args, type ChatInputCommandContext } from "@sapphire/framework";

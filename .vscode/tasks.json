@@ -2,9 +2,56 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "lavalink",
+            "type": "shell",
+            "command": "npm run lavalink",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated",
+                "label": "Lavalink"
+            },
+            "problemMatcher": [
+                {
+                    "owner": "lavalink",
+                    "pattern": [
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "Lavalink",
+                        "endsPattern": "Lavalink is ready to accept connections"
+                    }
+                }
+            ]
+        },
+        {
+            "label": "pre-launch",
+            "dependsOn": ["tsc-build", "lavalink"],
+            "dependsOrder": "parallel"
+        },
+        {
+            "label": "tsc-build",
+            "type": "shell",
+            "command": "npm run build",
+            "problemMatcher": ["$tsc"],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "group": "build"
+        },
+        {
+            "label": "tsc-watch",
             "command": "${workspaceRoot}/node_modules/typescript/bin/tsc",
             "args": [
+                "-b",
+                "src",
                 "--watch"
             ],
             "isBackground": true,

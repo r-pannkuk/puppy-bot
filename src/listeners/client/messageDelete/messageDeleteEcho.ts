@@ -2,8 +2,6 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { container, Events, Listener } from '@sapphire/framework';
 import { PartialMessage, TextChannel, type Message } from 'discord.js';
 
-const moment = require('moment-timezone');
-
 
 @ApplyOptions<Listener.Options>({
     event: Events.MessageDelete
@@ -22,9 +20,13 @@ export class MessageDeleteEcho extends Listener<typeof Events.MessageDelete> {
 
         const echoChannel = message.guild.messageEchoer.outputChannel;
 
-        var createdDate = new Date(message.createdTimestamp);
-        var m = moment.tz(createdDate, 'America/New_York');
-        var content = `(${m.format('YYYY-MM-DD h:mm:ss a')}) \`DELETED\` message from **${message.author?.username}** [${message.channel}]:\n`
+        const createdDate = new Date(message.createdTimestamp);
+        const formatted = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/New_York',
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true,
+        }).format(createdDate).replace(',', '');
+        var content = `(${formatted}) \`DELETED\` message from **${message.author?.username}** [${message.channel}]:\n`
         content += `${message.url}\n`;
         content += `${message.content}`;
         if(echoChannel instanceof TextChannel) {

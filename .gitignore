@@ -107,3 +107,7 @@ saves/*/*.gif
 
 # custom
 youtube-cookie.json
+# lavalink
+lavalink/*.jar
+lavalink/plugins/
+lavalink/logs/

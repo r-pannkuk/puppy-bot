@@ -1,19 +1,18 @@
 {
     "extends": "./tsconfig.base.json",
     "compilerOptions": {
-        "lib": [
-            "ESNext",
-            "DOM"
-        ],
-        "target": "ESNext",
-        "module": "ESNext"
+        "lib": ["ESNext", "DOM"],
+        "target": "ES2022",
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "skipLibCheck": true,
+        "noEmit": true
     },
     "include": [
         "src",
-        "scripts",
         "tests",
-        "babel.config.js",
-        "jest.config.ts",
-        "tsup.config.ts"
+        "vitest.config.ts"
     ]
 }

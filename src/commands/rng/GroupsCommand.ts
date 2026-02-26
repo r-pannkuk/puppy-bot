@@ -1,9 +1,20 @@
+/**
+ * @file GroupsCommand.ts
+ * @description `/groups` command — divides a list of entries into random teams.
+ *
+ * Takes a group size `N` and a space-separated list of entry names, then assigns
+ * each entry to one of `ceil(entries / N)` groups at random.  Results are shown
+ * in an embed where each group is a field; a re-roll button lets users shuffle again.
+ *
+ * Aliases: `teams`, `team`, `group`.
+ * Example: `!groups 2 Alice Bob Carol Dave`
+ */
 import type { Args, ApplicationCommandRegistry, ChatInputCommandContext } from '@sapphire/framework'
-import { Message, ActionRowBuilder, ButtonInteraction, Collection, EmbedBuilder, ChatInputCommandInteraction, ButtonStyle, ButtonBuilder, ComponentType, MessageReplyOptions } from 'discord.js'
+import { Message, ActionRowBuilder, ButtonInteraction, Collection, EmbedBuilder, ChatInputCommandInteraction, ButtonStyle, ButtonBuilder, ComponentType, MessageActionRowComponentBuilder } from 'discord.js'
 import 'dotenv/config'
 import { ApplyOptions } from '@sapphire/decorators'
 import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand'
-import type { User } from '@sentry/node'
+import type { User } from 'discord.js'
 
 const SHORT_DESCRIPTION = 'Constructs random teams of size N with the provided list of entrants.';
 
@@ -114,7 +125,7 @@ export class GroupsCommand extends PuppyBotCommand {
 
         const customId = 'GroupsCommand.reroll';
 
-        const row = new ActionRowBuilder()
+        const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId(customId)
@@ -125,7 +136,7 @@ export class GroupsCommand extends PuppyBotCommand {
         const followUpMessage = await followUp({
             embeds: [await generateEmbed()],
             components: [row]
-        } as MessageReplyOptions)
+        })
         const response = messageOrInteraction.channel?.messages.cache.get(followUpMessage.id)!;
         response.createMessageComponentCollector({
             componentType: ComponentType.Button,

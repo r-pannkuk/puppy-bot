@@ -1,5 +1,18 @@
+/**
+ * @file DiceRollCommand.ts
+ * @description `/roll` command — rolls dice using full RPG notation.
+ *
+ * Uses `@dice-roller/rpg-dice-roller` to parse and execute notation strings
+ * such as `3d6`, `4d8kh3`, `2d6!>=5`, `{3d6, 3d6}`, etc.
+ *
+ * Validates notation before rolling; surfaces helpful syntax-error messages
+ * listing supported operators when the input is invalid.  Results are shown in
+ * an embed with per-die breakdown and total.  A re-roll button is provided.
+ *
+ * Aliases: `dice`.  Cooldown: 5 s / 6 uses per channel.
+ */
 import { Args, ApplicationCommandRegistry, ChatInputCommandContext, UserError } from '@sapphire/framework'
-import { Message, User, GuildMember, ButtonInteraction, ActionRowBuilder, Collection, ChatInputCommandInteraction, EmbedBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageReplyOptions } from 'discord.js'
+import { Message, User, GuildMember, ButtonInteraction, ActionRowBuilder, Collection, ChatInputCommandInteraction, EmbedBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageActionRowComponentBuilder } from 'discord.js'
 import 'dotenv/config'
 import { DiceRoll, Parser } from '@dice-roller/rpg-dice-roller'
 import { ApplyOptions } from '@sapphire/decorators'
@@ -185,7 +198,7 @@ export class DiceRollCommand extends PuppyBotCommand {
 
         const customId = 'DiceRollCommand.reroll';
 
-        const row = new ActionRowBuilder()
+        const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId(customId)
@@ -197,7 +210,7 @@ export class DiceRollCommand extends PuppyBotCommand {
         const response = await followUp({ 
             embeds: [await generateEmbed()], 
             components: [row]
-        } as MessageReplyOptions);
+        });
         this.cachedQuery.set(messageOrInteraction.guildId ?? user.id, {
             notation: processedInput
         });

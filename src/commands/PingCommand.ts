@@ -1,3 +1,10 @@
+/**
+ * @file PingCommand.ts
+ * @description `/ping` command — latency and heartbeat check.
+ *
+ * Returns the round-trip API latency and the WebSocket heartbeat latency as an embed.
+ * Aliases: `pong`.
+ */
 import type { ApplicationCommandRegistry, ChatInputCommandContext } from '@sapphire/framework';
 import { TextChannel, type ChatInputCommandInteraction, type Message } from 'discord.js';
 import { ApplyOptions } from '@sapphire/decorators'

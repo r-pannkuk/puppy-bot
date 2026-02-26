@@ -1,7 +1,21 @@
+/**
+ * @file Superturn.ts
+ * @description `/superturn` command — posts a random "you've been waiting" spinning GIF.
+ *
+ * Extends {@link RandomMediaCommand}; picks a random file from
+ * `src/assets/media/superturn/` or the user-selected type.
+ *
+ * Available types include: Bernkastel, Spinning Chair, Chargeman Ken, Dark Souls
+ * Rolling, Huz, Izaya Orihara, Kotomine Kirei, Tsuchimikado Maika, Maki Natsuo,
+ * RoboCop, Emiya Shirou, Speed Racer, Spinzaku, Touhou Youkai, Never-ending
+ * Truck Crash, Kasumi Shigure, and the Wheel of Fortune.
+ *
+ * Aliases: `super-turn`, `waiting`.
+ */
 import { ApplyOptions } from '@sapphire/decorators';
 import { RandomMediaCommand } from '../../lib/structures/command/RandomMediaCommand';
 
-const SHORT_DESCRIPTION = 'You\'ve been waiting a really long time...'
+const SHORT_DESCRIPTION = 'You have been waiting!';
 
 @ApplyOptions<RandomMediaCommand.Options>({
     name: 'superturn',

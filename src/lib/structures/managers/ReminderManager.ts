@@ -1,3 +1,18 @@
+/**
+ * @file ReminderManager.ts
+ * @description Global manager for all reminder data.
+ *
+ * Architecture:
+ * - MongoDB (via Prisma) is the **source of truth** for all reminders.
+ * - Redis/Bull (via Sapphire's plugin-scheduled-tasks) is the **execution
+ *   engine** for firing reminders on schedule.
+ * - The in-memory `_cache` mirrors the database for fast lookups without
+ *   per-request DB reads.
+ *
+ * On bot startup, {@link ReminderManager.loadData} loads all active reminders
+ * from MongoDB and re-enqueues pending jobs so that reminders survive
+ * process restarts (which would otherwise clear the Redis queue).
+ */
 import {
 	DiscordLocation,
 	Prisma,
@@ -90,8 +105,12 @@ export class ReminderManager {
 		const getExecutionNumber = () => events.filter((value) => value.eventType === ReminderEventType.Fire).size;
 		const getIsPending = () => (getActiveSchedule()) ? (getActiveSchedule()!.getNextInstance().getTime() > Date.now() || getActiveSchedule()!.repeat.isInfinite) : false;
 		const getOwner = () => container.client.users.cache.get(reminder.ownerId)!;
-		//TODO: This doesn't resolve with a bullJob that clears on finish
-		const getJob = () => container.tasks.get(reminder.jobId!);
+		// Note: container.tasks.get(jobId) looks up a Bull job by its string ID.
+		// Now that scheduleReminder() correctly stores the actual Bull job ID,
+		// this lookup will work. Previously it stored the MongoDB ObjectId instead.
+		const getJob = () => reminder.jobId
+			? container.tasks.get(reminder.jobId)
+			: undefined;
 
 		return {
 			...reminder,
@@ -107,54 +126,110 @@ export class ReminderManager {
 		} as ReminderManager.Reminder.Instance;
 	}
 
+	/**
+	 * Loads all active (non-disabled) reminders from MongoDB into the
+	 * in-memory cache, then calls {@link scheduleAllPendingReminders} to
+	 * re-queue any jobs that were dropped when the process restarted.
+	 */
 	public async loadData() {
-		var loadedReminders = await container.database.reminder.findMany({
+		const loadedReminders = await container.database.reminder.findMany({
+			where: { isDisabled: false },
 			include: {
 				events: true,
 				schedules: true,
-			}
+			},
 		});
 
-		for (var reminder of loadedReminders) {
+		for (const reminder of loadedReminders) {
 			this._cache.set(reminder.id, this._instantiateReminder(reminder));
+		}
+
+		// Restore any pending jobs into the Redis/Bull queue so reminders
+		// fire correctly even after a process restart.
+		await this.scheduleAllPendingReminders();
+	}
+
+	/**
+	 * Iterates the in-memory cache and enqueues a Bull job for every reminder
+	 * that is pending (not disabled, has an active schedule, and whose next
+	 * fire time is in the future). Updates the `jobId` field in MongoDB.
+	 *
+	 * This should be called once after {@link loadData} on startup.
+	 */
+	public async scheduleAllPendingReminders() {
+		for (const [, reminder] of this._cache) {
+			if (reminder.isDisabled) continue;
+			const schedule = reminder.getActiveSchedule();
+			if (!schedule) continue;
+			if (schedule.getNextInstance() <= new Date()) continue;
+
+			const jobId = await this.scheduleReminder(reminder);
+			if (!jobId) continue;
+
+			reminder.jobId = jobId;
+			await container.database.reminder.update({
+				where: { id: reminder.id },
+				data: { jobId },
+			});
+			this._cache.set(reminder.id, reminder);
 		}
 	}
 
-	private async scheduleReminder(reminder: ReminderManager.Reminder.Instance) {
+	/**
+	 * Enqueues a Bull job for this reminder's active schedule.
+	 *
+	 * @returns The Bull job ID (as a string) to be stored in MongoDB as `jobId`,
+	 *          or `null` if the reminder has no active schedule or its next
+	 *          fire time is already in the past.
+	 */
+	private async scheduleReminder(reminder: ReminderManager.Reminder.Instance): Promise<string | null> {
 		const schedule = reminder.getActiveSchedule();
 
 		if (!schedule) return null;
 
 		const delay = schedule.getNextInstance().getTime() - Date.now();
+		// Don't schedule reminders whose next fire time has already passed.
+		if (delay < 0) return null;
 
-		let duration = {
+		const duration: ScheduledTasksTaskOptions = {
 			repeated: false,
 			delay,
 			customJobOptions: {
 				removeOnComplete: true,
-			} as JobOptions
-		} as ScheduledTasksTaskOptions;
+			} as JobOptions,
+		};
 
 		if (schedule.repeat.isRepeating) {
 			const interval = Number(schedule.repeat.interval);
-			duration.customJobOptions.repeat = {
+			duration.customJobOptions!.repeat = {
 				every: interval,
-			} as Bull.RepeatOptions
+			} as Bull.RepeatOptions;
 
 			if (!schedule.repeat.isInfinite) {
 				(duration.customJobOptions as JobOptions).repeat!.limit = 1;
 			}
 		}
 
-		await container.tasks.create(
-			"Reminder_FireReminder",
-			{
-				reminderId: reminder.id,
-			} as ReminderManager.ScheduledTask.Payload,
-			duration
-		);
+		try {
+			// Wrap in Promise.race so a hung bullmq Queue.add() (a Promise that
+			// never settles) cannot block startup indefinitely.
+			const job = await Promise.race([
+				container.tasks.create(
+					'Reminder_FireReminder',
+					{ reminderId: reminder.id } as ReminderManager.ScheduledTask.Payload,
+					duration,
+				),
+				new Promise<never>((_, reject) =>
+					setTimeout(() => reject(new Error('Bull task creation timed out after 5 s')), 5_000)
+				),
+			]);
 
-		return reminder.id;
+			// Bull job IDs may be numbers or strings; normalize to string for DB storage.
+			return job?.id !== undefined ? String(job.id) : null;
+		} catch (error) {
+			container.logger.error(`[ReminderManager] Failed to schedule job for reminder ${reminder.id}:`, error);
+			return null;
+		}
 	}
 
 	public async createReminder(reminder: {
@@ -199,13 +274,13 @@ export class ReminderManager {
 
 		const instantiatedReminder = this._instantiateReminder(createdReminder);
 
-		const reminderId = await this.scheduleReminder(instantiatedReminder);
+		const jobId = await this.scheduleReminder(instantiatedReminder);
 
-		if(!reminderId) {
-			throw new UserError({identifier: 'Invalid Schedule', context: reminderId});
+		if (!jobId) {
+			throw new UserError({ identifier: 'Invalid Schedule', context: instantiatedReminder });
 		}
 
-		instantiatedReminder.jobId = reminderId;
+		instantiatedReminder.jobId = jobId;
 
 		await container.database.reminder.update({
 			where: {
@@ -381,13 +456,13 @@ export class ReminderManager {
 
 		const instantiatedReminder = this._instantiateReminder(updatedReminder);
 
-		const reminderId = await this.scheduleReminder(instantiatedReminder);
+		const jobId = await this.scheduleReminder(instantiatedReminder);
 
-		if(!reminderId) {
-			throw new UserError({identifier: 'Invalid Schedule', context: reminderId});
+		if (!jobId) {
+			throw new UserError({ identifier: 'Invalid Schedule', context: instantiatedReminder });
 		}
 
-		instantiatedReminder.jobId = reminderId.split(':')[1];
+		instantiatedReminder.jobId = jobId;
 
 		await container.database.reminder.update({
 			where: {

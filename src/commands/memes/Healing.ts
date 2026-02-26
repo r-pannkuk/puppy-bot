@@ -1,9 +1,17 @@
+/**
+ * @file Healing.ts
+ * @description `/sylphie` command — generates a "The one thing I ever want to do" meme.
+ *
+ * Passes an optional activity string to `sylphie.py`, which composites the text
+ * onto the Redo of Healer template image.
+ */
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import { TextChannel, type ChatInputCommandInteraction, type Message } from 'discord.js';
+import { TextChannel } from 'discord.js';
+import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
-const SHORT_DESCRIPTION = 'You really don\'t want to do anything else.'
+const SHORT_DESCRIPTION = 'The one thing you have always wanted to do.';
 
 @ApplyOptions<PyScriptCommand.Options>({
     name: 'sylphie',

@@ -54,7 +54,7 @@ def main():
 
     normal_font = ImageFont.truetype("./src/assets/fonts/calibri.ttf", 25)
     italic_font = ImageFont.truetype("./src/assets/fonts/calibrii.ttf", 25)
-    font_height = normal_font.getbbox('T')[1] - normal_font.getbbox('T')[3] * 1.5
+    font_height = (normal_font.getbbox('T')[1] - normal_font.getbbox('T')[3]) * 1.5
 
     # original offset excludes the first "But I don't want..." in order to get italicized
     true_x_offset = 549

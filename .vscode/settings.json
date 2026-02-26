@@ -12,5 +12,27 @@
 		"**/.yarn": true,
 		"**/dist/": true,
 		"**/.git/": true
-	}
+	},
+	"dbcode.connections": [
+		{
+			"connectionId": "TU-rShNdDPtJpzJoGBrhI",
+			"name": "Puppy-Bot",
+			"driver": "redis",
+			"connectionType": "host",
+			"host": "165.22.152.215",
+			"port": 6379,
+			"ssl": false,
+			"username": "default",
+			"password": "",
+			"savePassword": "secretStorage",
+			"tunnelId": "host:Puppy-Bot",
+			"database": "DB0",
+			"readOnly": false,
+			"connectionTimeout": 30,
+			"driverOptions": {
+				"maxScanKeys": 50000
+			}
+		}
+	],
+	"prisma.pinToPrisma6": true
 }

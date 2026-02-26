@@ -21,7 +21,7 @@ export class ChatInputCommandFinishCheckForTraps extends Listener {
         ]
         const matches = guild?.battleSystem?.traps?.filter((trap) => {
             if (trap.state !== BattleTrapState.Armed) return false;
-            if (!content.some((c) => c.indexOf(trap.phrase))) return false;
+            if (!content.some((c) => c.includes(trap.phrase))) return false;
 
             const recordCreated = trap.records.find((r) => r.type === BattleTrapRecordType.Create)!;
             const payload = recordCreated.payload as BattleSystem.Trap.Record.Payload.Create;

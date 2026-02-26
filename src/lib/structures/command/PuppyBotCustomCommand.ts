@@ -67,7 +67,7 @@ export class PuppyBotCustomCommand extends PuppyBotCommand {
 			}
 		}
 
-		var customCommand = messageOrInteraction.guild!.customCommandSystem.customCommands.get(this.schema.id as unknown as [commandId: string]);
+		const customCommand = messageOrInteraction.guild!.customCommandSystem.customCommands.get(this.schema.id);
 
 		if (customCommand) {
 			if (!customCommand.useCount) {
