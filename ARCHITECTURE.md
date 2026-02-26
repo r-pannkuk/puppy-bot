@@ -1,6 +1,6 @@
 # PuppyBot — Architecture & Feature Reference
 
-> Last updated: 2026-02-25
+> Last updated: 2026-02-26
 
 ---
 
@@ -47,7 +47,7 @@ PuppyBot is a multi-guild Discord bot built on the [Sapphire Framework](https://
 | Per-guild music queue | `GuildMusicQueue` — lightweight in-memory state map on `client.musicQueue` |
 | Image generation (memes) | Python scripts called via `python-shell` |
 | Error tracking | [Sentry](https://sentry.io/) (`@sentry/node`) — optional |
-| Environment validation | [Zod](https://zod.dev/) schema (`src/lib/env/schema.ts`) |
+| Environment validation | [Zod](https://zod.dev/) schema (`src/lib/setup/schema.ts`) |
 | Language | TypeScript (compiled with `tsc`) |
 | Runtime | Node.js |
 
@@ -104,10 +104,10 @@ and the queue entry is removed from the map.
 
 ## Environment Variables
 
-All variables are declared and validated in `src/lib/env/schema.ts` using a
+All variables are declared and validated in `src/lib/setup/schema.ts` using a
 [Zod](https://zod.dev/) schema. The schema is parsed once at startup; any missing
 required variable throws immediately with a descriptive error rather than failing
-silently. Typed helper wrappers in `src/lib/env/utils.ts` read from the parsed
+silently. Typed helper wrappers in `src/lib/setup/utils.ts` read from the parsed
 `env` object for call sites that pre-date the Zod migration.
 
 | Variable | Type | Default | Description |
@@ -519,6 +519,7 @@ extend Sapphire's `Subcommand`.
 ```
 Subcommand (Sapphire)
   └── PuppyBotCommand
+        ├── PuppyBotCustomCommand   ← obsolete; retained in source but not in active use
         ├── PyScriptCommand
         │     └── (BrightCommand, DuwangCommand, SylphieCommand, KinzoCommand,
         │           LiedCommand, MagnetoCommand)
@@ -776,7 +777,7 @@ puppy-bot/
 │   ├── config/default/
 │   │   └── BattleConfig.json      # Default battle system config (versioned)
 │   ├── lib/
-│   │   ├── env/
+│   │   ├── setup/
 │   │   │   ├── schema.ts          # Zod schema: validates and parses all env vars at startup
 │   │   │   ├── utils.ts           # Legacy envParse* helper wrappers (read from parsed env)
 │   │   │   └── types.d.ts         # TypeScript env type declarations
@@ -786,6 +787,7 @@ puppy-bot/
 │   │   │   ├── builders/          # PuppyBotSlashCommandBuilder
 │   │   │   ├── client/            # PuppyBotClient (Prisma + Shoukaku init, fetchPrefix)
 │   │   │   ├── command/           # PuppyBotCommand, PyScriptCommand, RandomMediaCommand
+│   │   │   │                      #   PuppyBotCustomCommand (obsolete, not in active use)
 │   │   │   ├── managers/          # All per-guild and global subsystem managers
 │   │   │   │   ├── AGuildScannerRegistryOwner.ts
 │   │   │   │   ├── BattleSystem.ts
@@ -795,6 +797,8 @@ puppy-bot/
 │   │   │   │   ├── GuildMessageScanner.ts
 │   │   │   │   ├── GuildMusicQueue.ts   ← per-guild queue state interface
 │   │   │   │   ├── GuildSettingsManager.ts
+│   │   │   │   ├── IConfigLoader.d.ts   ← abstract interface for config-loading managers
+│   │   │   │   ├── IGuildManager.d.ts   ← abstract interface for guild-scoped managers
 │   │   │   │   ├── MessageEchoManager.ts
 │   │   │   │   ├── ReminderManager.ts
 │   │   │   │   └── RoleAssignmentManager.ts
@@ -845,6 +849,7 @@ puppy-bot/
     │   ├── CustomCommandSystem.cache.test.ts
     │   ├── DiceRollCommand.test.ts
     │   ├── GroupsCommand.test.ts
+    │   ├── MusicCommands.test.ts
     │   └── ReminderCommand.test.ts
     └── integration/               # Integration tests (Prisma + seeded MongoDB)
         ├── CustomCommandSystem.test.ts
