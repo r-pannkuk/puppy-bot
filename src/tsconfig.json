@@ -15,7 +15,9 @@
         "sourceMap": true,
         "allowJs": false,
         "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "incremental": true,
+        "tsBuildInfoFile": "../dist/.tsbuildinfo"
     },
     "exclude": [
         "./tsconfig.json"
