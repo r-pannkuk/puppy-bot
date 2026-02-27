@@ -72,8 +72,18 @@
         {
             "label": "deploy",
             "type": "shell",
-            "command": "npm run build; git add -f dist; git commit -m \"deploy build\"; git subtree push --prefix dist live main; git reset HEAD~1",
-            "problemMatcher": []
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-Command",
+                "npm run build; git subtree split --prefix dist -b __deploy__; git push live __deploy__:main --force; git branch -D __deploy__"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
