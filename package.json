@@ -35,9 +35,11 @@
         "jsdom": "^25.0.0",
         "moment-timezone": "^0.5.48",
         "pretty-ms": "^7.0.1",
+        "prisma": "^5.22.0",
         "python-shell": "^3.0.1",
         "reflect-metadata": "^0.2.2",
         "shoukaku": "^4.2.0",
+        "typescript": "^5.7.0",
         "zod": "^3.24.0"
     },
     "devDependencies": {
@@ -48,17 +50,16 @@
         "@types/bull": "^3.15.9",
         "@types/node": "^22.19.11",
         "@vitest/coverage-v8": "^4.0.18",
+        "cross-env": "^10.1.0",
         "jsonpath-object-transform": "^1.0.4",
         "npm-run-all": "^4.1.5",
         "prettier": "^3.5.3",
-        "prisma": "^5.22.0",
         "tsx": "^4.21.0",
-        "typescript": "^5.7.0",
         "vitest": "^4.0.18"
     },
     "scripts": {
-        "build": "node --max-old-space-size=512 node_modules/typescript/bin/tsc -b src",
-        "watch": "node --max-old-space-size=512 node_modules/typescript/bin/tsc -b src -w",
+        "build": "cross-env NODE_OPTIONS=--max-old-space-size=512 tsc -b src",
+        "watch": "cross-env NODE_OPTIONS=--max-old-space-size=512 tsc -b src -w",
         "start": "node --enable-source-maps dist/index.js",
         "lavalink": "java -jar lavalink/Lavalink.jar --spring.config.location=lavalink/application.yml",
         "dev": "run-s build start",
