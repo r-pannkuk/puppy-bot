@@ -58,8 +58,8 @@
         "vitest": "^4.0.18"
     },
     "scripts": {
-        "build": "cross-env NODE_OPTIONS=--max-old-space-size=512 tsc -b src",
-        "watch": "cross-env NODE_OPTIONS=--max-old-space-size=512 tsc -b src -w",
+        "build": "tsc -b src",
+        "watch": "tsc -b src -w",
         "start": "node --enable-source-maps dist/index.js",
         "lavalink": "java -jar lavalink/Lavalink.jar --spring.config.location=lavalink/application.yml",
         "dev": "run-s build start",
