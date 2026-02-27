@@ -70,9 +70,9 @@
             }
         },
         {
-            "label": "Deploy to Live",
+            "label": "deploy",
             "type": "shell",
-            "command": "npm run build && git add -f dist && git commit -m \"deploy build\" && git subtree push --prefix dist live main && git reset HEAD~1",
+            "command": "npm run build; git add -f dist; git commit -m \"deploy build\"; git subtree push --prefix dist live main; git reset HEAD~1",
             "problemMatcher": []
         }
     ]
