@@ -82,14 +82,11 @@
                 "-NoProfile",
                 "-ExecutionPolicy",
                 "Bypass",
-                "-Command",
-                "npm run build; git add -f dist; git commit -m 'deploy build'; git subtree split --prefix dist -b __deploy__; git push live __deploy__:main --force; git branch -D __deploy__"
+                "-File",
+                "${workspaceFolder}/deploy.ps1"
             ],
             "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build"
         }
     ]
 }
