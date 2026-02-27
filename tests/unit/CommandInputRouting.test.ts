@@ -135,6 +135,7 @@ function makeArgs(overrides: Record<string, unknown> = {}) {
     return {
         getOption:  vi.fn().mockReturnValue(null),
         pick:       vi.fn().mockResolvedValue(null),
+        rest:       vi.fn().mockRejectedValue(new Error('no args')),
         repeat:     vi.fn().mockResolvedValue([]),
         restResult: vi.fn().mockResolvedValue({ isErr: () => true }),
         ...overrides,
@@ -927,7 +928,7 @@ describe('SylphieCommand – messageRun sends file to channel', () => {
         cmd.run = vi.fn().mockResolvedValue(fakeFiles);
 
         const msg  = makeMessage();
-        const args = makeArgs({ getOption: vi.fn().mockReturnValue('pilates') });
+        const args = makeArgs({ rest: vi.fn().mockResolvedValue('pilates') });
         await cmd.messageRun(msg, args);
 
         expect(cmd.run).toHaveBeenCalledWith(['pilates']);
@@ -940,7 +941,7 @@ describe('SylphieCommand – messageRun sends file to channel', () => {
         cmd.run = vi.fn().mockResolvedValue(fakeFiles);
 
         const msg  = makeMessage();
-        const args = makeArgs(); // getOption returns null → treated as ""
+        const args = makeArgs(); // rest rejects → catch returns '' → run([""])
         await cmd.messageRun(msg, args);
 
         expect(cmd.run).toHaveBeenCalledWith(['']);
@@ -998,13 +999,13 @@ describe('BrightCommand – messageRun sends file or error', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('DuwangCommand – messageRun sends file to channel', () => {
-    it('messageRun calls channel.send with files when a target URL is provided', async () => {
+    it('messageRun calls channel.send with files when a positional URL is provided', async () => {
         const cmd = makeCmd(DuwangCommand);
         const fakeFiles = ['path/to/duwang.png'];
         cmd.run = vi.fn().mockResolvedValue(fakeFiles);
 
         const msg  = makeMessage();
-        const args = makeArgs({ getOption: vi.fn().mockReturnValue('https://example.com/img.png') });
+        const args = makeArgs({ pick: vi.fn().mockResolvedValue('https://example.com/img.png') });
         await cmd.messageRun(msg, args);
 
         expect(cmd.run).toHaveBeenCalledWith(['https://example.com/img.png']);
@@ -1016,7 +1017,7 @@ describe('DuwangCommand – messageRun sends file to channel', () => {
         const fakeFiles = ['path/to/duwang.png'];
         cmd.run = vi.fn().mockResolvedValue(fakeFiles);
 
-        // No args.getOption, no attachments
+        // pick returns null, no attachment
         const msg  = makeMessage();
         const args = makeArgs();
         await cmd.messageRun(msg, args);
@@ -1031,30 +1032,16 @@ describe('DuwangCommand – messageRun sends file to channel', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('KinzoCommand – messageRun routing and member resolution', () => {
-    function makeKinzoMessage(memberCache: Map<string, any>) {
-        return makeMessage({
-            guild: {
-                id: GUILD_ID,
-                members: { cache: memberCache },
-            },
-            reply: vi.fn().mockResolvedValue(undefined),
-        });
-    }
-
     it('messageRun calls channel.send with files when member and text are provided', async () => {
         const cmd = makeCmd(KinzoCommand);
         const fakeFiles = ['path/to/kinzo.png'];
         cmd.run = vi.fn().mockResolvedValue(fakeFiles);
 
-        const memberId = '123456789';
         const fakeMember = { displayName: 'TestUser' };
-        const memberCache = new Map([[memberId, fakeMember]]);
-
-        const msg  = makeKinzoMessage(memberCache);
+        const msg  = makeMessage();
         const args = makeArgs({
-            getOption: vi.fn((key: string) =>
-                key === 'user' ? `<@${memberId}>` : key === 'text' ? 'whining text' : null
-            ),
+            pick: vi.fn().mockResolvedValue(fakeMember),
+            rest: vi.fn().mockResolvedValue('whining text'),
         });
         await cmd.messageRun(msg, args);
 
@@ -1062,16 +1049,12 @@ describe('KinzoCommand – messageRun routing and member resolution', () => {
         expect(msg.channel.send).toHaveBeenCalledWith({ files: fakeFiles });
     });
 
-    it('messageRun replies with an error when the member is not found', async () => {
+    it('messageRun replies with an error when args.pick throws (no member mentioned)', async () => {
         const cmd = makeCmd(KinzoCommand);
         cmd.run   = vi.fn();
 
-        const msg  = makeKinzoMessage(new Map());
-        const args = makeArgs({
-            getOption: vi.fn((key: string) =>
-                key === 'user' ? '<@unknown>' : 'some text'
-            ),
-        });
+        const msg  = makeMessage();
+        const args = makeArgs({ pick: vi.fn().mockRejectedValue(new Error('no member')) });
         await cmd.messageRun(msg, args);
 
         expect(msg.reply).toHaveBeenCalledWith(
@@ -1080,23 +1063,20 @@ describe('KinzoCommand – messageRun routing and member resolution', () => {
         expect(msg.channel.send).not.toHaveBeenCalled();
     });
 
-    it('messageRun replies with an error when no text is provided', async () => {
+    it('messageRun replies with an error when no text follows the mention', async () => {
         const cmd = makeCmd(KinzoCommand);
         cmd.run   = vi.fn();
 
-        const memberId = '123456789';
-        const memberCache = new Map([[memberId, { displayName: 'TestUser' }]]);
-
-        const msg  = makeKinzoMessage(memberCache);
+        const fakeMember = { displayName: 'TestUser' };
+        const msg  = makeMessage();
         const args = makeArgs({
-            getOption: vi.fn((key: string) =>
-                key === 'user' ? `<@${memberId}>` : null
-            ),
+            pick: vi.fn().mockResolvedValue(fakeMember),
+            // rest rejects (default) → text is null
         });
         await cmd.messageRun(msg, args);
 
         expect(msg.reply).toHaveBeenCalledWith(
-            expect.stringContaining('whining text'),
+            expect.stringContaining('!kinzo'),
         );
         expect(msg.channel.send).not.toHaveBeenCalled();
     });
@@ -1107,50 +1087,32 @@ describe('KinzoCommand – messageRun routing and member resolution', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('LiedCommand – messageRun routing and member resolution', () => {
-    function makeLiedMessage(memberCache: Map<string, any>) {
-        return makeMessage({
-            guild: {
-                id: GUILD_ID,
-                members: { cache: memberCache },
-            },
-            reply: vi.fn().mockResolvedValue(undefined),
-        });
-    }
-
     it('messageRun calls channel.send with files when member and text are provided', async () => {
         const cmd = makeCmd(LiedCommand);
         const fakeFiles = ['path/to/lied.png'];
         cmd.run = vi.fn().mockResolvedValue(fakeFiles);
 
-        const memberId   = '987654321';
         const fakeMember = {
             displayName:      'TargetUser',
             avatar:           null,
             displayAvatarURL: vi.fn().mockReturnValue('https://cdn.discord.com/avatar.png'),
         };
-        const memberCache = new Map([[memberId, fakeMember]]);
-
-        const msg  = makeLiedMessage(memberCache);
+        const msg  = makeMessage();
         const args = makeArgs({
-            getOption: vi.fn((key: string) =>
-                key === 'user' ? `<@!${memberId}>` : key === 'text' ? 'the lie' : null
-            ),
+            pick: vi.fn().mockResolvedValue(fakeMember),
+            rest: vi.fn().mockResolvedValue('the lie'),
         });
         await cmd.messageRun(msg, args);
 
         expect(msg.channel.send).toHaveBeenCalledWith({ files: fakeFiles });
     });
 
-    it('messageRun replies with an error when the member is not found', async () => {
+    it('messageRun replies with an error when args.pick throws (no member mentioned)', async () => {
         const cmd = makeCmd(LiedCommand);
         cmd.run   = vi.fn();
 
-        const msg  = makeLiedMessage(new Map());
-        const args = makeArgs({
-            getOption: vi.fn((key: string) =>
-                key === 'user' ? '<@nobody>' : 'the lie'
-            ),
-        });
+        const msg  = makeMessage();
+        const args = makeArgs({ pick: vi.fn().mockRejectedValue(new Error('no member')) });
         await cmd.messageRun(msg, args);
 
         expect(msg.reply).toHaveBeenCalledWith(
@@ -1169,9 +1131,9 @@ describe('MagnetoCommand – messageRun sends file or error', () => {
         const cmd = makeCmd(MagnetoCommand);
         cmd.run   = vi.fn();
 
-        // No --image arg, no attachment
+        // pick returns null (default), no attachment
         const msg  = makeMessage();
-        const args = makeArgs(); // getOption returns null
+        const args = makeArgs();
         await cmd.messageRun(msg, args);
 
         expect(msg.channel.send).toHaveBeenCalledWith(
@@ -1180,21 +1142,21 @@ describe('MagnetoCommand – messageRun sends file or error', () => {
         expect(cmd.run).not.toHaveBeenCalled();
     });
 
-    it('messageRun calls channel.send with files when an image URL is provided', async () => {
+    it('messageRun calls channel.send with files when a positional image URL is provided', async () => {
         const cmd = makeCmd(MagnetoCommand);
         const fakeFiles = ['path/to/magneto.png'];
         cmd.run = vi.fn().mockResolvedValue(fakeFiles);
 
         const IMAGE_URL = 'https://example.com/thwarted.png';
         const msg  = makeMessage();
-        const args = makeArgs({ getOption: vi.fn().mockReturnValue(IMAGE_URL) });
+        const args = makeArgs({ pick: vi.fn().mockResolvedValue(IMAGE_URL) });
         await cmd.messageRun(msg, args);
 
         expect(cmd.run).toHaveBeenCalledWith([IMAGE_URL]);
         expect(msg.channel.send).toHaveBeenCalledWith({ files: fakeFiles });
     });
 
-    it('messageRun picks up an attachment URL when no --image flag is given', async () => {
+    it('messageRun picks up an attachment URL when no positional arg is given', async () => {
         const cmd = makeCmd(MagnetoCommand);
         const fakeFiles = ['path/to/magneto.png'];
         cmd.run = vi.fn().mockResolvedValue(fakeFiles);
@@ -1203,7 +1165,7 @@ describe('MagnetoCommand – messageRun sends file or error', () => {
         const msg  = makeMessage({
             attachments: { first: () => ({ url: ATTACHMENT_URL }) },
         });
-        const args = makeArgs(); // --image not given
+        const args = makeArgs(); // pick returns null → falls back to attachment
         await cmd.messageRun(msg, args);
 
         expect(cmd.run).toHaveBeenCalledWith([ATTACHMENT_URL]);

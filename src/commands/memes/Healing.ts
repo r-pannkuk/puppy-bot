@@ -48,7 +48,7 @@ export class SylphieCommand extends PyScriptCommand {
     }
 
     public override async messageRun(message: Message, args: Args) {
-        const activity = args.getOption('activity') || "";
+        const activity = await args.rest('string').catch(() => '');
         const files = await this.run([activity]);
         if (message.channel.isSendable()) {
             await message.channel.send({ files: files });

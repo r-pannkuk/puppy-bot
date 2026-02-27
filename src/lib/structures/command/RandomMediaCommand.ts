@@ -111,7 +111,7 @@ export abstract class RandomMediaCommand extends PuppyBotCommand {
 	}
 
 	public override async messageRun(message: Message, args: Args) {
-		const type = args.getOption('type') as string;
+		const type = await args.pick('string').catch(() => null);
 		const file = await this.run(type);
 		if (message.channel.isSendable()) {
 			await message.channel.send({

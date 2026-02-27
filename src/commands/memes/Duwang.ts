@@ -47,7 +47,7 @@ export class DuwangCommand extends PyScriptCommand {
     }
 
     public override async messageRun(message: Message, args: Args) {
-        var target = args.getOption('target') ?? message.attachments.first()?.url;
+        const target = await args.pick('string').catch(() => null) ?? message.attachments.first()?.url;
         const files = await this.run(target ? [target] : []);
         if (message.channel.isSendable()) {
             await message.channel.send({ files: files });

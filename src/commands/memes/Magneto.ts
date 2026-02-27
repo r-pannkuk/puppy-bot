@@ -46,7 +46,7 @@ export class MagnetoCommand extends PyScriptCommand {
     }
 
     public override async messageRun(message: Message, args: Args) {
-        var image = args.getOption('image') ?? message.attachments.first()?.url;
+        const image = await args.pick('string').catch(() => null) ?? message.attachments.first()?.url;
         if (!image) {
             if (message.channel.isSendable()) {
                 await message.channel.send({ content: `No valid image found. Please provide a link or attach an image.` });
@@ -54,7 +54,6 @@ export class MagnetoCommand extends PyScriptCommand {
             return;
         }
         const files = await this.run([image]);
-        
         if (message.channel.isSendable()) {
             await message.channel.send({ files: files });
         }

@@ -78,17 +78,14 @@ export class KinzoCommand extends PyScriptCommand {
     }
 
     public override async messageRun(message: Message, args: Args) {
-        // --user accepts a mention; strip formatting to extract the snowflake ID.
-        const rawUser = args.getOption('user');
-        const memberId = rawUser?.replace(/[<@!>]/g, '');
-        const member = memberId ? message.guild?.members.cache.get(memberId) ?? null : null;
+        const member = await args.pick('member').catch(() => null);
         if (!member) {
-            await message.reply('Please provide a valid server member mention using `--user @mention`.');
+            await message.reply('Please mention a valid server member: `!kinzo @user <text>`.');
             return;
         }
-        const text = args.getOption('text');
+        const text = await args.rest('string').catch(() => null);
         if (!text) {
-            await message.reply('Please provide whining text using `--text <text>`.');
+            await message.reply('Please provide whining text: `!kinzo @user <text>`.');
             return;
         }
         const files = await this.run([member.displayName, text]);
