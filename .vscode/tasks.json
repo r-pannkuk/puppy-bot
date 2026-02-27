@@ -32,14 +32,19 @@
         },
         {
             "label": "pre-launch",
-            "dependsOn": ["tsc-build", "lavalink"],
+            "dependsOn": [
+                "tsc-build",
+                "lavalink"
+            ],
             "dependsOrder": "parallel"
         },
         {
             "label": "tsc-build",
             "type": "shell",
             "command": "npm run build",
-            "problemMatcher": ["$tsc"],
+            "problemMatcher": [
+                "$tsc"
+            ],
             "presentation": {
                 "reveal": "silent",
                 "panel": "shared"
@@ -75,9 +80,10 @@
             "command": "powershell",
             "args": [
                 "-NoProfile",
-                "-ExecutionPolicy", "Bypass",
+                "-ExecutionPolicy",
+                "Bypass",
                 "-Command",
-                "npm run build; git subtree split --prefix dist -b __deploy__; git push live __deploy__:main --force; git branch -D __deploy__"
+                "npm run build; git add -f dist; git commit -m 'deploy build'; git subtree split --prefix dist -b __deploy__; git push live __deploy__:main --force; git branch -D __deploy__"
             ],
             "problemMatcher": [],
             "group": {
