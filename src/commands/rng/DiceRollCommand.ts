@@ -87,7 +87,12 @@ export class DiceRollCommand extends PuppyBotCommand {
 
     private static validDiceArgCheck = Args.make<string>((parameter, context) => {
         try {
-            DiceRollCommand.validDice(parameter);
+            // Skip parser validation when tokens are present — bare aliases like
+            // `will` or `STR` aren't valid dice notation on their own and would
+            // cause a false SyntaxError.  Full validation runs after resolution.
+            if (!hasTokens(parameter)) {
+                DiceRollCommand.validDice(parameter);
+            }
             return Args.ok(parameter);
         } catch (e) {
             if (e instanceof UserError) {
