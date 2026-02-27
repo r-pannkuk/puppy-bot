@@ -68,6 +68,12 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Deploy to Live",
+            "type": "shell",
+            "command": "npm run build && git add -f dist && git commit -m \"deploy build\" && git subtree push --prefix dist live main && git reset HEAD~1",
+            "problemMatcher": []
         }
     ]
 }
