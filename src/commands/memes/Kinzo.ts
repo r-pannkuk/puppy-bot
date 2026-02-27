@@ -10,7 +10,6 @@
  */
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext, ContextMenuCommandContext } from '@sapphire/framework';
-import { TextChannel } from 'discord.js';
 import type { ChatInputCommandInteraction, ContextMenuCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
@@ -79,11 +78,22 @@ export class KinzoCommand extends PyScriptCommand {
     }
 
     public override async messageRun(message: Message, args: Args) {
-        const member = message.guild?.members.cache.get(args.getOption('user')!);
+        // --user accepts a mention; strip formatting to extract the snowflake ID.
+        const rawUser = args.getOption('user');
+        const memberId = rawUser?.replace(/[<@!>]/g, '');
+        const member = memberId ? message.guild?.members.cache.get(memberId) ?? null : null;
+        if (!member) {
+            await message.reply('Please provide a valid server member mention using `--user @mention`.');
+            return;
+        }
         const text = args.getOption('text');
-        const files = await this.run([member!.displayName!, text!]);
-        if(message.channel instanceof TextChannel) {
-            message.channel.send({ files: files });
+        if (!text) {
+            await message.reply('Please provide whining text using `--text <text>`.');
+            return;
+        }
+        const files = await this.run([member.displayName, text]);
+        if (message.channel.isSendable()) {
+            await message.channel.send({ files: files });
         }
     }
 }

@@ -6,7 +6,6 @@
  */
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import { TextChannel } from 'discord.js';
 import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
@@ -48,13 +47,16 @@ export class MagnetoCommand extends PyScriptCommand {
 
     public override async messageRun(message: Message, args: Args) {
         var image = args.getOption('image') ?? message.attachments.first()?.url;
-        if(message.channel instanceof TextChannel) {
-            if(!image) {
-                message.channel.send({ content: `No valid image found. Please provide a link or attach an image.`});
-                return;
+        if (!image) {
+            if (message.channel.isSendable()) {
+                await message.channel.send({ content: `No valid image found. Please provide a link or attach an image.` });
             }
-            const files = await this.run([image]);
-            message.channel.send({ files: files });
+            return;
+        }
+        const files = await this.run([image]);
+        
+        if (message.channel.isSendable()) {
+            await message.channel.send({ files: files });
         }
     }
 }

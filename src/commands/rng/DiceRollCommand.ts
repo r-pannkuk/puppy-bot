@@ -229,13 +229,13 @@ export class DiceRollCommand extends PuppyBotCommand {
             processedInput = this.cachedQuery.get(message.guildId ?? message.author.id)?.notation
                 ?? 'd20';
         } else {
-            processedInput = results.unwrap().replace('\W', "")
+            processedInput = results.unwrap().trim()
         }
         await this.run(message, message.author, processedInput);
     }
 
     public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
-        var processedInput = interaction.options.get('notation')?.value?.toString().replace('\W', "")
+        var processedInput = interaction.options.get('notation')?.value?.toString().trim()
             ?? this.cachedQuery.get(interaction.guildId ?? interaction.user.id)?.notation
             ?? 'd20';
         DiceRollCommand.validDice(processedInput);

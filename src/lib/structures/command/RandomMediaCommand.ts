@@ -16,7 +16,7 @@
  * all slash-command registration and invocation logic is implemented here.
  */
 import type { Args, ChatInputCommandContext, Command } from '@sapphire/framework';
-import { TextChannel, type ChatInputCommandInteraction, type Message } from 'discord.js';
+import { type ChatInputCommandInteraction, type Message } from 'discord.js';
 import { readdirSync } from 'fs';
 import { join, parse } from 'path';
 import { CHAT_INPUT_OPTION_CHOICE_LIMIT } from '../../utils/constants';
@@ -113,8 +113,8 @@ export abstract class RandomMediaCommand extends PuppyBotCommand {
 	public override async messageRun(message: Message, args: Args) {
 		const type = args.getOption('type') as string;
 		const file = await this.run(type);
-		if (message.channel instanceof TextChannel) {
-			message.channel.send({
+		if (message.channel.isSendable()) {
+			await message.channel.send({
 				files: [file]
 			});
 		}

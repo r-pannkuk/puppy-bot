@@ -10,7 +10,6 @@
  */
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import { TextChannel } from 'discord.js';
 import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
@@ -59,8 +58,8 @@ export class BrightCommand extends PyScriptCommand {
             return;
         }
         const files = await this.run([target.displayAvatarURL()]);
-        if(message.channel instanceof TextChannel) {
-            message.channel.send({ files: files });
+        if (message.channel.isSendable()) {
+            await message.channel.send({ files: files });
         }
     }
 }

@@ -7,7 +7,7 @@
  */
 import { ApplyOptions } from '@sapphire/decorators';
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import { ChatInputCommandInteraction, EmbedBuilder, Message, TextChannel } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, Message } from 'discord.js';
 import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand';
 
 const SHORT_DESCRIPTION = 'Stops playback and disconnects the bot from voice.';
@@ -40,7 +40,9 @@ export class StopCommand extends PuppyBotCommand {
         client.musicQueue.delete(guildId);
 
         if (messageOrInteraction instanceof Message) {
-            await (messageOrInteraction.channel as TextChannel).send({ embeds: [embed] });
+            if (messageOrInteraction.channel.isSendable()) {
+                await messageOrInteraction.channel.send({ embeds: [embed] });
+            }
         } else {
             await messageOrInteraction.reply({ embeds: [embed] });
         }

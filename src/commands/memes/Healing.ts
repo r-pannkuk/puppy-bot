@@ -7,7 +7,6 @@
  */
 import { ApplyOptions } from '@sapphire/decorators';
 import type { ApplicationCommandRegistry, Args, ChatInputCommandContext } from '@sapphire/framework';
-import { TextChannel } from 'discord.js';
 import type { ChatInputCommandInteraction, Message } from 'discord.js';
 import { PyScriptCommand } from '../../lib/structures/command/PyScriptCommand';
 
@@ -15,6 +14,7 @@ const SHORT_DESCRIPTION = 'The one thing you have always wanted to do.';
 
 @ApplyOptions<PyScriptCommand.Options>({
     name: 'sylphie',
+    aliases: ['healing'],
     description: SHORT_DESCRIPTION,
     detailedDescription: SHORT_DESCRIPTION + ' Examples:\n' +
         '-- /sylphie\n' +
@@ -50,8 +50,8 @@ export class SylphieCommand extends PyScriptCommand {
     public override async messageRun(message: Message, args: Args) {
         const activity = args.getOption('activity') || "";
         const files = await this.run([activity]);
-        if(message.channel instanceof TextChannel) {
-            message.channel.send({ files: files });
+        if (message.channel.isSendable()) {
+            await message.channel.send({ files: files });
         }
     }
 }

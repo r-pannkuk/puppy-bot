@@ -7,7 +7,7 @@
  */
 import { ApplyOptions } from '@sapphire/decorators';
 import { ApplicationCommandRegistry, Args, ChatInputCommandContext, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import { ChatInputCommandInteraction, Guild, Message, TextChannel } from 'discord.js';
+import { ChatInputCommandInteraction, Guild, Message } from 'discord.js';
 import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand';
 import { Emojis } from '../../lib/utils/constants';
 
@@ -52,7 +52,7 @@ export class PauseCommand extends PuppyBotCommand {
     }
 
     public override async messageRun(message: Message, _input: Args) {
-        if (message.channel instanceof TextChannel) {
+        if (message.channel.isSendable()) {
             await message.channel.send({ content: this.pause(message.guild!) });
         }
     }

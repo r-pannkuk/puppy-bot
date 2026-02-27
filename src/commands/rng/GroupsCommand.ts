@@ -152,8 +152,16 @@ export class GroupsCommand extends PuppyBotCommand {
     }
 
     public override async messageRun(message: Message, input: Args) {
-        const groupSize = Number(input.getOption('size')) ?? this.cachedQuery.get(message.guildId ?? message.author.id)?.size;
-        const entries = await input.repeat('string') ?? this.cachedQuery.get(message.guildId ?? message.author.id)?.entries;
+        const cacheKey = message.guildId ?? message.author.id;
+
+        // Named flag (--size 3) takes priority; if absent try the first positional
+        // integer (e.g. !groups 3 Alice Bob Carol), then fall back to the cache.
+        const sizeOpt = input.getOption('size');
+        const groupSize: number | null | undefined = sizeOpt != null
+            ? Number(sizeOpt)
+            : (await input.pick('integer').catch(() => null)) ?? this.cachedQuery.get(cacheKey)?.size;
+
+        const entries = await input.repeat('string') ?? this.cachedQuery.get(cacheKey)?.entries;
 
         await this.run(message, message.author, groupSize, entries);
     }

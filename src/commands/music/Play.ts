@@ -175,7 +175,9 @@ export class PlayCommand extends PuppyBotCommand {
     public override async messageRun(message: Message, input: Args) {
         const source = input.getOption('source') ?? (await input.rest('string').catch(() => null));
         if (!source) {
-            await (message.channel as TextChannel).send({ content: '🚫 | Please provide a search query or URL.' });
+            if (message.channel.isSendable()) {
+                await message.channel.send({ content: '🚫 | Please provide a search query or URL.' });
+            }
             return;
         }
 
@@ -183,7 +185,9 @@ export class PlayCommand extends PuppyBotCommand {
         const voiceChannel = member.voice.channel as VoiceBasedChannel;
 
         if (!voiceChannel) {
-            await (message.channel as TextChannel).send({ content: '🚫 | You must be in a voice channel to play music.' });
+            if (message.channel.isSendable()) {
+                await message.channel.send({ content: '🚫 | You must be in a voice channel to play music.' });
+            }
             return;
         }
 
