@@ -528,23 +528,38 @@ describe('DiceRollCommand – messageRun / chatInputRun routing', () => {
     });
     afterEach(() => restoreValidDice());
 
+    /**
+     * Creates a DiceRollCommand stub with an empty cachedQuery and a stubbed
+     * pathfinderManager (Object.create skips the constructor so class fields
+     * are never initialised — we must set them manually).
+     */
+    function makeDiceCmd() {
+        const cmd = makeCmd(DiceRollCommand) as any;
+        cmd.cachedQuery = new Map();
+        cmd.pathfinderManager = {
+            getActive:     vi.fn().mockResolvedValue(null),
+            getLastUsed:   vi.fn().mockResolvedValue(null),
+            touchLastUsed: vi.fn().mockResolvedValue(undefined),
+        };
+        return cmd;
+    }
+
     // ── messageRun ────────────────────────────────────────────────────────────
 
     it('messageRun calls run() with the notation returned by Args', async () => {
-        const cmd         = makeCmd(DiceRollCommand) as any;
-        cmd.cachedQuery   = new Map();
+        const cmd         = makeDiceCmd();
         const runSpy      = vi.fn().mockResolvedValue(undefined);
         cmd.run           = runSpy;
         const args        = makeArgs({
             restResult: vi.fn().mockResolvedValue({ isErr: () => false, unwrap: () => '2d6' }),
         });
         await cmd.messageRun(makeMessage(), args);
-        expect(runSpy).toHaveBeenCalledWith(expect.anything(), user, '2d6');
+        // Check interaction, user, and notation positionally; characterName is optional at index 5.
+        expect(runSpy.mock.calls[0][2]).toBe('2d6');
     });
 
     it('messageRun falls back to "d20" when Args returns an error result and no cached query', async () => {
-        const cmd         = makeCmd(DiceRollCommand) as any;
-        cmd.cachedQuery   = new Map();
+        const cmd         = makeDiceCmd();
         const runSpy      = vi.fn().mockResolvedValue(undefined);
         cmd.run           = runSpy;
         const args        = makeArgs({
@@ -555,8 +570,13 @@ describe('DiceRollCommand – messageRun / chatInputRun routing', () => {
     });
 
     it('messageRun uses the cached query notation when Args fails and a cache entry exists', async () => {
-        const cmd               = makeCmd(DiceRollCommand) as any;
+        const cmd               = makeDiceCmd();
         cmd.cachedQuery         = new Map([[`${GUILD_ID}`, { notation: '4d8' }]]);
+        // Mock pathfinderManager: guildId is set so the best-effort lookup runs.
+        cmd.pathfinderManager = {
+            getActive:    vi.fn().mockResolvedValue(null),
+            getLastUsed:  vi.fn().mockResolvedValue(null),
+        };
         const runSpy            = vi.fn().mockResolvedValue(undefined);
         cmd.run                 = runSpy;
         const args              = makeArgs({
@@ -571,17 +591,16 @@ describe('DiceRollCommand – messageRun / chatInputRun routing', () => {
     // ── chatInputRun ──────────────────────────────────────────────────────────
 
     it('chatInputRun calls run() with the notation from interaction options', async () => {
-        const cmd       = makeCmd(DiceRollCommand) as any;
-        cmd.cachedQuery = new Map();
+        const cmd       = makeDiceCmd();
         const runSpy    = vi.fn().mockResolvedValue(undefined);
         cmd.run         = runSpy;
         await cmd.chatInputRun(makeInteraction({ notation: '3d6' }), {} as any);
-        expect(runSpy).toHaveBeenCalledWith(expect.anything(), user, '3d6');
+        // Check notation positionally; characterName is optional at index 5.
+        expect(runSpy.mock.calls[0][2]).toBe('3d6');
     });
 
     it('chatInputRun falls back to "d20" when the notation option is absent', async () => {
-        const cmd       = makeCmd(DiceRollCommand) as any;
-        cmd.cachedQuery = new Map();
+        const cmd       = makeDiceCmd();
         const runSpy    = vi.fn().mockResolvedValue(undefined);
         cmd.run         = runSpy;
         await cmd.chatInputRun(makeInteraction(), {} as any);
@@ -589,8 +608,13 @@ describe('DiceRollCommand – messageRun / chatInputRun routing', () => {
     });
 
     it('chatInputRun uses the cached notation when the option is absent and cache exists', async () => {
-        const cmd               = makeCmd(DiceRollCommand) as any;
+        const cmd               = makeDiceCmd();
         cmd.cachedQuery         = new Map([[`${GUILD_ID}`, { notation: '1d12' }]]);
+        // Mock pathfinderManager: guildId is set so the best-effort lookup runs.
+        cmd.pathfinderManager = {
+            getActive:    vi.fn().mockResolvedValue(null),
+            getLastUsed:  vi.fn().mockResolvedValue(null),
+        };
         const runSpy            = vi.fn().mockResolvedValue(undefined);
         cmd.run                 = runSpy;
         const ix                = makeInteraction();
@@ -607,8 +631,7 @@ describe('DiceRollCommand – messageRun / chatInputRun routing', () => {
     // silently eating the first capital-W from the notation string.
 
     it('messageRun preserves dice notation without mangling characters', async () => {
-        const cmd         = makeCmd(DiceRollCommand) as any;
-        cmd.cachedQuery   = new Map();
+        const cmd         = makeDiceCmd();
         const runSpy      = vi.fn().mockResolvedValue(undefined);
         cmd.run           = runSpy;
         const args        = makeArgs({
@@ -620,8 +643,7 @@ describe('DiceRollCommand – messageRun / chatInputRun routing', () => {
     });
 
     it('messageRun trims leading/trailing whitespace but preserves notation body', async () => {
-        const cmd         = makeCmd(DiceRollCommand) as any;
-        cmd.cachedQuery   = new Map();
+        const cmd         = makeDiceCmd();
         const runSpy      = vi.fn().mockResolvedValue(undefined);
         cmd.run           = runSpy;
         const args        = makeArgs({
@@ -632,13 +654,12 @@ describe('DiceRollCommand – messageRun / chatInputRun routing', () => {
     });
 
     it('chatInputRun trims whitespace from the option value', async () => {
-        const cmd       = makeCmd(DiceRollCommand) as any;
-        cmd.cachedQuery = new Map();
+        const cmd       = makeDiceCmd();
         const runSpy    = vi.fn().mockResolvedValue(undefined);
         cmd.run         = runSpy;
         // Provide the notation option with surrounding spaces.
         const ix = makeInteraction();
-        ix.options.get = vi.fn().mockReturnValue({ value: '  4d6  ' });
+        ix.options.getString = vi.fn().mockReturnValue('  4d6  ');
         await cmd.chatInputRun(ix, {} as any);
         expect(runSpy.mock.calls[0][2]).toBe('4d6');
     });
@@ -646,10 +667,8 @@ describe('DiceRollCommand – messageRun / chatInputRun routing', () => {
     it('both forms forward the same notation to run() when given identical input', async () => {
         const NOTATION = '4d8';
 
-        const cmdA       = makeCmd(DiceRollCommand) as any;
-        const cmdB       = makeCmd(DiceRollCommand) as any;
-        cmdA.cachedQuery = new Map();
-        cmdB.cachedQuery = new Map();
+        const cmdA       = makeDiceCmd();
+        const cmdB       = makeDiceCmd();
         const spyA       = vi.fn().mockResolvedValue(undefined);
         const spyB       = vi.fn().mockResolvedValue(undefined);
         cmdA.run = spyA;

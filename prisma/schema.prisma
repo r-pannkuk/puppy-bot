@@ -354,9 +354,15 @@ model PathfinderSheetConfig {
 }
 
 model PathfinderCharacterConfig {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId 
-  sheetUrl    String
-  name        String
-  ownerId     String
-  lastUpdated DateTime
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  guildId      String
+  ownerId      String
+  name         String
+  sheetUrl     String
+  isActive     Boolean   @default(false)
+  registeredAt DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  @@index([guildId, ownerId])
+  @@unique([guildId, ownerId, name])
 }

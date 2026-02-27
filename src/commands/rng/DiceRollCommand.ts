@@ -5,19 +5,23 @@
  * Uses `@dice-roller/rpg-dice-roller` to parse and execute notation strings
  * such as `3d6`, `4d8kh3`, `2d6!>=5`, `{3d6, 3d6}`, etc.
  *
- * Validates notation before rolling; surfaces helpful syntax-error messages
- * listing supported operators when the input is invalid.  Results are shown in
- * an embed with per-die breakdown and total.  A re-roll button is provided.
+ * Supports optional Pathfinder character-sheet token references (`[STR]`,
+ * `[Perception]`, `[Longsword:ATK]`, `[C32]`, etc.).  When tokens are present
+ * the active (or most recently used) character sheet is read live via the
+ * Google Sheets API and the substituted notation is rolled normally.
  *
  * Aliases: `dice`.  Cooldown: 5 s / 6 uses per channel.
+ * Re-roll button: intentionally omitted (live sheet values may change).
  */
-import { Args, ApplicationCommandRegistry, ChatInputCommandContext, UserError } from '@sapphire/framework'
-import { Message, User, GuildMember, ButtonInteraction, ActionRowBuilder, Collection, ChatInputCommandInteraction, EmbedBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageActionRowComponentBuilder } from 'discord.js'
+import { Args, ApplicationCommandRegistry, ChatInputCommandContext, UserError, container } from '@sapphire/framework'
+import { Collection, ChatInputCommandInteraction, EmbedBuilder, Message, User, GuildMember } from 'discord.js'
 import 'dotenv/config'
 import { DiceRoll, Parser } from '@dice-roller/rpg-dice-roller'
 import { ApplyOptions } from '@sapphire/decorators'
 import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand'
 import { Time } from '@sapphire/time-utilities'
+import { PathfinderManager } from '../../lib/structures/managers/PathfinderManager'
+import { hasTokens, resolveTokens } from '../../lib/utils/pathfinderRoll'
 
 @ApplyOptions<PuppyBotCommand.Options>({
     name: 'roll',
@@ -31,6 +35,8 @@ import { Time } from '@sapphire/time-utilities'
     nsfw: false
 })
 export class DiceRollCommand extends PuppyBotCommand {
+    protected readonly pathfinderManager = new PathfinderManager();
+
     protected cachedQuery: Collection<string, {
         notation: string
     }> = new Collection();
@@ -104,8 +110,8 @@ export class DiceRollCommand extends PuppyBotCommand {
             .setDescription(this.description)
             .addStringOption((option) =>
                 option
-                    .setName("notation")
-                    .setDescription("Dice notation to use.")
+                    .setName('notation')
+                    .setDescription('Dice notation to use. Supports [StatRef] tokens when a character is set with /character use.')
             ),
             this.slashCommandOptions
         )
@@ -151,96 +157,151 @@ export class DiceRollCommand extends PuppyBotCommand {
     //     return output
     // }
 
-    public async generateEmbed(user: User | GuildMember, results: DiceRoll, rerollAmount?: number) {
-        const exportedResults = JSON.parse(results.export()!);
+    public async generateEmbed(
+        user: User | GuildMember,
+        results: DiceRoll,
+        originalNotation?: string,
+        damageType?: string | null,
+        characterName?: string | null,
+    ) {
+        const username = user instanceof GuildMember ? user.displayName : user.username;
 
-        exportedResults.rolls[0].results
+        // Resolved-notation line — shown before the result line, per spec embed layout.
+        let resolvedLine = '';
+        if (originalNotation && originalNotation !== results.notation) {
+            if (damageType) {
+                resolvedLine = `*(resolved: \`${results.notation}\` — **${damageType}**)*\n`;
+            } else {
+                resolvedLine = `*(resolved: \`${results.notation}\`)*\n`;
+            }
+        }
 
-        var embed = new EmbedBuilder()
+        // Result line: "X got Y" or "X dealt Y <type>".
+        const descriptionLine = damageType
+            ? `${user} dealt **${results.total}** ${damageType}!`
+            : `${user} got **${results.total}**!`;
+
+        const embed = new EmbedBuilder()
             .setColor(14400597)
             .setAuthor({
-                name: `Dice roll: ${results.notation}`,
-                iconURL: 'https://vignette.wikia.nocookie.net/game-of-dice/images/c/cb/White_Dice.png/revision/latest?cb=20160113233423'
+                name: `Dice roll: ${originalNotation ?? results.notation}`,
+                iconURL: 'https://vignette.wikia.nocookie.net/game-of-dice/images/c/cb/White_Dice.png/revision/latest?cb=20160113233423',
             })
-            .setDescription(`${user} got **${results.total}**!\n\n${results.toString()}`)
+            .setDescription(`${resolvedLine}${descriptionLine}\n\n${results.toString()}`);
 
-
-        if (user instanceof GuildMember) {
-            var username = user.displayName;
-        } else {
-            var username = user.username;
-        }
-
-        var options = {
-            "text": `${username}${(rerollAmount) ? ` - Rerolled ${rerollAmount} time${(rerollAmount === 1) ? `` : `s`}.` : ``}`,
+        const footerOptions: { text: string; iconURL?: string } = {
+            text: characterName ? `${characterName} · ${username}` : username,
         };
-
-        if(user.avatarURL()) {
-            options["iconURL"] = user.avatarURL();
-        }
-
-        embed.setFooter(options);
+        const avatarUrl = user.avatarURL();
+        if (avatarUrl) footerOptions.iconURL = avatarUrl;
+        embed.setFooter(footerOptions);
 
         return embed;
     }
 
-    public async run(messageOrInteraction: Message | ChatInputCommandInteraction, user: User | GuildMember, processedInput: string) {
+    public async run(
+        messageOrInteraction: Message | ChatInputCommandInteraction,
+        user: User | GuildMember,
+        resolvedNotation: string,
+        originalNotation?: string,
+        damageType?: string | null,
+        characterName?: string | null,
+    ) {
         const followUp = await this.generateFollowUp(messageOrInteraction);
 
-        var rerollAmount = 0;
-        const results = new DiceRoll(processedInput);
+        const results = new DiceRoll(resolvedNotation);
+        const embed = await this.generateEmbed(user, results, originalNotation, damageType, characterName);
 
-        const generateEmbed = async () => {
-            const embed = this.generateEmbed(user, results, rerollAmount);
-            ++rerollAmount;
-            return embed;
-        }
+        await followUp({ embeds: [embed] });
 
-        const customId = 'DiceRollCommand.reroll';
-
-        const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
-            .addComponents(
-                new ButtonBuilder()
-                    .setCustomId(customId)
-                    .setLabel('Re-Roll')
-                    .setStyle(ButtonStyle.Secondary)
-            );
-
-        // What the fuck.
-        const response = await followUp({ 
-            embeds: [await generateEmbed()], 
-            components: [row]
-        });
         this.cachedQuery.set(messageOrInteraction.guildId ?? user.id, {
-            notation: processedInput
+            notation: originalNotation ?? resolvedNotation,
         });
-        response.createMessageComponentCollector({
-            componentType: ComponentType.Button,
-            filter: (interaction: ButtonInteraction) => interaction.customId === customId && interaction.user.id === user.id
-        }).addListener('collect', async (interaction: ButtonInteraction) => {
-            await interaction.update({ embeds: [await generateEmbed()] })
-        })
     }
 
     public override async messageRun(message: Message, input: Args) {
-        var results = await input.restResult(DiceRollCommand.validDiceArgCheck);
-        let processedInput: string;
-        if (results.isErr()) {
-            processedInput = this.cachedQuery.get(message.guildId ?? message.author.id)?.notation
-                ?? 'd20';
+        const result = await input.restResult(DiceRollCommand.validDiceArgCheck);
+        let notation: string;
+        if (result.isErr()) {
+            notation = this.cachedQuery.get(message.guildId ?? message.author.id)?.notation ?? 'd20';
         } else {
-            processedInput = results.unwrap().trim()
+            notation = result.unwrap().trim();
         }
-        await this.run(message, message.author, processedInput);
+
+        if (hasTokens(notation) && message.guildId) {
+            // Token resolution — active character is required.
+            const character =
+                await this.pathfinderManager.getActive(message.guildId, message.author.id) ??
+                await this.pathfinderManager.getLastUsed(message.guildId, message.author.id);
+            if (!character) {
+                throw new UserError({
+                    identifier: 'No character found. Register one with `/character register` and select it with `/character use`.',
+                });
+            }
+
+            const sheetConfig = await container.database.pathfinderSheetConfig.findFirst({
+                where: { guildId: message.guildId },
+                orderBy: { version: 'desc' },
+            });
+
+            const { resolved, damageType } = await resolveTokens(notation, character.sheetUrl, sheetConfig);
+            DiceRollCommand.validDice(resolved);
+            await this.pathfinderManager.touchLastUsed(character.id);
+            await this.run(message, message.author, resolved, notation, damageType, character.name);
+        } else {
+            // Best-effort character lookup — shows name in embed but never errors.
+            let characterName: string | null = null;
+            if (message.guildId) {
+                const character =
+                    await this.pathfinderManager.getActive(message.guildId, message.author.id) ??
+                    await this.pathfinderManager.getLastUsed(message.guildId, message.author.id);
+                characterName = character?.name ?? null;
+            }
+            DiceRollCommand.validDice(notation);
+            await this.run(message, message.author, notation, undefined, undefined, characterName);
+        }
     }
 
     public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
-        var processedInput = interaction.options.get('notation')?.value?.toString().trim()
+        const notation = (interaction.options.getString('notation')?.trim()
             ?? this.cachedQuery.get(interaction.guildId ?? interaction.user.id)?.notation
-            ?? 'd20';
-        DiceRollCommand.validDice(processedInput);
+            ?? 'd20');
 
-        await this.run(interaction, interaction.user, processedInput);
+        if (hasTokens(notation) && interaction.guildId) {
+            const guildId = interaction.guildId;
+            const ownerId = interaction.user.id;
 
+            // Character resolution: active (set via /character use) → most recently used.
+            const character =
+                await this.pathfinderManager.getActive(guildId, ownerId) ??
+                await this.pathfinderManager.getLastUsed(guildId, ownerId);
+
+            if (!character) {
+                throw new UserError({
+                    identifier: 'No character found. Register one with `/character register` and select it with `/character use`.',
+                });
+            }
+
+            const sheetConfig = await container.database.pathfinderSheetConfig.findFirst({
+                where: { guildId },
+                orderBy: { version: 'desc' },
+            });
+
+            const { resolved, damageType } = await resolveTokens(notation, character.sheetUrl, sheetConfig);
+            DiceRollCommand.validDice(resolved);
+            await this.pathfinderManager.touchLastUsed(character.id);
+            await this.run(interaction, interaction.user, resolved, notation, damageType, character.name);
+        } else {
+            // Best-effort character lookup — shows name in embed but never errors.
+            let characterName: string | null = null;
+            if (interaction.guildId) {
+                const character =
+                    await this.pathfinderManager.getActive(interaction.guildId, interaction.user.id) ??
+                    await this.pathfinderManager.getLastUsed(interaction.guildId, interaction.user.id);
+                characterName = character?.name ?? null;
+            }
+            DiceRollCommand.validDice(notation);
+            await this.run(interaction, interaction.user, notation, undefined, undefined, characterName);
+        }
     }
 };
