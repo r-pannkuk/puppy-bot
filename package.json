@@ -57,9 +57,9 @@
         "vitest": "^4.0.18"
     },
     "scripts": {
-        "build": "tsc -b src",
-        "watch": "tsc -b src -w",
-        "start": "node --enable-source-maps --max-old-space-size=2048 dist/index.js",
+        "build": "node --max-old-space-size=512 node_modules/typescript/bin/tsc -b src",
+        "watch": "node --max-old-space-size=512 node_modules/typescript/bin/tsc -b src -w",
+        "start": "node --enable-source-maps dist/index.js",
         "lavalink": "java -jar lavalink/Lavalink.jar --spring.config.location=lavalink/application.yml",
         "dev": "run-s build start",
         "format": "prettier --write \"src/**/*.ts\"",
