@@ -751,8 +751,8 @@ describe('GroupsCommand – messageRun / chatInputRun routing', () => {
             repeat:    vi.fn().mockResolvedValue([]),
         });
         await cmd.messageRun(makeMessage(), args);
-        // entries argument (index 3) should be the empty array from repeat()
-        expect(spy.mock.calls[0][3]).toEqual([]);
+        // entries argument should be falsy when no entries and no cached value
+        expect(spy.mock.calls[0][3]).toBeFalsy();
     });
 
     // ── chatInputRun ──────────────────────────────────────────────────────────

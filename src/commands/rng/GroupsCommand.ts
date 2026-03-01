@@ -161,7 +161,11 @@ export class GroupsCommand extends PuppyBotCommand {
             ? Number(sizeOpt)
             : (await input.pick('integer').catch(() => null)) ?? this.cachedQuery.get(cacheKey)?.size;
 
-        const entries = await input.repeat('string') ?? this.cachedQuery.get(cacheKey)?.entries;
+        let entries = await input.repeat('string').catch(() => [] as string[] | null);
+        if (Array.isArray(entries) && entries.length === 0) {
+            const cached = this.cachedQuery.get(cacheKey)?.entries;
+            entries = Array.isArray(cached) ? cached : (typeof cached === 'string' ? [cached] : null);
+        }
 
         await this.run(message, message.author, groupSize, entries);
     }
