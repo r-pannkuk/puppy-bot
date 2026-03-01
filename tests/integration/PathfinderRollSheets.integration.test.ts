@@ -61,9 +61,9 @@ describe.skipIf(!hasCredentials)('Integration — Sheet1 (live API)', () => {
         expect(resolved).toBe('15');
     });
 
-    it('[Kukri:DMG] returns "1d4 + 7" and type "S"', async () => {
+    it('[Kukri:DMG] returns "1d4 + 13" and type "S"', async () => {
         const { resolved, damageType } = await resolveTokens('[Kukri:DMG]', fx.url, null);
-        expect(resolved).toBe('1d4 + 7');
+        expect(resolved).toBe('1d4 + 13');
         expect(damageType).toBe('S');
     });
 

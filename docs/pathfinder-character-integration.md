@@ -47,13 +47,14 @@ model PathfinderCharacterConfig {
 
 Characters are **guild-scoped** — a player may register different characters in different servers without cross-contamination. There is no hard limit on the number of characters per user per guild.
 
-### `PathfinderSheetConfig` — No Schema Change
 
-This model already stores a per-guild versioned schema that maps Pathfinder stat names to Sheets cell references and named ranges. The default config at `src/config/default/PathfinderSheetConfig.json` covers:
+### `PathfinderSheetConfig` — Schema Change (ability scores + modifiers)
+
+This model stores a per-guild versioned schema that maps Pathfinder stat names to Sheets cell references and named ranges. The default config at `src/config/default/PathfinderSheetConfig.json` now represents abilities as objects with both a `score` (visual A1 cell or named range) and a `modifier` (the named range or cell used by token substitution). The default config covers:
 
 | Category | Lookup Method |
 |---|---|
-| Ability score modifiers | Named ranges (`Strength`, `Dexterity`, …) |
+| Ability scores | Two-part entry: `{ score: "F9", modifier: "Strength" }`. `modifier` continues to be used by roll token substitution (named range preferred); `score` is optional and used for the character-info visual. |
 | Saves (Fort / Ref / Will) | Cell refs (`F17`, `F18`, `F19`) |
 | CMB | Cell ref (`B34`) |
 | BAB | Named range `BaseAttack` |
@@ -567,7 +568,7 @@ prisma/
   schema.prisma                   ← PathfinderCharacterConfig evolution:
                                      add guildId, isActive, registeredAt, lastUsedAt
 src/config/default/
-  PathfinderSheetConfig.json      ← unchanged
+  PathfinderSheetConfig.json      ← updated: abilities now include `score` and `modifier` entries
 ```
 
 ### Autocomplete Wiring

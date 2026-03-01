@@ -126,6 +126,69 @@ describe('DiceRollCommand – validDice()', () => {
     });
 });
 
+// ---------------------------------------------------------------------------
+// Implicit 1d20 behavior tests
+// ---------------------------------------------------------------------------
+
+describe('DiceRollCommand – implicit 1d20 for single-token segments', () => {
+    it('treats a single numeric token as 1d20+X (positive)', () => {
+        const segment = '[perc]';
+        const allResults = [{ resolved: '5', damageType: null }];
+
+        const isSingleAtkToken = /^\s*\[[^\]]+:(ATK|ATTACK)(?::\d+)?\]\s*$/i.test(segment);
+        const singleTokenMatch = segment.trim().match(/^\s*(?:\[([^\]]+)\]|([^\[\]]+))\s*$/);
+        let isSingleSkillToken = false;
+        if (singleTokenMatch) {
+            const inner = (singleTokenMatch[1] ?? singleTokenMatch[2]).trim();
+            const OFFENSE_RE = /^(.+?):(ATK|ATTACK|DMG|DAMAGE)(?::(\d+))?$/i;
+            if (!OFFENSE_RE.test(inner)) isSingleSkillToken = true;
+        }
+
+        const resolvedList = allResults.map((r) => {
+            let res = r.resolved;
+            if (isSingleAtkToken) {
+                const n = parseInt(String(res).trim(), 10);
+                if (!Number.isNaN(n)) res = n >= 0 ? `1d20+${n}` : `1d20${n}`;
+            } else if (isSingleSkillToken) {
+                const n = parseInt(String(res).trim(), 10);
+                if (!Number.isNaN(n)) res = n >= 0 ? `1d20+${n}` : `1d20${n}`;
+            }
+            return res;
+        });
+
+        expect(resolvedList[0]).toBe('1d20+5');
+        expect(resolvedList[0]).toBe('1d20+5');
+    });
+
+    it('treats a single numeric token as 1d20+X (negative)', () => {
+        const segment = '[will]';
+        const allResults = [{ resolved: '-3', damageType: null }];
+
+        const isSingleAtkToken = /^\s*\[[^\]]+:(ATK|ATTACK)(?::\d+)?\]\s*$/i.test(segment);
+        const singleTokenMatch = segment.trim().match(/^\s*(?:\[([^\]]+)\]|([^\[\]]+))\s*$/);
+        let isSingleSkillToken = false;
+        if (singleTokenMatch) {
+            const inner = (singleTokenMatch[1] ?? singleTokenMatch[2]).trim();
+            const OFFENSE_RE = /^(.+?):(ATK|ATTACK|DMG|DAMAGE)(?::(\d+))?$/i;
+            if (!OFFENSE_RE.test(inner)) isSingleSkillToken = true;
+        }
+
+        const resolvedList = allResults.map((r) => {
+            let res = r.resolved;
+            if (isSingleAtkToken) {
+                const n = parseInt(String(res).trim(), 10);
+                if (!Number.isNaN(n)) res = n >= 0 ? `1d20+${n}` : `1d20${n}`;
+            } else if (isSingleSkillToken) {
+                const n = parseInt(String(res).trim(), 10);
+                if (!Number.isNaN(n)) res = n >= 0 ? `1d20+${n}` : `1d20${n}`;
+            }
+            return res;
+        });
+
+        expect(resolvedList[0]).toBe('1d20-3');
+    });
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('DiceRollCommand – splitSegments()', () => {

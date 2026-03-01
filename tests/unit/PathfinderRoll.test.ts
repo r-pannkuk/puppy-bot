@@ -177,6 +177,15 @@ describe('Bare stat / skill aliases (no brackets)', () => {
         expect(resolved).toBe('1d20 + 11');
     });
 
+    it('bare kn.spheric / kn spheric / knspheric resolve to Spheric Combat', async () => {
+        const a = await resolveTokens('1d20 + kn.spheric', FAKE_SHEET_URL, null);
+        const b = await resolveTokens('1d20 + "kn spheric"'.replace(/"/g, ''), FAKE_SHEET_URL, null);
+        const c = await resolveTokens('1d20 + knspheric', FAKE_SHEET_URL, null);
+        expect(a.resolved).toBe('1d20 + 1');
+        expect(b.resolved).toBe(a.resolved);
+        expect(c.resolved).toBe(a.resolved);
+    });
+
     it('bare init resolves to the initiative cell', async () => {
         const { resolved } = await resolveTokens('1d20 + init', FAKE_SHEET_URL, null);
         expect(resolved).toBe('1d20 + 4');

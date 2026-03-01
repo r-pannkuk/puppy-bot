@@ -47,12 +47,30 @@
 			"Prof:": "AJ44"
 		},
 		"abilities": {
-			"strength": "Strength",
-			"dexterity": "Dexterity",
-			"constitution": "Constitution",
-			"intelligence": "Intelligence",
-			"wisdom": "Wisdom",
-			"charisma": "Charisma"
+			"strength": {
+				"score": "F9",
+				"modifier": "Strength"
+			},
+			"dexterity": {
+				"score": "F10",
+				"modifier": "Dexterity"
+			},
+			"constitution": {
+				"score": "F11",
+				"modifier": "Constitution"
+			},
+			"intelligence": {
+				"score": "F12",
+				"modifier": "Intelligence"
+			},
+			"wisdom": {
+				"score": "F13",
+				"modifier": "Wisdom"
+			},
+			"charisma": {
+				"score": "F14",
+				"modifier": "Charisma"
+			}
 		},
 		"saves": {
 			"fortitude": "F17",

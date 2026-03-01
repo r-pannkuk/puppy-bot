@@ -7,7 +7,7 @@
  *   register  <sheet_url> <name>  — register or re-register a character
  *   unregister <name>             — remove a character
  *   list                          — list all characters for the invoker
- *   use       <name>              — set the active character and bump lastUsedAt
+ *   equip     <name>              — set the active character and bump lastUsedAt
  *   unequip                       — clear the active character (opposite of /character use)
  *   info      [name]              — show live stats from the sheet
  *
@@ -56,11 +56,11 @@ const defaultSheetConfig = require('../../config/default/PathfinderSheetConfig.j
 @ApplyOptions<Subcommand.Options>({
     name: 'character',
     description: 'Manage Pathfinder character sheet registrations.',
-    subcommands: [
+        subcommands: [
         { name: 'register',   chatInputRun: 'subcommandRegister' },
         { name: 'unregister', chatInputRun: 'subcommandUnregister' },
         { name: 'list',       chatInputRun: 'subcommandList' },
-        { name: 'use',        chatInputRun: 'subcommandUse' },
+            { name: 'equip',      chatInputRun: 'subcommandEquip' },
         { name: 'unequip',    chatInputRun: 'subcommandUnequip' },
         { name: 'info',       chatInputRun: 'subcommandInfo' },
         {
@@ -115,10 +115,10 @@ export class CharacterCommand extends Subcommand {
                     sub.setName('list').setDescription('List all your registered characters.')
                 )
 
-                // /character use
+                // /character equip
                 .addSubcommand((sub) =>
                     sub
-                        .setName('use')
+                        .setName('equip')
                         .setDescription('Set your active character for rolls (token substitution and embed display).')
                         .addStringOption((o) =>
                             o.setName('name').setDescription('Character name to use for rolls.').setRequired(true).setAutocomplete(true)
@@ -193,17 +193,20 @@ export class CharacterCommand extends Subcommand {
         const subcommand = interaction.options.getSubcommand(false);
         const subcommandGroup = interaction.options.getSubcommandGroup(false);
 
-        // Admin unregister: autocomplete from the target user's characters.
-        let ownerId: string;
-        if (subcommandGroup === 'admin' && subcommand === 'unregister') {
-            // At autocomplete time, the user option value is available as a raw string ID.
-            const targetUserId = interaction.options.get('user')?.value as string | undefined;
-            ownerId = targetUserId ?? interaction.user.id;
-        } else {
-            ownerId = interaction.user.id;
-        }
-
-        const characters = await this.manager.listCharacters(guildId, ownerId);
+            // Admin unregister: autocomplete from the target user's characters.
+            // `/character info` should autocomplete across all characters in the
+            // guild (not limited to the invoking user's), while other subcommands
+            // (e.g., equip/use) remain restricted to the invoking user's characters.
+            let characters: { name: string }[] = [];
+            if (subcommandGroup === 'admin' && subcommand === 'unregister') {
+                const targetUserId = interaction.options.get('user')?.value as string | undefined;
+                const ownerId = targetUserId ?? interaction.user.id;
+                characters = await this.manager.listCharacters(guildId, ownerId);
+            } else if (subcommand === 'info') {
+                characters = await this.manager.listAll(guildId);
+            } else {
+                characters = await this.manager.listCharacters(guildId, interaction.user.id);
+            }
         const query = focused.value.toLowerCase();
         const filtered = query
             ? characters.filter((c) => c.name.toLowerCase().includes(query))
@@ -295,7 +298,7 @@ export class CharacterCommand extends Subcommand {
             throw new UserError({ identifier: `No character named \`${name}\` found in your registry for this server.` });
         }
 
-        await interaction.reply({ content: `🗑️ Character **${name}** removed.`, ephemeral: true });
+        await interaction.reply({ content: `🗑️ Character **${name}** removed.` });
     }
 
     // -------------------------------------------------------------------------
@@ -309,7 +312,6 @@ export class CharacterCommand extends Subcommand {
         if (characters.length === 0) {
             await interaction.reply({
                 content: 'You have no characters registered in this server. Use `/character register` to add one.',
-                ephemeral: true,
             });
             return;
         }
@@ -328,7 +330,7 @@ export class CharacterCommand extends Subcommand {
                 }).join('\n\n')
             );
 
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({ embeds: [embed] });
     }
 
     // -------------------------------------------------------------------------
@@ -377,13 +379,13 @@ export class CharacterCommand extends Subcommand {
         try {
             const nameArg = interaction.options.getString('name')?.trim() ?? null;
             const character = nameArg
-                ? await this.manager.getByName(guildId, interaction.user.id, nameArg)
+                ? await this.manager.getByNameAny(guildId, nameArg)
                 : await this.manager.getActive(guildId, interaction.user.id);
 
             if (!character) {
                 await interaction.editReply({
                     content: nameArg
-                        ? `No character named \`${nameArg}\` found in your registry for this server.`
+                        ? `No character named \`${nameArg}\` found in the server registry.`
                         : 'No active character set. Use `/character use` to select one.',
                 });
                 return;
@@ -400,7 +402,6 @@ export class CharacterCommand extends Subcommand {
             const namedRangeMap = await resolveNamedRanges(spreadsheetId);
 
             // Build the cell list for the single batchGet call.
-            const abilityRanges = Object.values(schema.abilities);
             const skillCells = Object.values(schema.skills);
             const saveCells = Object.values(schema.saves);
             const defenseCells = Object.values(schema.defenses);
@@ -410,11 +411,60 @@ export class CharacterCommand extends Subcommand {
             const offenseTypeCells = schema.offenses.map((o) => o.type);
             const offenseCritCells = schema.offenses.map((o) => o.crit);
 
-            // Resolve named ranges to cell addresses.
+            // Resolve named ranges to cell addresses. For visuals we prefer the
+            // ability "score" cells which are commonly stored one column left
+            // of the modifier cell; if a named range resolves to an A1 cell
+            // (e.g. "G9") we'll compute the left cell ("F9") for display.
             const resolvedAbilityCells: string[] = [];
             const abilityKeys = Object.keys(schema.abilities);
-            for (const rangeName of abilityRanges) {
-                resolvedAbilityCells.push(namedRangeMap[rangeName] ?? rangeName);
+            const shiftCellLeft = (cellOrName: string) => {
+                const cell = (namedRangeMap[cellOrName] ?? cellOrName).toString();
+                const m = cell.match(/^([A-Za-z]+)(\d+)$/);
+                if (!m) return cellOrName; // not an A1 address — fall back to original
+                const col = m[1].toUpperCase();
+                const row = m[2];
+                // Convert column letters to number
+                let n = 0;
+                for (let i = 0; i < col.length; i++) {
+                    n = n * 26 + (col.charCodeAt(i) - 64);
+                }
+                if (n <= 1) return `${col}${row}`; // can't shift left of A
+                n -= 1;
+                // Convert back to letters
+                let left = '';
+                while (n > 0) {
+                    const rem = (n - 1) % 26;
+                    left = String.fromCharCode(65 + rem) + left;
+                    n = Math.floor((n - 1) / 26);
+                }
+                return `${left}${row}`;
+            };
+
+            const resolvedModifierCells: string[] = [];
+            for (const key of abilityKeys) {
+                const entry: any = (schema.abilities as any)[key];
+                // Score cell (visual): prefer explicit `score` entry, else infer
+                if (typeof entry === 'string') {
+                    // legacy string -> modifier named range or A1; infer score one column left
+                    resolvedAbilityCells.push(shiftCellLeft(entry));
+                    resolvedModifierCells.push(namedRangeMap[entry] ?? entry);
+                } else if (entry && typeof entry === 'object') {
+                    if (entry.score) {
+                        resolvedAbilityCells.push(namedRangeMap[entry.score] ?? entry.score);
+                    } else if (entry.modifier) {
+                        resolvedAbilityCells.push(shiftCellLeft(entry.modifier));
+                    } else {
+                        resolvedAbilityCells.push('—');
+                    }
+                    if (entry.modifier) {
+                        resolvedModifierCells.push(namedRangeMap[entry.modifier] ?? entry.modifier);
+                    } else {
+                        resolvedModifierCells.push('—');
+                    }
+                } else {
+                    resolvedAbilityCells.push('—');
+                    resolvedModifierCells.push('—');
+                }
             }
             const babCell = namedRangeMap[schema.totals.bab] ?? schema.totals.bab;
             const levelCell = namedRangeMap[schema.totals.level] ?? schema.totals.level;
@@ -423,6 +473,7 @@ export class CharacterCommand extends Subcommand {
                 schema.name,
                 levelCell,
                 schema.health,
+                ...resolvedModifierCells,
                 ...resolvedAbilityCells,
                 ...saveCells,
                 schema.cmb,
@@ -444,6 +495,7 @@ export class CharacterCommand extends Subcommand {
             // Build embed.
             const embed = new EmbedBuilder()
                 .setTitle(v(schema.name) || character.name)
+                .setURL(character.sheetUrl)
                 .setColor(0x8b4513)
                 .setFooter({ text: `Fetched at ${new Date().toUTCString()} · ${character.name}` });
 
@@ -457,9 +509,47 @@ export class CharacterCommand extends Subcommand {
             // Ability scores — STR / DEX / CON / INT / WIS / CHA
             embed.addFields([{
                 name: 'Abilities',
-                value: abilityKeys.map((key, i) =>
-                    `${key.charAt(0).toUpperCase() + key.slice(1, 3).toUpperCase()}: ${v(resolvedAbilityCells[i])}`
-                ).join(' | '),
+                value: abilityKeys.map((key, i) => {
+                    const label = key.charAt(0).toUpperCase() + key.slice(1, 3).toUpperCase();
+                    const scoreRaw = v(resolvedAbilityCells[i]);
+                    const modRaw = v((resolvedModifierCells && resolvedModifierCells[i]) || '—');
+
+                    const scoreStr = String(scoreRaw ?? '').trim();
+                    const modStrRaw = String(modRaw ?? '').trim();
+
+                    // Prefer explicit modifier value when available and signed.
+                    if (/^[+-]\d+$/.test(modStrRaw)) {
+                        if (scoreStr && scoreStr !== '—') {
+                            const scoreNum = parseInt(scoreStr.replace(/[^0-9-]/g, ''), 10);
+                            if (!Number.isNaN(scoreNum)) return `${label}: ${scoreNum} (${modStrRaw})`;
+                        }
+                        return `${label}: ${modStrRaw}`;
+                    }
+
+                    // If modifier cell contains an unsigned number, treat it as the modifier.
+                    const modNum = parseInt(modStrRaw.replace(/[^0-9-]/g, ''), 10);
+                    if (!Number.isNaN(modNum) && modStrRaw !== '') {
+                        const signed = modNum >= 0 ? `+${modNum}` : `${modNum}`;
+                        if (scoreStr && scoreStr !== '—') {
+                            const scoreNum = parseInt(scoreStr.replace(/[^0-9-]/g, ''), 10);
+                            if (!Number.isNaN(scoreNum)) return `${label}: ${scoreNum} (${signed})`;
+                        }
+                        return `${label}: ${signed}`;
+                    }
+
+                    // Fallback: if we have a score, compute the modifier from it.
+                    const num = parseInt(scoreStr.replace(/[^0-9-]/g, ''), 10);
+                    if (!Number.isNaN(num)) {
+                        const computed = Math.floor((num - 10) / 2);
+                        const computedStr = computed >= 0 ? `+${computed}` : `${computed}`;
+                        return `${label}: ${num} (${computedStr})`;
+                    }
+
+                    // Final fallback: show whatever raw value we have for score or modifier.
+                    if (scoreStr && scoreStr !== '—') return `${label}: ${scoreStr}`;
+                    if (modStrRaw && modStrRaw !== '—') return `${label}: ${modStrRaw}`;
+                    return `${label}: —`;
+                }).join('\n'),
                 inline: false,
             }]);
 
@@ -550,15 +640,15 @@ export class CharacterCommand extends Subcommand {
 
         const lines: string[] = [];
         for (const [ownerId, names] of grouped) {
-            lines.push(`<@${ownerId}>: ${names.join(', ')}`);
+            lines.push(`<@${ownerId}>:\n${names.map((name) => `- ${name}`).join('\n')}`);
         }
 
         const embed = new EmbedBuilder()
-            .setTitle('All registered characters')
-            .setColor(0xff0000)
-            .setDescription(lines.join('\n'));
+            .setTitle('All Registered Characters')
+            .setColor('Purple')
+            .addFields(lines.map((line) => ({ name: '\u200b', value: line, inline: false })));
 
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({ embeds: [embed] });
     }
 
     // -------------------------------------------------------------------------

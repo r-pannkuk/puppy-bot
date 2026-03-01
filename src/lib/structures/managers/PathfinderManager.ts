@@ -57,6 +57,18 @@ export class PathfinderManager {
         });
     }
 
+    /** Returns a single character by name anywhere in the guild (any owner).
+     * If multiple characters share the name, returns the most recently registered. */
+    public async getByNameAny(
+        guildId: string,
+        name: string,
+    ): Promise<PathfinderCharacterConfig | null> {
+        return this.db.pathfinderCharacterConfig.findFirst({
+            where: { guildId, name },
+            orderBy: { registeredAt: 'desc' },
+        });
+    }
+
     /** Returns the most recently used character for a user in a guild (null if none). */
     public async getLastUsed(
         guildId: string,

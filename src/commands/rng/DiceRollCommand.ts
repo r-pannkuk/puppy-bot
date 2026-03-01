@@ -340,9 +340,9 @@ export class DiceRollCommand extends PuppyBotCommand {
         let resolvedLine = '';
         if (originalNotation && originalNotation !== results.notation) {
             if (damageType) {
-                resolvedLine = `*(resolved: \`${results.notation}\` — **${damageType}**)*\n`;
+                resolvedLine = `*(Resolved: \`${results.notation}\` — **${damageType}**)*\n`;
             } else {
-                resolvedLine = `*(resolved: \`${results.notation}\`)*\n`;
+                resolvedLine = `*(Resolved: \`${results.notation}\`)*\n`;
             }
         }
 
@@ -470,10 +470,50 @@ export class DiceRollCommand extends PuppyBotCommand {
         for (const segment of segments) {
             if (character && hasTokens(segment)) {
                 const allResults = await resolveAllAttacks(segment, character.sheetUrl, sheetConfig);
-                allResults.forEach((r) => DiceRollCommand.validDice(r.resolved));
+
+                // If the user provided exactly a single offense ATK token like
+                // `[Longsword:ATK]` (no other text), implicitly prepend `1d20+` so
+                // they don't have to type `1d20+[Longsword:ATK]`.
+                const isSingleAtkToken = /^\s*\[[^\]]+:(ATK|ATTACK)(?::\d+)?\]\s*$/i.test(segment);
+
+                // Also detect a single bare/bracketed stat/skill token so we can
+                // implicitly prepend `1d20+` for skill checks (e.g. `[Perception]` or `perc`).
+                const singleTokenMatch = segment.trim().match(/^\s*(?:\[([^\]]+)\]|([^\[\]]+))\s*$/);
+                let isSingleSkillToken = false;
+                if (singleTokenMatch) {
+                    const inner = (singleTokenMatch[1] ?? singleTokenMatch[2]).trim();
+                    // If this inner token is an offense reference (ATK/DMG), skip skill handling.
+                    const OFFENSE_RE = /^(.+?):(ATK|ATTACK|DMG|DAMAGE)(?::(\d+))?$/i;
+                    if (!OFFENSE_RE.test(inner)) {
+                        isSingleSkillToken = true;
+                    }
+                }
+
+                const resolvedList = allResults.map((r) => {
+                    let res = r.resolved;
+
+                    if (isSingleAtkToken) {
+                        // Only apply when the resolved value is a plain integer (e.g. "5" or "-1").
+                        const n = parseInt(String(res).trim(), 10);
+                        if (!Number.isNaN(n)) {
+                            res = n >= 0 ? `1d20+${n}` : `1d20${n}`;
+                        }
+                    } else if (isSingleSkillToken) {
+                        // For a single skill/ability token (resolved to a numeric bonus),
+                        // treat it as `1d20+<bonus>`. Accept negative bonuses too.
+                        const n = parseInt(String(res).trim(), 10);
+                        if (!Number.isNaN(n)) {
+                            res = n >= 0 ? `1d20+${n}` : `1d20${n}`;
+                        }
+                    }
+
+                    return res;
+                });
+
+                resolvedList.forEach((s) => DiceRollCommand.validDice(s));
                 resolvedSegments.push({
                     originalNotation: segment,
-                    resolved: allResults.map((r) => r.resolved),
+                    resolved: resolvedList,
                     damageType: allResults[0].damageType,
                 });
             } else {

@@ -31,7 +31,7 @@
             ]
         },
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Delete Slash Commands",
             "console": "integratedTerminal",
@@ -63,7 +63,7 @@
             ]
         },
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Import Old Schema",
             "console": "integratedTerminal",
@@ -96,7 +96,7 @@
         },
         {
             "name": "Python: Meme Test",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "console": "integratedTerminal",
             "stopOnEntry": false,

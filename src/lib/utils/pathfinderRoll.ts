@@ -40,7 +40,7 @@ interface SheetSchema {
     name: string;
     sheetName?: string;
     skills: Record<string, string>;
-    abilities: Record<string, string>;
+    abilities: Record<string, Record<string, string>>;
     saves: Record<string, string>;
     defenses: Record<string, string>;
     cmb: string;
@@ -123,15 +123,15 @@ const SKILL_ALIASES: Record<string, string> = {
     'handle animal': 'Handle Animal', ha: 'Handle Animal', handle: 'Handle Animal',
     heal: 'Heal',
     intimidate: 'Intimidate', intim: 'Intimidate',
-    'kn. spheric': 'Kn. Spheric', ksph: 'Kn. Spheric', spheric: 'Kn. Spheric', 'kn.spheric': 'Kn. Spheric',
+    'kn. spheric': 'Kn. Spheric', ksph: 'Kn. Spheric', spheric: 'Kn. Spheric', 'kn.spheric': 'Kn. Spheric', 'kn.sph': 'Kn. Spheric',
     'kn. dungeoneering': 'Kn. Dungeoneering', kdung: 'Kn. Dungeoneering', dungeon: 'Kn. Dungeoneering', 'kn.dungeon': 'Kn. Dungeoneering',
-    'kn. engineering': 'Kn. Engineering', keng: 'Kn. Engineering', engineer: 'Kn. Engineering', 'kn.engineering': 'Kn. Engineering',
+    'kn. engineering': 'Kn. Engineering', keng: 'Kn. Engineering', engineer: 'Kn. Engineering', engineering: 'Kn. Engineering','kn.engineering': 'Kn. Engineering',
     'kn. geography': 'Kn. Geography', kgeo: 'Kn. Geography', geography: 'Kn. Geography', 'kn.geography': 'Kn. Geography',
     'kn. history': 'Kn. History', khist: 'Kn. History', history: 'Kn. History', 'kn.history': 'Kn. History',
-    'kn. local': 'Kn. Local', kloc: 'Kn. Local', local: 'Kn. Local', 'kn.local': 'Kn. Local',
+    'kn. local': 'Kn. Local', kloc: 'Kn. Local', loc: 'Kn. Local', local: 'Kn. Local', 'kn.local': 'Kn. Local',
     'kn. nature': 'Kn. Nature', knat: 'Kn. Nature', nature: 'Kn. Nature', 'kn.nature': 'Kn. Nature',
-    'kn. nobility': 'Kn. Nobility', knob: 'Kn. Nobility', nobility: 'Kn. Nobility', 'kn.nobility': 'Kn. Nobility',
-    'kn. religion': 'Kn. Religion', krel: 'Kn. Religion', religion: 'Kn. Religion', 'kn.religion': 'Kn. Religion',
+    'kn. nobility': 'Kn. Nobility', knob: 'Kn. Nobility', nobility: 'Kn. Nobility', 'nob': 'Kn. Nobility', 'kn.nobility': 'Kn. Nobility',
+    'kn. religion': 'Kn. Religion', krel: 'Kn. Religion', religion: 'Kn. Religion', 'rel': 'Kn. Religion', 'kn.religion': 'Kn. Religion',
     linguistics: 'Linguistics', ling: 'Linguistics',
     perception: 'Perception', perc: 'Perception',
     piloting: 'Piloting', pilot: 'Piloting',
@@ -143,6 +143,20 @@ const SKILL_ALIASES: Record<string, string> = {
     survival: 'Survival', surv: 'Survival',
     swim: 'Swim',
 };
+
+// Expand alias variants so combinations of dots/whitespace also match.
+// e.g. `kn. spheric`, `kn.spheric`, `kn spheric`, and `knspheric` should all map.
+{
+    const originalKeys = Object.keys(SKILL_ALIASES);
+    for (const k of originalKeys) {
+        const lower = k.toLowerCase();
+        const spaceNorm = lower.replace(/[.\s]+/g, ' ').trim();
+        const nospaceNorm = lower.replace(/[.\s]+/g, '');
+        const value = SKILL_ALIASES[k as keyof typeof SKILL_ALIASES];
+        if (spaceNorm && !(spaceNorm in SKILL_ALIASES)) SKILL_ALIASES[spaceNorm] = value;
+        if (nospaceNorm && !(nospaceNorm in SKILL_ALIASES)) SKILL_ALIASES[nospaceNorm] = value;
+    }
+}
 
 // ---------------------------------------------------------------------------
 // Bare alias support (stat / skill refs without brackets)
@@ -552,7 +566,8 @@ function classifyToken(raw: string, schema: SheetSchema): TokenMeta {
     if (skillName) {
         const cell = schema.skills[skillName];
         if (!cell) throw new UserError({ identifier: `Skill \`${skillName}\` is not in the sheet config.` });
-        return { kind: 'cell', raw, rangeOrCell: cell, isNamedRange: false };
+        const isNamed = !CELL_REF_RE.test(cell);
+        return { kind: 'cell', raw, rangeOrCell: cell, isNamedRange: isNamed };
     }
 
     // 3. Offense reference
@@ -571,9 +586,23 @@ function classifyToken(raw: string, schema: SheetSchema): TokenMeta {
 
 function statAliasToMeta(raw: string, alias: { type: 'ability' | 'save' | 'cell'; key: string }, schema: SheetSchema): CellTokenMeta {
     if (alias.type === 'ability') {
-        const namedRange = schema.abilities[alias.key];
-        if (!namedRange) throw new UserError({ identifier: `Ability \`${alias.key}\` is not in the sheet config.` });
-        return { kind: 'cell', raw, rangeOrCell: namedRange, isNamedRange: true };
+        const entry: any = schema.abilities[alias.key];
+        if (!entry) throw new UserError({ identifier: `Ability \`${alias.key}\` is not in the sheet config.` });
+        // Schema `abilities` may be either a string (named-range or A1 cell)
+        // or an object containing `modifier` and/or `score` properties.
+        if (typeof entry === 'string') {
+            const namedRange = entry;
+            return { kind: 'cell', raw, rangeOrCell: namedRange, isNamedRange: true };
+        }
+        // entry is an object — prefer the modifier named range for token
+        // substitution. If the modifier field is an A1 reference, treat it
+        // as a direct cell instead of a named range.
+        const modifier = entry.modifier ?? entry.mod ?? null;
+        if (!modifier) throw new UserError({ identifier: `Ability \`${alias.key}\` has no modifier or score in the sheet config.` });
+        if (CELL_REF_RE.test(modifier)) {
+            return { kind: 'cell', raw, rangeOrCell: modifier.toUpperCase(), isNamedRange: false };
+        }
+        return { kind: 'cell', raw, rangeOrCell: modifier, isNamedRange: true };
     }
     if (alias.type === 'save') {
         const cell = schema.saves[alias.key];
@@ -652,6 +681,8 @@ function resolveOffense(
 
         if (!rawDmg) throw new UserError({ identifier: `Damage cell \`${offense.damage}\` for \`${match.name}\` is empty.` });
 
+        // (no-op) diagnostics removed
+
         // Try to detect embedded type in the damage cell.
         let dmgExpression = rawDmg.trim();
         let dmgType = rawType?.trim() || null;
@@ -675,7 +706,7 @@ function resolveOffense(
 
 function parseNumericValue(raw: string | null | undefined, tokenLabel: string): number {
     if (raw == null || raw === '') {
-        throw new UserError({ identifier: `Token \`[${tokenLabel}]\` resolved to an empty cell.` });
+        throw new UserError({ identifier: `Token \`[${tokenLabel}]\` resolved to an empty cell.  Does this character have the relevant value configured on their sheet?`});
     }
     const cleaned = raw.replace(/[+ ]/g, '').trim();
     const n = parseInt(cleaned, 10);
