@@ -6,9 +6,12 @@
             "type": "shell",
             "command": "& '${workspaceFolder}/lavalink/start.ps1'",
             "isBackground": true,
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
             "presentation": {
                 "reveal": "silent",
-                "panel": "new",
+                "panel": "dedicated",
                 "close": true
             },
             "problemMatcher": [
