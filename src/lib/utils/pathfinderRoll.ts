@@ -10,8 +10,13 @@
  *
  * Exported surface:
  * - `hasTokens(notation)` — quick check for `[…]` tokens or bare stat aliases.
- * - `resolveTokens(notation, sheetId, sheetConfig)` — returns the substituted
- *   notation string and the damage type (if any).
+ * - `resolveAllAttacks(notation, sheetUrl, sheetConfig)` — preferred entry point.
+ *   When the notation contains an ATK token with no explicit index (`[Name:ATK]`),
+ *   splits the raw attack cell on `/` and returns one `ResolveTokensResult` per
+ *   iterative bonus, batching all cell reads into a single HTTP call.  Falls back
+ *   to a single-element result array when no all-iterative ATK token is present.
+ * - `resolveTokens(notation, sheetUrl, sheetConfig)` — resolves a single notation
+ *   string; `[Name:ATK]` without an index selects only the first (highest) bonus.
  *
  * Resolution order per `[token]`:
  *   1. A1 cell-reference pattern (letters followed by digits).
@@ -222,6 +227,148 @@ function normalizeBareAliases(notation: string): string {
  * @param sheetUrl       Full Google Sheets URL of the character sheet.
  * @param sheetConfig    Guild-specific (or default) PathfinderSheetConfig row.
  */
+/**
+ * Like `resolveTokens` but when the notation contains an ATK token without an
+ * explicit attack index (`[Name:ATK]` rather than `[Name:ATK:1]`), expands into
+ * one resolved notation string per iterative attack, splitting the raw cell value
+ * on `/`.  All cells are batch-fetched once.  Returns a single-element array
+ * when no all-iterative ATK token is present.
+ */
+export async function resolveAllAttacks(
+    notation: string,
+    sheetUrl: string,
+    sheetConfig: PathfinderSheetConfig | null,
+): Promise<ResolveTokensResult[]> {
+    const normalizedNotation = normalizeBareAliases(notation);
+    const config = resolveConfig(sheetConfig);
+    const spreadsheetId = extractSheetId(sheetUrl);
+    if (!spreadsheetId) {
+        throw new UserError({ identifier: 'The character sheet URL is invalid. Please re-register the character.' });
+    }
+
+    const tokens = [...normalizedNotation.matchAll(TOKEN_RE)].map((m) => m[1]);
+    if (tokens.length === 0) return [{ resolved: normalizedNotation, damageType: null }];
+
+    const tokenMeta: TokenMeta[] = tokens.map((t) => classifyToken(t, config.schema));
+
+    // Only expand when exactly one all-iterative ATK token is present.
+    const iterativeToken = tokenMeta.find(
+        (m): m is OffenseTokenMeta => m.kind === 'offense' && m.subType === 'ATK' && m.allIterative,
+    );
+    if (!iterativeToken) {
+        return [await resolveTokens(notation, sheetUrl, sheetConfig)];
+    }
+
+    // -------------------------------------------------------------------------
+    // Collect all cells needed for the single batch-fetch.
+    // -------------------------------------------------------------------------
+    const namedRangeNames = new Set<string>();
+    const directCells = new Set<string>();
+
+    for (const meta of tokenMeta) {
+        if (meta.kind === 'cell') {
+            if (meta.isNamedRange) namedRangeNames.add(meta.rangeOrCell);
+            else directCells.add(meta.rangeOrCell);
+        }
+    }
+    // Always pre-fetch offense name, attack, damage, and type cells.
+    for (const o of config.schema.offenses) {
+        directCells.add(o.name);
+        directCells.add(o.attack);
+        directCells.add(o.damage);
+        directCells.add(o.type);
+    }
+
+    const namedRangeMap: Record<string, string> = {};
+    if (namedRangeNames.size > 0) {
+        const allNamed = await resolveNamedRanges(spreadsheetId);
+        for (const name of namedRangeNames) {
+            const cell = allNamed[name];
+            if (cell) { namedRangeMap[name] = cell; directCells.add(cell); }
+            else throw new UserError({ identifier: `Named range \`${name}\` was not found in the spreadsheet.` });
+        }
+    }
+
+    const cellArray = [...directCells];
+    const values: RangeValueMap = cellArray.length > 0
+        ? await batchGetValues(spreadsheetId, config.sheetName, cellArray)
+        : {};
+
+    const offenseNameValues = config.schema.offenses.map((o) => values[o.name] ?? null);
+
+    // -------------------------------------------------------------------------
+    // Locate the offense row matching the iterative token.
+    // -------------------------------------------------------------------------
+    const q = iterativeToken.nameQuery.toLowerCase();
+    const candidates = offenseNameValues
+        .map((name, idx) => ({ name, idx }))
+        .filter((e) => e.name !== null && e.name.trim() !== '');
+
+    const exact     = candidates.filter((e) => e.name!.toLowerCase() === q);
+    const prefix    = candidates.filter((e) => e.name!.toLowerCase().startsWith(q));
+    const substring = candidates.filter((e) => e.name!.toLowerCase().includes(q));
+
+    let match: { name: string | null; idx: number } | undefined;
+    if (exact.length === 1)           match = exact[0];
+    else if (prefix.length === 1)     match = prefix[0];
+    else if (substring.length === 1)  match = substring[0];
+    else if (exact.length > 1 || prefix.length > 1 || substring.length > 1) {
+        const pool = (exact.length > 1 ? exact : prefix.length > 1 ? prefix : substring)
+            .map((e) => `\`${e.name}\``).join(', ');
+        throw new UserError({ identifier: `Ambiguous offense name \`${iterativeToken.nameQuery}\` — did you mean: ${pool}?` });
+    } else {
+        throw new UserError({ identifier: `No offense named \`${iterativeToken.nameQuery}\` was found on the sheet.` });
+    }
+
+    const offense = config.schema.offenses[match.idx];
+    const rawAtk  = values[offense.attack];
+    if (!rawAtk) throw new UserError({ identifier: `Attack cell \`${offense.attack}\` for \`${match.name}\` is empty.` });
+
+    const atkParts = rawAtk.split('/').map((s) => s.trim());
+
+    // -------------------------------------------------------------------------
+    // For each attack part, substitute the iterative token then resolve others.
+    // -------------------------------------------------------------------------
+    const results: ResolveTokensResult[] = [];
+
+    for (let i = 0; i < atkParts.length; i++) {
+        const bonus    = parseNumericValue(atkParts[i], `${iterativeToken.nameQuery}:ATK`);
+        const bonusStr = formatNumber(bonus);
+
+        // Replace only the all-iterative ATK placeholder; keep brackets for other tokens.
+        let partNotation = normalizedNotation.replace(`[${iterativeToken.raw}]`, bonusStr);
+
+        // Resolve remaining tokens using the already-fetched values.
+        let damageType: string | null = null;
+
+        for (let j = tokens.length - 1; j >= 0; j--) {
+            const raw  = tokens[j];
+            const meta = tokenMeta[j];
+
+            // Already substituted.
+            if (meta.kind === 'offense' && (meta as OffenseTokenMeta).allIterative) continue;
+
+            if (meta.kind === 'cell') {
+                const cell       = meta.isNamedRange ? namedRangeMap[meta.rangeOrCell] : meta.rangeOrCell;
+                const rawVal     = values[cell];
+                const num        = parseNumericValue(rawVal, raw);
+                const sub        = formatNumber(num);
+                partNotation = partNotation.replace(`[${raw}]`, sub);
+            } else {
+                const { substitution: sub, type } = resolveOffense(
+                    meta as OffenseTokenMeta, offenseNameValues, config.schema, values,
+                );
+                partNotation = partNotation.replace(`[${raw}]`, sub);
+                if (type !== null) damageType = type;
+            }
+        }
+
+        results.push({ resolved: partNotation, damageType });
+    }
+
+    return results;
+}
+
 export async function resolveTokens(
     notation: string,
     sheetUrl: string,
@@ -380,6 +527,8 @@ interface OffenseTokenMeta {
     nameQuery: string;
     subType: 'ATK' | 'DMG';
     attackIndex: number; // 1-based; 1 = first/highest
+    /** True when the user wrote `[Name:ATK]` with no explicit index — signals full-attack expansion. */
+    allIterative: boolean;
 }
 
 type TokenMeta = CellTokenMeta | OffenseTokenMeta;
@@ -413,7 +562,8 @@ function classifyToken(raw: string, schema: SheetSchema): TokenMeta {
         const subTypeRaw = offenseMatch[2].toUpperCase();
         const subType: 'ATK' | 'DMG' = (subTypeRaw === 'ATK' || subTypeRaw === 'ATTACK') ? 'ATK' : 'DMG';
         const attackIndex = offenseMatch[3] ? parseInt(offenseMatch[3], 10) : 1;
-        return { kind: 'offense', raw, nameQuery, subType, attackIndex };
+        const allIterative = !offenseMatch[3] && subType === 'ATK';
+        return { kind: 'offense', raw, nameQuery, subType, attackIndex, allIterative };
     }
 
     throw new UserError({ identifier: `Unknown token \`[${raw}]\`. Check the roll notation and try again.` });

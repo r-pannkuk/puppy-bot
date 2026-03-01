@@ -16,13 +16,18 @@ import '@sapphire/plugin-logger/register';
 import '@sapphire/plugin-editable-commands/register';
 import '@sapphire/plugin-api/register';
 import '@sapphire/plugin-scheduled-tasks/register';
+import { ApplicationCommandRegistries, BucketScope, RegisterBehavior } from '@sapphire/framework';
 import type { ClientOptions } from 'discord.js';
 import { Time } from '@sapphire/time-utilities';
-import { BucketScope } from '@sapphire/framework';
 import { ActivityType, GatewayIntentBits, Partials } from 'discord.js';
 import { envParseArray, envParseInteger, envParseString } from './setup/utils';
 import { join } from 'path';
 import './utils/time';
+
+// BulkOverwrite issues a single PUT /applications/:id/commands on startup,
+// replacing Discord's registered command list entirely. This removes any stale
+// slash commands that were previously registered but have since been deleted.
+ApplicationCommandRegistries.setDefaultBehaviorWhenNotIdentical(RegisterBehavior.BulkOverwrite);
 
 export const CLIENT_OPTIONS: ClientOptions = {
     // setup.ts compiles to dist/lib/setup.js; dist/lib/../ == dist/ which is

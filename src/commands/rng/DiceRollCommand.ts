@@ -10,6 +10,17 @@
  * the active (or most recently used) character sheet is read live via the
  * Google Sheets API and the substituted notation is rolled normally.
  *
+ * Multi-roll: semicolons separate independent roll expressions.
+ *   `1d20+5 ; 1d20+[fly] ; 1d20+1d4`
+ * Each segment resolves and rolls independently (token substitution and full-attack
+ * expansion all apply per segment).  All results are combined into a single embed
+ * with one field per roll.  A single-segment notation (no `;`) behaves as before.
+ *
+ * Full-attack expansion: when a notation segment contains `[Name:ATK]` with no
+ * explicit attack index, `resolveAllAttacks` splits the raw attack cell on `/` and
+ * produces one field per iterative bonus within the multi-roll embed.
+ * A named index (`[Name:ATK:2]`) still selects only that specific bonus.
+ *
  * Aliases: `dice`.  Cooldown: 5 s / 6 uses per channel.
  * Re-roll button: intentionally omitted (live sheet values may change).
  */
@@ -21,7 +32,7 @@ import { ApplyOptions } from '@sapphire/decorators'
 import { PuppyBotCommand } from '../../lib/structures/command/PuppyBotCommand'
 import { Time } from '@sapphire/time-utilities'
 import { PathfinderManager } from '../../lib/structures/managers/PathfinderManager'
-import { hasTokens, resolveTokens } from '../../lib/utils/pathfinderRoll'
+import { hasTokens, resolveAllAttacks } from '../../lib/utils/pathfinderRoll'
 
 @ApplyOptions<PuppyBotCommand.Options>({
     name: 'roll',
@@ -85,13 +96,22 @@ export class DiceRollCommand extends PuppyBotCommand {
         }
     }
 
+    /** Splits a raw notation string on `;`, trims each part, drops empty parts. */
+    private static splitSegments(notation: string): string[] {
+        return notation.split(';').map((s) => s.trim()).filter((s) => s.length > 0);
+    }
+
     private static validDiceArgCheck = Args.make<string>((parameter, context) => {
         try {
-            // Skip parser validation when tokens are present — bare aliases like
-            // `will` or `STR` aren't valid dice notation on their own and would
+            // Split on semicolons so multi-roll input is validated segment-by-segment.
+            // Skip parser validation per segment when tokens are present — bare aliases
+            // like `will` or `STR` aren't valid dice notation on their own and would
             // cause a false SyntaxError.  Full validation runs after resolution.
-            if (!hasTokens(parameter)) {
-                DiceRollCommand.validDice(parameter);
+            const segments = DiceRollCommand.splitSegments(parameter);
+            for (const segment of segments) {
+                if (!hasTokens(segment)) {
+                    DiceRollCommand.validDice(segment);
+                }
             }
             return Args.ok(parameter);
         } catch (e) {
@@ -116,7 +136,7 @@ export class DiceRollCommand extends PuppyBotCommand {
             .addStringOption((option) =>
                 option
                     .setName('notation')
-                    .setDescription('Dice notation to use. Supports [StatRef] tokens when a character is set with /character use.')
+                    .setDescription('Dice notation. Semicolons for multiple rolls: 1d20+5 ; [fly] ; 1d6+STR. Supports [StatRef] tokens.')
             ),
             this.slashCommandOptions
         )
@@ -161,6 +181,151 @@ export class DiceRollCommand extends PuppyBotCommand {
 
     //     return output
     // }
+
+    public async generateIterativeEmbed(
+        user: User | GuildMember,
+        rolls: DiceRoll[],
+        originalNotation: string,
+        damageType?: string | null,
+        characterName?: string | null,
+    ) {
+        const username = user instanceof GuildMember ? user.displayName : user.username;
+        const ordinals = ['1st', '2nd', '3rd', '4th', '5th'];
+
+        const embed = new EmbedBuilder()
+            .setColor(14400597)
+            .setAuthor({
+                name: `Full attack: ${originalNotation}`,
+                iconURL: 'https://vignette.wikia.nocookie.net/game-of-dice/images/c/cb/White_Dice.png/revision/latest?cb=20160113233423',
+            });
+
+        for (let i = 0; i < rolls.length; i++) {
+            const roll = rolls[i];
+            const label = ordinals[i] ?? `${i + 1}th`;
+            const resultLine = damageType
+                ? `**${roll.total}** ${damageType}`
+                : `**${roll.total}**`;
+            const resolvedLine = originalNotation !== roll.notation
+                ? (damageType
+                    ? `*(Resolved: \`${roll.notation}\` — **${damageType}**)*\n`
+                    : `*(Resolved: \`${roll.notation}\`)*\n`)
+                : '';
+            embed.addFields([{
+                name: `${label} Attack`,
+                value: `${resolvedLine}${resultLine}\n${roll.toString()}`,
+                inline: false,
+            }]);
+        }
+
+        const footerOptions: { text: string; iconURL?: string } = {
+            text: characterName ? `${characterName} · ${username}` : username,
+        };
+        const avatarUrl = user.avatarURL();
+        if (avatarUrl) footerOptions.iconURL = avatarUrl;
+        embed.setFooter(footerOptions);
+
+        return embed;
+    }
+
+    public async generateMultiRollEmbed(
+        user: User | GuildMember,
+        segments: Array<{
+            originalNotation: string;
+            rolls: DiceRoll[];
+            damageType: string | null;
+        }>,
+        fullOriginalNotation: string,
+        characterName?: string | null,
+    ) {
+        const username = user instanceof GuildMember ? user.displayName : user.username;
+        const ordinals = ['1st', '2nd', '3rd', '4th', '5th'];
+
+        const embed = new EmbedBuilder()
+            .setColor(14400597)
+            .setAuthor({
+                name: `Dice roll: ${fullOriginalNotation}`,
+                iconURL: 'https://vignette.wikia.nocookie.net/game-of-dice/images/c/cb/White_Dice.png/revision/latest?cb=20160113233423',
+            });
+
+        for (const segment of segments) {
+            if (segment.rolls.length === 1) {
+                const roll = segment.rolls[0];
+                const resultLine = segment.damageType
+                    ? `**${roll.total}** ${segment.damageType}`
+                    : `**${roll.total}**`;
+                embed.addFields([{
+                    name: segment.originalNotation,
+                    value: `${resultLine}\n${roll.toString()}`,
+                    inline: false,
+                }]);
+            } else {
+                // Iterative attacks within this segment.
+                for (let i = 0; i < segment.rolls.length; i++) {
+                    const roll = segment.rolls[i];
+                    const ordinal = ordinals[i] ?? `${i + 1}th`;
+                    const resultLine = segment.damageType
+                        ? `**${roll.total}** ${segment.damageType}`
+                        : `**${roll.total}**`;
+                    // First attack field carries the original notation as context.
+                    const fieldName = i === 0
+                        ? `${segment.originalNotation} — ${ordinal} Attack`
+                        : `${ordinal} Attack`;
+                    embed.addFields([{
+                        name: fieldName,
+                        value: `${resultLine}\n${roll.toString()}`,
+                        inline: false,
+                    }]);
+                }
+            }
+        }
+
+        const footerOptions: { text: string; iconURL?: string } = {
+            text: characterName ? `${characterName} · ${username}` : username,
+        };
+        const avatarUrl = user.avatarURL();
+        if (avatarUrl) footerOptions.iconURL = avatarUrl;
+        embed.setFooter(footerOptions);
+
+        return embed;
+    }
+
+    public async runMulti(
+        messageOrInteraction: Message | ChatInputCommandInteraction,
+        user: User | GuildMember,
+        segments: Array<{
+            originalNotation: string;
+            rolls: DiceRoll[];
+            damageType: string | null;
+        }>,
+        fullOriginalNotation: string,
+        characterName?: string | null,
+    ) {
+        const followUp = await this.generateFollowUp(messageOrInteraction);
+        const embed = await this.generateMultiRollEmbed(user, segments, fullOriginalNotation, characterName);
+        await followUp({ embeds: [embed] });
+        const key = messageOrInteraction.guildId ?? (user instanceof GuildMember ? user.id : (user as User).id);
+        this.cachedQuery.set(key, { notation: fullOriginalNotation });
+    }
+
+    public async runIterative(
+        messageOrInteraction: Message | ChatInputCommandInteraction,
+        user: User | GuildMember,
+        resolvedNotations: string[],
+        originalNotation: string,
+        damageType?: string | null,
+        characterName?: string | null,
+    ) {
+        const followUp = await this.generateFollowUp(messageOrInteraction);
+
+        resolvedNotations.forEach((n) => DiceRollCommand.validDice(n));
+        const rolls = resolvedNotations.map((n) => new DiceRoll(n));
+        const embed = await this.generateIterativeEmbed(user, rolls, originalNotation, damageType, characterName);
+
+        await followUp({ embeds: [embed] });
+
+        const key = messageOrInteraction.guildId ?? (user instanceof GuildMember ? user.id : (user as User).id);
+        this.cachedQuery.set(key, { notation: originalNotation });
+    }
 
     public async generateEmbed(
         user: User | GuildMember,
@@ -232,81 +397,126 @@ export class DiceRollCommand extends PuppyBotCommand {
         } else {
             notation = result.unwrap().trim();
         }
-
-        if (hasTokens(notation) && message.guildId) {
-            // Token resolution — active character is required.
-            const character =
-                await this.pathfinderManager.getActive(message.guildId, message.author.id) ??
-                await this.pathfinderManager.getLastUsed(message.guildId, message.author.id);
-            if (!character) {
-                throw new UserError({
-                    identifier: 'No character found. Register one with `/character register` and select it with `/character use`.',
-                });
-            }
-
-            const sheetConfig = await container.database.pathfinderSheetConfig.findFirst({
-                where: { guildId: message.guildId },
-                orderBy: { version: 'desc' },
-            });
-
-            const { resolved, damageType } = await resolveTokens(notation, character.sheetUrl, sheetConfig);
-            DiceRollCommand.validDice(resolved);
-            await this.pathfinderManager.touchLastUsed(character.id);
-            await this.run(message, message.author, resolved, notation, damageType, character.name);
-        } else {
-            // Best-effort character lookup — shows name in embed but never errors.
-            let characterName: string | null = null;
-            if (message.guildId) {
-                const character =
-                    await this.pathfinderManager.getActive(message.guildId, message.author.id) ??
-                    await this.pathfinderManager.getLastUsed(message.guildId, message.author.id);
-                characterName = character?.name ?? null;
-            }
-            DiceRollCommand.validDice(notation);
-            await this.run(message, message.author, notation, undefined, undefined, characterName);
-        }
+        await this.executeRoll(message, message.author, notation, message.guildId);
     }
 
     public override async chatInputRun(interaction: ChatInputCommandInteraction, _context: ChatInputCommandContext) {
-        const notation = (interaction.options.getString('notation')?.trim()
+        const notation = (
+            interaction.options.getString('notation')?.trim()
             ?? this.cachedQuery.get(interaction.guildId ?? interaction.user.id)?.notation
-            ?? 'd20');
+            ?? 'd20'
+        );
+        await this.executeRoll(interaction, interaction.user, notation, interaction.guildId);
+    }
 
-        if (hasTokens(notation) && interaction.guildId) {
-            const guildId = interaction.guildId;
-            const ownerId = interaction.user.id;
+    /**
+     * Shared execution path for both message and slash invocations.
+     *
+     * Splits the notation on `;`, resolves each segment (token substitution,
+     * iterative-attack expansion), rolls, then dispatches to the appropriate
+     * embed builder:
+     * - 1 segment, 1 result  → `run` (single-roll embed)
+     * - 1 segment, N results → `runIterative` (full-attack embed)
+     * - N segments           → `runMulti` (multi-roll embed, one field per roll)
+     */
+    private async executeRoll(
+        messageOrInteraction: Message | ChatInputCommandInteraction,
+        user: User | GuildMember,
+        fullNotation: string,
+        guildId: string | null,
+    ): Promise<void> {
+        const segments = DiceRollCommand.splitSegments(fullNotation);
+        const isMulti = segments.length > 1;
+        const userId = user instanceof GuildMember ? user.id : (user as User).id;
 
-            // Character resolution: active (set via /character use) → most recently used.
-            const character =
-                await this.pathfinderManager.getActive(guildId, ownerId) ??
-                await this.pathfinderManager.getLastUsed(guildId, ownerId);
+        // -----------------------------------------------------------------------
+        // Character resolution
+        // -----------------------------------------------------------------------
+        // If any segment has tokens, the character is required for resolution.
+        // For token-free rolls we do a best-effort lookup (footer only, no errors).
+        const needsCharacter = guildId !== null && segments.some((s) => hasTokens(s));
+        let character: Awaited<ReturnType<PathfinderManager['getActive']>> = null;
+        let sheetConfig: Awaited<ReturnType<typeof container.database.pathfinderSheetConfig.findFirst>> = null;
 
-            if (!character) {
+        if (guildId) {
+            character =
+                await this.pathfinderManager.getActive(guildId, userId) ??
+                await this.pathfinderManager.getLastUsed(guildId, userId);
+
+            if (needsCharacter && !character) {
                 throw new UserError({
                     identifier: 'No character found. Register one with `/character register` and select it with `/character use`.',
                 });
             }
 
-            const sheetConfig = await container.database.pathfinderSheetConfig.findFirst({
-                where: { guildId },
-                orderBy: { version: 'desc' },
-            });
-
-            const { resolved, damageType } = await resolveTokens(notation, character.sheetUrl, sheetConfig);
-            DiceRollCommand.validDice(resolved);
-            await this.pathfinderManager.touchLastUsed(character.id);
-            await this.run(interaction, interaction.user, resolved, notation, damageType, character.name);
-        } else {
-            // Best-effort character lookup — shows name in embed but never errors.
-            let characterName: string | null = null;
-            if (interaction.guildId) {
-                const character =
-                    await this.pathfinderManager.getActive(interaction.guildId, interaction.user.id) ??
-                    await this.pathfinderManager.getLastUsed(interaction.guildId, interaction.user.id);
-                characterName = character?.name ?? null;
+            if (character && needsCharacter) {
+                sheetConfig = await container.database.pathfinderSheetConfig.findFirst({
+                    where: { guildId },
+                    orderBy: { version: 'desc' },
+                });
             }
-            DiceRollCommand.validDice(notation);
-            await this.run(interaction, interaction.user, notation, undefined, undefined, characterName);
+        }
+
+        const characterName = character?.name ?? null;
+
+        // -----------------------------------------------------------------------
+        // Resolve each segment to notation strings (no rolling yet)
+        // -----------------------------------------------------------------------
+        // Each entry holds the original text, one or more resolved notation strings
+        // (>1 means iterative-attack expansion), and the damage type if any.
+        type ResolvedSegment = { originalNotation: string; resolved: string[]; damageType: string | null };
+        const resolvedSegments: ResolvedSegment[] = [];
+
+        for (const segment of segments) {
+            if (character && hasTokens(segment)) {
+                const allResults = await resolveAllAttacks(segment, character.sheetUrl, sheetConfig);
+                allResults.forEach((r) => DiceRollCommand.validDice(r.resolved));
+                resolvedSegments.push({
+                    originalNotation: segment,
+                    resolved: allResults.map((r) => r.resolved),
+                    damageType: allResults[0].damageType,
+                });
+            } else {
+                DiceRollCommand.validDice(segment);
+                resolvedSegments.push({ originalNotation: segment, resolved: [segment], damageType: null });
+            }
+        }
+
+        if (character) await this.pathfinderManager.touchLastUsed(character.id);
+
+        // -----------------------------------------------------------------------
+        // Dispatch to the appropriate embed path
+        // -----------------------------------------------------------------------
+        if (!isMulti) {
+            const seg = resolvedSegments[0];
+            if (seg.resolved.length > 1) {
+                // Single segment, multiple iterative attacks → iterative embed.
+                await this.runIterative(
+                    messageOrInteraction, user,
+                    seg.resolved,
+                    seg.originalNotation,
+                    seg.damageType,
+                    characterName,
+                );
+            } else {
+                // Single segment, single roll → standard embed.
+                const resolvedNotation = seg.resolved[0];
+                await this.run(
+                    messageOrInteraction, user,
+                    resolvedNotation,
+                    resolvedNotation !== seg.originalNotation ? seg.originalNotation : undefined,
+                    seg.damageType,
+                    characterName,
+                );
+            }
+        } else {
+            // Multiple segments → multi-roll embed; runMulti handles the actual rolling.
+            const rollSegments = resolvedSegments.map((seg) => ({
+                originalNotation: seg.originalNotation,
+                rolls: seg.resolved.map((n) => new DiceRoll(n)),
+                damageType: seg.damageType,
+            }));
+            await this.runMulti(messageOrInteraction, user, rollSegments, fullNotation, characterName);
         }
     }
 };

@@ -4,6 +4,13 @@
  *
  * All methods are guild-scoped — characters registered in one guild are never
  * visible in another. Accessed via `container.database`.
+ *
+ * Key mutations:
+ * - `register`     — upsert by name; auto-sets isActive on first character.
+ * - `unregister`   — deletes a character; auto-promotes successor if it was active.
+ * - `activate`     — sets isActive=true on the named character, clears all others.
+ * - `deactivate`   — clears isActive from all the user's characters (for /character unequip).
+ * - `touchLastUsed` — updates lastUsedAt after a successful roll.
  */
 import type { PathfinderCharacterConfig } from '@prisma/client';
 import { container } from '@sapphire/framework';
@@ -166,6 +173,17 @@ export class PathfinderManager {
         return this.db.pathfinderCharacterConfig.update({
             where: { id: record.id },
             data: { isActive: true },
+        });
+    }
+
+    /**
+     * Clears `isActive` from all characters owned by the user in the guild.
+     * After this call the user has no active character until they run `/character use`.
+     */
+    public async deactivate(guildId: string, ownerId: string): Promise<void> {
+        await this.db.pathfinderCharacterConfig.updateMany({
+            where: { guildId, ownerId, isActive: true },
+            data: { isActive: false },
         });
     }
 

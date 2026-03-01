@@ -1,7 +1,7 @@
 # Pathfinder Character Integration — Feature Specification
 
-> Version: 1.5.0
-> Last updated: 2026-02-27
+> Version: 1.7.0
+> Last updated: 2026-03-01
 
 ---
 
@@ -101,6 +101,29 @@ Each roll that uses stat references makes **one batched** `spreadsheets.values.b
 ## Roll Syntax Extension
 
 ### Principle
+
+The notation string is pre-processed **before** being passed to `@dice-roller/rpg-dice-roller`. Stat and skill references are substituted with live values read from the character's Google Sheet; the resulting string is then rolled normally.
+
+### Multi-Roll (semicolon separator)
+
+Semicolons separate independent roll expressions within a single invocation:
+
+```
+1d20+5 ; 1d20+[fly] ; 1d20+1d4
+```
+
+Each segment is:
+1. Trimmed of leading/trailing whitespace.
+2. Resolved independently (token substitution, iterative-attack expansion).
+3. Rolled as a separate `DiceRoll`.
+
+All results are combined into **a single embed** with one field per roll. If a segment contains `[Name:ATK]` with no index and the attack cell has slash-delimited iteratives, each iterative attack gets its own field within the same embed (the first field for that segment labels itself `<notation> — 1st Attack`, subsequent fields `2nd Attack`, etc.).
+
+Token resolution (character lookup, sheet API call) happens **once** for the whole invocation — all segments that need the active character share the same batch request. The notation (with semicolons) is stored in the reply cache so a bare `!roll` / `/roll` with no argument repeats the entire multi-roll.
+
+Single-segment input (no semicolons) behaves exactly as before.
+
+### Principle (single-segment)
 
 The notation string is pre-processed **before** being passed to `@dice-roller/rpg-dice-roller`. Stat and skill references are substituted with live values read from the character's Google Sheet; the resulting string is then rolled normally.
 
@@ -260,16 +283,22 @@ Resolves column `O` for the matched row. The sheet stores iterative attacks as a
 
 - If the value contains no `/`, treat the entire value as a single attack bonus.
 - If the value contains `/`, split on `/` to produce an ordered list of bonuses.
-- `[Name:ATK]` with no index selects the **first** (highest) bonus.
-- `[Name:ATK:n]` selects the **n-th** bonus (1-based). If `n` exceeds the number of available attack steps, the command errors:
+- `[Name:ATK]` with **no index** triggers **full-attack expansion**: each iterative bonus
+  is rolled as a separate `DiceRoll`, and all results are combined into a single embed
+  with one field per attack ("1st Attack", "2nd Attack", "3rd Attack", …). No sheet
+  values are re-fetched; all rolls share the single batch request made at the start of
+  the command invocation.
+- `[Name:ATK:n]` selects **only** the n-th bonus (1-based) and rolls a single result.
+  If `n` exceeds the number of available attack steps, the command errors:
   > *"Only 2 iterative attacks found for Longsword."*
 
-The resolved bonus is substituted as a signed integer into the notation:
+Resolution examples:
 
 ```
-1d20 + [Longsword:ATK]    →  1d20 + 12
-1d20 + [Longsword:ATK:2]  →  1d20 + 7
-1d20 + [Longsword:ATK:3]  →  1d20 + 2
+1d20 + [Longsword:ATK]    →  full-attack: rolls 1d20+12, 1d20+7, 1d20+2 separately
+1d20 + [Longsword:ATK:1]  →  single roll: 1d20 + 12
+1d20 + [Longsword:ATK:2]  →  single roll: 1d20 + 7
+1d20 + [Longsword:ATK:3]  →  single roll: 1d20 + 2
 ```
 
 #### Damage — `[Name:DMG]`
@@ -294,7 +323,7 @@ Examples:
 
 ### Embed Output
 
-When stat tokens are used, the embed shows both the original tokenised expression and the fully substituted one:
+**Single roll** — original tokenised expression and fully substituted notation:
 
 > **Dice roll:** `1d20 + [Perception]`
 > *(resolved: `1d20 + 11`)*
@@ -302,7 +331,7 @@ When stat tokens are used, the embed shows both the original tokenised expressio
 > `[18, -1]`
 > Footer: *Sylphie · Buddy*
 
-For damage rolls with a type suffix:
+**Damage roll** with type suffix:
 
 > **Dice roll:** `[Longsword:DMG]`
 > *(resolved: `1d8+4` — **slashing**)*
@@ -310,19 +339,27 @@ For damage rolls with a type suffix:
 > `[5, +4]`
 > Footer: *Sylphie · Buddy*
 
-When a character is active but the notation contains no tokens, the character name still appears in the footer (best-effort lookup; never causes an error):
+**Full-attack** (`[Name:ATK]` with no index) — one field per iterative:
 
-> **Dice roll:** `3d6`
-> Buddy got **12**!
-> `[4, 3, 5]`
+> **Full attack:** `1d20 + [Longsword:ATK]`
+> ┌ **1st Attack** ─ **24** │ `[12, +12]`
+> ├ **2nd Attack** ─ **15** │ `[8, +7]`
+> └ **3rd Attack** ─ **4**  │ `[2, +2]`
 > Footer: *Sylphie · Buddy*
 
-When no character is registered or set, the footer shows only the username:
+**Multi-roll** (`1d20+5 ; 1d20+[fly] ; 1d20+1d4`) — one field per segment, single embed:
 
-> **Dice roll:** `3d6`
-> Buddy got **12**!
-> `[4, 3, 5]`
-> Footer: *Buddy*
+> **Dice roll:** `1d20+5 ; 1d20+[fly] ; 1d20+1d4`
+> ┌ **1d20+5** ─ **18** │ `[13, +5]`
+> ├ **1d20+[fly]** ─ **23** │ `[17, +6]`
+> └ **1d20+1d4** ─ **14** │ `[11, +3]`
+> Footer: *Sylphie · Buddy*
+
+A multi-roll segment that itself expands to iterative attacks shows the first attack field as `<notation> — 1st Attack` with subsequent fields `2nd Attack`, `3rd Attack`, … all within the same embed.
+
+When a character is active but the notation contains no tokens, the character name still appears in the footer (best-effort lookup; never causes an error).
+
+When no character is registered or set, the footer shows only the username.
 
 ### Re-roll Button — Removed
 
@@ -418,15 +455,11 @@ Sets the named character as the active character for rolls in this guild. This i
 
 ---
 
-#### `/character activate <name>`
+#### `/character unequip`
 
-Promotes the named character to the `isActive` slot for this user in this guild.
+Clears the active character for the invoking user in this guild. After this command no character has `isActive = true` until the user runs `/character use` again. Useful when the player wants to roll plain dice without a character name appearing in the footer.
 
-| Option | Type | Required | Description |
-|---|---|---|---|
-| `name` | string | Yes | Character name to activate |
-
-The `name` option uses Discord autocomplete filtered to the invoking user's characters.
+No options.
 
 ---
 
@@ -498,7 +531,7 @@ The `name` option autocompletes from the selected `user`'s registered characters
 /character unregister        <name>
 /character list
 /character use               <name>
-/character activate          <name>
+/character unequip
 /character info              [name]
 /character admin list-all
 /character admin register    <user> <sheet_url> <name>
@@ -551,5 +584,5 @@ src/config/default/
 - Both `/roll` (slash) and `!roll` (prefix) support `[…]` tokens and bare stat/skill aliases. Character resolution uses `isActive` first, then `lastUsedAt` as a fallback; there is no per-invocation character override on either form.
 - The `PathfinderSheetConfig` for the guild is loaded once per command invocation from the database; if no guild-specific config exists, the default `v1.0.0` config from disk is used.
 - Stat values are always read fresh from the live sheet — there is no persistent or in-process caching of sheet values.
-- `isActive` is written by: `/character use` and `/character activate` (explicit user choice), `/character unregister` (auto-promotion of remaining character), and `/character register` (auto-set on first registration). It is read by `/roll` as the **primary** character selector, and by `/character info` when no name is given.
+- `isActive` is written by: `/character use` (explicit user choice, clears all others), `/character unequip` (clears all), `/character unregister` (auto-promotion of remaining character), and `/character register` (auto-set on first registration). It is read by `/character info` when no name is given.
 - `lastUsedAt` is written by: `/roll` (after a successful token-substitution roll) and `/character use` (to ensure the newly activated character also wins the fallback immediately). It serves as the **fallback** character selector in `/roll` when no character has `isActive = true`.

@@ -7,7 +7,8 @@
  *   register  <sheet_url> <name>  — register or re-register a character
  *   unregister <name>             — remove a character
  *   list                          — list all characters for the invoker
- *   activate  <name>              — set isActive flag
+ *   use       <name>              — set the active character and bump lastUsedAt
+ *   unequip                       — clear the active character (opposite of /character use)
  *   info      [name]              — show live stats from the sheet
  *
  * Subcommand group (admin, owner-only):
@@ -60,7 +61,7 @@ const defaultSheetConfig = require('../../config/default/PathfinderSheetConfig.j
         { name: 'unregister', chatInputRun: 'subcommandUnregister' },
         { name: 'list',       chatInputRun: 'subcommandList' },
         { name: 'use',        chatInputRun: 'subcommandUse' },
-        { name: 'activate',   chatInputRun: 'subcommandActivate' },
+        { name: 'unequip',    chatInputRun: 'subcommandUnequip' },
         { name: 'info',       chatInputRun: 'subcommandInfo' },
         {
             name: 'admin',
@@ -124,14 +125,11 @@ export class CharacterCommand extends Subcommand {
                         )
                 )
 
-                // /character activate
+                // /character unequip
                 .addSubcommand((sub) =>
                     sub
-                        .setName('activate')
-                        .setDescription('Set a character as active.')
-                        .addStringOption((o) =>
-                            o.setName('name').setDescription('Character name to activate.').setRequired(true).setAutocomplete(true)
-                        )
+                        .setName('unequip')
+                        .setDescription('Clear your active character so no character is selected for rolls.')
                 )
 
                 // /character info
@@ -356,19 +354,16 @@ export class CharacterCommand extends Subcommand {
     }
 
     // -------------------------------------------------------------------------
-    // /character activate
+    // /character unequip
     // -------------------------------------------------------------------------
 
-    public async subcommandActivate(interaction: ChatInputCommandInteraction) {
+    public async subcommandUnequip(interaction: ChatInputCommandInteraction) {
         const guildId = this.requireGuild(interaction);
-        const name = interaction.options.getString('name', true).trim();
-
-        const activated = await this.manager.activate(guildId, interaction.user.id, name);
-        if (!activated) {
-            throw new UserError({ identifier: `No character named \`${name}\` found in your registry for this server.` });
-        }
-
-        await interaction.reply({ content: `⭐ **${name}** is now your active character.`, ephemeral: true });
+        await this.manager.deactivate(guildId, interaction.user.id);
+        await interaction.reply({
+            content: '🔕 Active character cleared. Use `/character use` to select one again.',
+            ephemeral: true,
+        });
     }
 
     // -------------------------------------------------------------------------
@@ -377,139 +372,158 @@ export class CharacterCommand extends Subcommand {
 
     public async subcommandInfo(interaction: ChatInputCommandInteraction) {
         const guildId = this.requireGuild(interaction);
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply();
 
-        const nameArg = interaction.options.getString('name')?.trim() ?? null;
-        const character = nameArg
-            ? await this.manager.getByName(guildId, interaction.user.id, nameArg)
-            : await this.manager.getActive(guildId, interaction.user.id);
+        try {
+            const nameArg = interaction.options.getString('name')?.trim() ?? null;
+            const character = nameArg
+                ? await this.manager.getByName(guildId, interaction.user.id, nameArg)
+                : await this.manager.getActive(guildId, interaction.user.id);
 
-        if (!character) {
-            throw new UserError({
-                identifier: nameArg
-                    ? `No character named \`${nameArg}\` found in your registry for this server.`
-                    : 'No active character set. Use `/character activate` or `/character register` first.',
-            });
-        }
+            if (!character) {
+                await interaction.editReply({
+                    content: nameArg
+                        ? `No character named \`${nameArg}\` found in your registry for this server.`
+                        : 'No active character set. Use `/character use` to select one.',
+                });
+                return;
+            }
 
-        const { schema, sheetName } = await this.getSheetConfig(guildId);
-        const spreadsheetId = extractSheetId(character.sheetUrl);
-        if (!spreadsheetId) {
-            throw new UserError({ identifier: 'The character sheet URL is invalid. Please re-register the character.' });
-        }
+            const { schema, sheetName } = await this.getSheetConfig(guildId);
+            const spreadsheetId = extractSheetId(character.sheetUrl);
+            if (!spreadsheetId) {
+                await interaction.editReply({ content: 'The character sheet URL is invalid. Please re-register the character.' });
+                return;
+            }
 
-        // Collect all named ranges.
-        const namedRangeMap = await resolveNamedRanges(spreadsheetId);
+            // Collect all named ranges.
+            const namedRangeMap = await resolveNamedRanges(spreadsheetId);
 
-        // Build the cell list for the single batchGet call.
-        const abilityRanges = Object.values(schema.abilities);
-        const skillCells = Object.values(schema.skills);
-        const saveCells = Object.values(schema.saves);
-        const defenseCells = Object.values(schema.defenses);
-        const offenseNameCells = schema.offenses.map((o) => o.name);
-        const offenseATKCells  = schema.offenses.map((o) => o.attack);
-        const offenseDMGCells  = schema.offenses.map((o) => o.damage);
-        const offenseTypeCells = schema.offenses.map((o) => o.type);
-        const offenseCritCells = schema.offenses.map((o) => o.crit);
+            // Build the cell list for the single batchGet call.
+            const abilityRanges = Object.values(schema.abilities);
+            const skillCells = Object.values(schema.skills);
+            const saveCells = Object.values(schema.saves);
+            const defenseCells = Object.values(schema.defenses);
+            const offenseNameCells = schema.offenses.map((o) => o.name);
+            const offenseATKCells  = schema.offenses.map((o) => o.attack);
+            const offenseDMGCells  = schema.offenses.map((o) => o.damage);
+            const offenseTypeCells = schema.offenses.map((o) => o.type);
+            const offenseCritCells = schema.offenses.map((o) => o.crit);
 
-        // Resolve named ranges to cell addresses.
-        const resolvedAbilityCells: string[] = [];
-        const abilityKeys = Object.keys(schema.abilities);
-        for (const rangeName of abilityRanges) {
-            resolvedAbilityCells.push(namedRangeMap[rangeName] ?? rangeName);
-        }
-        const babCell = namedRangeMap[schema.totals.bab] ?? schema.totals.bab;
-        const levelCell = namedRangeMap[schema.totals.level] ?? schema.totals.level;
+            // Resolve named ranges to cell addresses.
+            const resolvedAbilityCells: string[] = [];
+            const abilityKeys = Object.keys(schema.abilities);
+            for (const rangeName of abilityRanges) {
+                resolvedAbilityCells.push(namedRangeMap[rangeName] ?? rangeName);
+            }
+            const babCell = namedRangeMap[schema.totals.bab] ?? schema.totals.bab;
+            const levelCell = namedRangeMap[schema.totals.level] ?? schema.totals.level;
 
-        const allCells = [
-            schema.name,
-            levelCell,
-            schema.health,
-            ...resolvedAbilityCells,
-            ...saveCells,
-            schema.cmb,
-            babCell,
-            schema.initiative,
-            ...defenseCells,
-            ...skillCells,
-            ...offenseNameCells,
-            ...offenseATKCells,
-            ...offenseDMGCells,
-            ...offenseTypeCells,
-            ...offenseCritCells,
-        ];
+            const allCells = [
+                schema.name,
+                levelCell,
+                schema.health,
+                ...resolvedAbilityCells,
+                ...saveCells,
+                schema.cmb,
+                babCell,
+                schema.initiative,
+                ...defenseCells,
+                ...skillCells,
+                ...offenseNameCells,
+                ...offenseATKCells,
+                ...offenseDMGCells,
+                ...offenseTypeCells,
+                ...offenseCritCells,
+            ];
 
-        const values = await batchGetValues(spreadsheetId, sheetName, allCells);
+            const values = await batchGetValues(spreadsheetId, sheetName, allCells);
 
-        const v = (cell: string) => values[cell] ?? '—';
+            const v = (cell: string) => values[cell] ?? '—';
 
-        // Build embed.
-        const embed = new EmbedBuilder()
-            .setTitle(v(schema.name))
-            .setColor(0x8b4513)
-            .setFooter({ text: `Fetched at ${new Date().toUTCString()} · ${character.name}` });
+            // Build embed.
+            const embed = new EmbedBuilder()
+                .setTitle(v(schema.name) || character.name)
+                .setColor(0x8b4513)
+                .setFooter({ text: `Fetched at ${new Date().toUTCString()} · ${character.name}` });
 
-        // Identity
-        embed.addFields([
-            { name: 'Level', value: v(levelCell), inline: true },
-            { name: 'HP', value: v(schema.health), inline: true },
-        ]);
+            // Level, HP, Init
+            embed.addFields([
+                { name: 'Level', value: v(levelCell),          inline: true },
+                { name: 'HP',   value: v(schema.health),       inline: true },
+                { name: 'Init', value: v(schema.initiative),   inline: true },
+            ]);
 
-        // Ability scores
-        const abilityFields = abilityKeys.map((key, i) => ({
-            name: key.charAt(0).toUpperCase() + key.slice(1, 3).toUpperCase(),
-            value: v(resolvedAbilityCells[i]),
-            inline: true,
-        }));
-        embed.addFields(abilityFields);
-
-        // Saves
-        embed.addFields([
-            { name: 'Fort', value: v(schema.saves['fortitude']), inline: true },
-            { name: 'Ref',  value: v(schema.saves['reflex']),    inline: true },
-            { name: 'Will', value: v(schema.saves['will']),       inline: true },
-        ]);
-
-        // Offenses
-        for (let i = 0; i < schema.offenses.length; i++) {
-            const o = schema.offenses[i];
-            const oName = values[o.name];
-            if (!oName || oName.trim() === '') continue;
+            // Ability scores — STR / DEX / CON / INT / WIS / CHA
             embed.addFields([{
-                name: `⚔️ ${oName}`,
-                value: [
-                    `Atk: ${v(o.attack)}`,
-                    `Dmg: ${v(o.damage)} ${v(o.type)}`.trim(),
-                    `Crit: ${v(o.crit)}`,
-                ].join(' | '),
+                name: 'Abilities',
+                value: abilityKeys.map((key, i) =>
+                    `${key.charAt(0).toUpperCase() + key.slice(1, 3).toUpperCase()}: ${v(resolvedAbilityCells[i])}`
+                ).join(' | '),
                 inline: false,
             }]);
+
+            // Saves
+            embed.addFields([{
+                name: 'Saves',
+                value: `Fort: ${v(schema.saves['fortitude'])} | Ref: ${v(schema.saves['reflex'])} | Will: ${v(schema.saves['will'])}`,
+                inline: false,
+            }]);
+
+            // BAB / CMB
+            embed.addFields([{
+                name: 'Combat',
+                value: `BAB: ${v(babCell)} | CMB: ${v(schema.cmb)}`,
+                inline: false,
+            }]);
+
+            // Offenses — one field, each attack on its own line block
+            const offenseLines: string[] = [];
+            for (const o of schema.offenses) {
+                const oName = values[o.name];
+                if (!oName || oName.trim() === '') continue;
+                offenseLines.push(
+                    `**${oName}**\nAtk: ${v(o.attack)} | Dmg: ${(`${v(o.damage)} ${v(o.type)}`).trim()} | Crit: ${v(o.crit)}`
+                );
+            }
+            if (offenseLines.length > 0) {
+                embed.addFields([{
+                    name: '⚔️ Offenses',
+                    value: offenseLines.join('\n\n'),
+                    inline: false,
+                }]);
+            }
+
+            // Defenses — one field
+            const defKeys = Object.keys(schema.defenses);
+            embed.addFields([{
+                name: '🛡️ Defenses',
+                value: defKeys.map((k) => `${k}: ${v(schema.defenses[k])}`).join(' | ') || '—',
+                inline: false,
+            }]);
+
+            // Skills — one field, only non-empty, truncated to Discord's 1024-char limit
+            const skillEntries = Object.entries(schema.skills)
+                .map(([skillName, cell]) => ({ name: skillName, value: values[cell] }))
+                .filter((s) => s.value != null && s.value !== '');
+            if (skillEntries.length > 0) {
+                let skillValue = skillEntries.map((s) => `${s.name}: ${s.value}`).join('\n');
+                if (skillValue.length > 1024) skillValue = skillValue.slice(0, 1021) + '…';
+                embed.addFields([{ name: '📚 Skills', value: skillValue, inline: false }]);
+            }
+
+            await interaction.editReply({ embeds: [embed] });
+        } catch (error) {
+            this.container.logger.error(error);
+            const content = error instanceof UserError
+                ? error.identifier
+                : 'Failed to fetch character sheet. Please try again.';
+            try {
+                await interaction.editReply({ content });
+            } catch {
+                // Interaction may have expired.
+            }
         }
-
-        // Defenses
-        const defKeys = Object.keys(schema.defenses);
-        embed.addFields(
-            defKeys.map((k) => ({ name: k, value: v(schema.defenses[k]), inline: true }))
-        );
-
-        // Combat
-        embed.addFields([
-            { name: 'BAB',  value: v(babCell),          inline: true },
-            { name: 'CMB',  value: v(schema.cmb),       inline: true },
-            { name: 'Init', value: v(schema.initiative), inline: true },
-        ]);
-
-        // Skills (only non-empty)
-        const skillFields = Object.entries(schema.skills)
-            .map(([skillName, cell]) => ({ name: skillName, value: values[cell] ?? null }))
-            .filter((s) => s.value !== null && s.value !== '');
-        if (skillFields.length > 0) {
-            embed.addFields(
-                skillFields.map((s) => ({ name: s.name, value: s.value!, inline: true }))
-            );
-        }
-
-        await interaction.editReply({ embeds: [embed] });
     }
 
     // -------------------------------------------------------------------------
