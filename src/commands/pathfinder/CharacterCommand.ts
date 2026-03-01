@@ -334,10 +334,10 @@ export class CharacterCommand extends Subcommand {
     }
 
     // -------------------------------------------------------------------------
-    // /character use
+    // /character equip
     // -------------------------------------------------------------------------
 
-    public async subcommandUse(interaction: ChatInputCommandInteraction) {
+    public async subcommandEquip(interaction: ChatInputCommandInteraction) {
         const guildId = this.requireGuild(interaction);
         const name = interaction.options.getString('name', true).trim();
 
